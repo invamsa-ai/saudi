@@ -369,7 +369,129 @@
 <title>UAE PASS</title>
 Cust End -->
 <title>UAE PASS</title>
+<style>
+	/* تعريف المتغيرات والألوان الأساسية */
+:root {
+    --primary-blue: #005a9c;
+    --primary-teal: #00a19c;
+    --uaepass-black: #1a1a1a;
+    --gray-light: #f8f9fa;
+    --border-color: #dee2e6;
+}
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    direction: rtl; /* ليتناسب مع محتوى الصفحة العربي */
+}
+
+/* الشريط الملون العلوي */
+.rectangle {
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--primary-teal));
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+
+/* الحاوية الرئيسية */
+.container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 80px 20px 20px;
+}
+
+/* تنسيق الشعارات والنصوص */
+.logo img {
+    max-width: 160px;
+    height: auto;
+    margin-bottom: 25px;
+}
+
+.login-to-uaepass p {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--uaepass-black);
+    margin-bottom: 30px;
+}
+
+.login-to-uaepass span {
+    color: var(--primary-blue);
+}
+
+/* تنسيق حقول الإدخال */
+.idn-input {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: var(--gray-light);
+    transition: all 0.3s ease;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.idn-input:focus {
+    border-color: var(--primary-blue);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.1);
+}
+
+/* تنسيق زر تسجيل الدخول */
+.btn-login {
+    width: 100%;
+    background-color: var(--uaepass-black);
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.3s ease;
+}
+
+.btn-login:hover {
+    opacity: 0.9;
+}
+
+/* تنسيق الروابط والتذييل */
+.create-new-account {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.recover-account {
+    color: #6c757d;
+    font-size: 13px;
+    text-decoration: underline;
+}
+
+.footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.menu {
+    margin: 5px 10px;
+    display: inline-block;
+    color: #495057;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.copyright {
+    font-size: 11px;
+    color: #adb5bd;
+    margin-top: 15px;
+}
+	</style>
 <script src="libs/jquery_3.6.0/jquery-3.6.0.min.js"></script>
 
     
