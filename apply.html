@@ -3,209 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقديم طلب توظيف</title>
+    <title>UAE PASS - تسجيل الدخول</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-
         :root {
-            --primary-color: #009846;
-            --secondary-color: #007a3d;
-            --bg-light: #f4f7f6;
+            --primary-color: #6a2a8c; /* لون الهوية الرقمية الأرجواني */
+            --bg-color: #f4f7f6;
+            --text-color: #333;
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            padding: 0;
-        }
-
-        /* الهيدر المطور (نفس نمط الصفحة الرئيسية) */
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 20px 5%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            height: 100vh;
         }
 
-        .header-right { display: flex; gap: 10px; }
-        .header-logo {
-            width: 45px; height: 45px; border-radius: 50%;
-            background: rgba(255,255,255,0.2); border: 2px solid white;
-        }
-
-        .header-center { text-align: center; flex-grow: 1; }
-
-        /* حاوية النموذج */
-        main {
-            max-width: 550px;
-            margin: -20px auto 50px auto;
+        .login-container {
             background: white;
-            padding: 40px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .form-title h2 { color: var(--primary-color); margin: 0; }
-        .form-title p { color: #666; font-size: 14px; margin-top: 5px; }
-
-        .form-group { margin-bottom: 20px; }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px 15px;
+            padding: 2rem;
             border-radius: 12px;
-            border: 1px solid #ddd;
-            font-family: 'Cairo';
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: 0.3s;
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0,152,70,0.1);
-            outline: none;
-        }
-
-        .submit-btn {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
-            padding: 15px;
-            background: var(--primary-color);
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 150px;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: right;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-login {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
             cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
+            transition: background 0.3s;
         }
 
-        .submit-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
+        .btn-login:hover {
+            background-color: #552170;
         }
 
-        .success-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.95);
-            z-index: 1000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+        .footer-links {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
         }
 
-        .success-icon {
-            font-size: 60px;
+        .footer-links a {
             color: var(--primary-color);
-            margin-bottom: 20px;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-right">
-        <img src="https://via.placeholder.com/50" class="header-logo">
-        <img src="https://via.placeholder.com/50" class="header-logo">
-    </div>
-    <div class="header-center">
-        <h1>إتمام التقديم</h1>
-    </div>
-    <div style="width: 100px;"></div> </header>
-
-<main>
-    <a href="index.html" class="back-link">← العودة للوظائف</a>
-    
-    <div class="form-title">
-        <h2>نموذج طلب الوظيفة</h2>
-        <p>يرجى إدخال بياناتك بدقة للتواصل معك</p>
-    </div>
-
-    <form id="applyForm">
-        <div class="form-group">
-            <label>الاسم الكامل:</label>
-            <input type="text" placeholder="أدخل اسمك الثلاثي" required>
-        </div>
-
-        <div class="form-group">
-            <label>رقم الهوية:</label>
-            <input type="text" maxlength="10" placeholder="1XXXXXXXXX" required>
-        </div>
-
-        <div class="form-group">
-            <label>رقم الجوال:</label>
-            <input type="tel" placeholder="05XXXXXXXX" required>
-        </div>
-
-        <div class="form-group">
-            <label>المؤهل العلمي:</label>
-            <select required>
-                <option value="">اختر المؤهل</option>
-                <option>ثانوي</option>
-                <option>دبلوم</option>
-                <option>بكالوريوس</option>
-                <option>ماجستير فأعلى</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>البريد الإلكتروني:</label>
-            <input type="email" placeholder="name@example.com" required>
-        </div>
-
-        <button type="submit" class="submit-btn">إرسال الطلب الآن</button>
-    </form>
-</main>
-
-<div class="success-overlay" id="successOverlay">
-    <div class="success-icon">✔</div>
-    <h2 style="color: var(--primary-color);">تم استلام طلبك بنجاح!</h2>
-    <p>شكراً لثقتك بنا، سيقوم فريق التوظيف بمراجعة بياناتك والرد عليك قريباً.</p>
-    <br>
-    <a href="index.html" style="color: #666; text-decoration: none; font-weight: bold;">العودة للرئيسية</a>
-</div>
-
-<script>
-    document.getElementById('applyForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    <div class="login-container">
+        <img src="https://selfcare.uaepass.ae/assets/images/uaepass-logo.svg" alt="UAE PASS Logo" class="logo">
         
-        // إظهار واجهة النجاح
-        document.getElementById('successOverlay').style.display = 'flex';
-        
-        // إعادة تعيين النموذج
-        this.reset();
-    });
-</script>
+        <h2>تسجيل الدخول</h2>
+        <p>قم بتسجيل الدخول باستخدام الهوية الرقمية</p>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>رقم الهوية أو البريد الإلكتروني</label>
+                <input type="text" id="username" placeholder="مثال: 784-1990-1234567-1" required>
+            </div>
+
+            <button type="submit" class="btn-login">دخول</button>
+        </form>
+
+        <div class="footer-links">
+            <p>ليس لديك حساب؟ <a href="#">إنشاء حساب جديد</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            
+            if(username) {
+                alert('جاري محاولة تسجيل الدخول لـ: ' + username);
+                // هنا يتم الربط مع Backend أو API
+            }
+        });
+    </script>
 
 </body>
 </html>
