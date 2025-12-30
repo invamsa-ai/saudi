@@ -1,0 +1,641 @@
+@font-face {
+	font-family: 'Roboto';
+	src: url('../fonts/roboto/Roboto-Bold.eot');
+	src: url('../fonts/roboto/Roboto-Bold.eot?#iefix')
+		format('embedded-opentype'), url('../fonts/roboto/Roboto-Bold.woff2')
+		format('woff2'), url('../fonts/roboto/Roboto-Bold.woff')
+		format('woff'), url('../fonts/roboto/Roboto-Bold.ttf')
+		format('truetype');
+	font-weight: bold;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('../fonts/roboto/Roboto-Light.eot');
+	src: url('../fonts/roboto/Roboto-Light.eot?#iefix')
+		format('embedded-opentype'), url('../fonts/roboto/Roboto-Light.woff2')
+		format('woff2'), url('../fonts/roboto/Roboto-Light.woff')
+		format('woff'), url('../fonts/roboto/Roboto-Light.ttf')
+		format('truetype');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('../fonts/roboto/Roboto-Regular.eot');
+	src: url('../fonts/roboto/Roboto-Regular.eot?#iefix')
+		format('embedded-opentype'),
+		url('../fonts/roboto/Roboto-Regular.woff2') format('woff2'),
+		url('../fonts/roboto/Roboto-Regular.woff') format('woff'),
+		url('../fonts/roboto/Roboto-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('../fonts/roboto/Roboto-Medium.eot');
+	src: url('../fonts/roboto/Roboto-Medium.eot?#iefix')
+		format('embedded-opentype'),
+		url('../fonts/roboto/Roboto-Medium.woff2') format('woff2'),
+		url('../fonts/roboto/Roboto-Medium.woff') format('woff'),
+		url('../fonts/roboto/Roboto-Medium.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('../fonts/roboto/Roboto-Medium.eot');
+	src: url('../fonts/roboto/Roboto-Medium.eot?#iefix')
+		format('embedded-opentype'),
+		url('../fonts/roboto/Roboto-Medium.woff2') format('woff2'),
+		url('../fonts/roboto/Roboto-Medium.woff') format('woff'),
+		url('../fonts/roboto/Roboto-Medium.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-display: auto;
+	src: url('../fonts/roboto/Roboto-Bold.woff2') format('woff2'),
+		url('../fonts/roboto/Roboto-Bold.woff') format('woff'),
+		url('../fonts/roboto/Roboto-Bold.ttf') format('truetype'),
+		url('../fonts/roboto/Roboto-Bold.eot?#iefix')
+		format('embedded-opentype');
+	font-weight: bold;
+	font-style: normal;
+	unicode-range: U+003A-FFFF;
+}
+
+@font-face {
+	font-family: 'GESS';
+	font-display: auto;
+	src: url('../fonts/gess/GESSTwoBold-Bold.woff2') format('woff2'),
+		url('../fonts/gess/GESSTwoBold-Bold.woff') format('woff'),
+		url('../fonts/gess/GESSTwoBold-Bold.ttf') format('truetype'),
+		url('../fonts/gess/GESSTwoBold-Bold.eot?#iefix')
+		format('embedded-opentype');
+	font-weight: bold;
+	font-style: normal;
+	unicode-range: U+003A-FFFF;
+}
+
+@font-face {
+	font-family: 'GESS';
+	font-display: auto;
+	src: url('../fonts/gess/GESSTwoMedium-Medium.woff2') format('woff2'),
+		url('../fonts/gess/GESSTwoMedium-Medium.woff') format('woff'),
+		url('../fonts/gess/GESSTwoMedium-Medium.ttf') format('truetype'),
+		url('../fonts/gess/GESSTwoMedium-Medium.eot?#iefix')
+		format('embedded-opentype');
+	font-weight: 500;
+	font-style: normal;
+	unicode-range: U+003A-FFFF;
+}
+
+@font-face {
+	font-family: 'GESS';
+	font-display: auto;
+	src: url('../fonts/gess/GESSTwoLight-Light.woff2') format('woff2'),
+		url('../fonts/gess/GESSTwoLight-Light.woff') format('woff'),
+		url('../fonts/gess/GESSTwoLight-Light.ttf') format('truetype'),
+		url('../fonts/gess/GESSTwoLight-Light.eot?#iefix')
+		format('embedded-opentype');
+	font-weight: 300;
+	font-style: normal;
+	unicode-range: U+003A-FFFF;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+	color: #99a2b4;
+	opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+	color: #99a2b4;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+	color: #99a2b4;
+}
+
+.logo img {
+	max-width: 177px;
+	padding-top: 20px;
+	padding-bottom: 30px;
+}
+
+.form-input {
+	width: 100%;
+	outline: 0;
+	border-radius: 12px;
+	background-color: #ffffff;
+	border: 1px solid #b9bfcc;
+	padding: 17px 21px;
+	font-family: Roboto;
+	font-size: 14px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 1.43;
+	letter-spacing: 0.3px;
+	color: #99a2b4;
+	box-shadow: 0 4px 16px 0 rgba(69, 91, 99, 0.08);
+}
+
+.form-group-button {
+	text-align: center;
+	padding-bottom: 0px;
+/* 	margin-top: 1rem; */
+}
+
+input[disabled]#basicPasswordForm-submitButton, input[disabled]#basicPasswordForm-submitButton:hover,
+	input[disabled]#basicPasswordForm-submitButton:active, input[disabled]#basicPasswordForm-submitButton:focus
+	{
+	background: #CCCCCC;
+	box-shadow: none;
+	outline: none;
+	opacity: 0.5;
+	text-decoration: none;
+}
+
+@media ( max-width : 489px) {
+	.logo img {
+		max-width: 150px;
+	}
+	.page-title {
+		font-size: 30px;
+	}
+	.form-input {
+		padding: 13px 18px;
+	}
+	.btn {
+		padding: 11px 0;
+	}
+	.text {
+		
+	}
+}
+
+.copyright {
+	font-family: 'Roboto';
+	font-size: 13px;
+	font-weight: bold;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: 0.13px;
+	color: #78849E;
+	padding-left: 6px;
+	margin-top: 10px;
+}
+
+.rectangle {
+	height: 8px;
+	border-radius: 2px;
+	width: 110%;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#42e198', endColorstr='#0D98BA',GradientType=1 ); 
+	-ms-filter: progid:DXImageTransform.Microsoft.gradient (GradientType=0, startColorstr=#42e198, endColorstr=#0D98BA);
+	background-image: linear-gradient(272deg, #0D98BA, #42e198);
+}
+
+.login-to-uaepass {
+	font-family: Roboto;
+	font-size: 23px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	color: #454f63;
+	padding-bottom: 10px;
+}
+
+.idn-input {
+	padding: 15px 15px;
+	color: #454f63;
+	height: 50px;
+	border-radius: 12px;
+	border: solid 1px #78849e;
+	background-color: white;
+	text-align: left;
+	font-size: 12px;
+}
+
+.btn-login {
+	background-color: #78849e;
+	height: 50px;
+	border-radius: 12px;
+	font-family: Roboto;
+	width: 100%;
+	font-size: 20px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	color: white;
+	padding: 14px 0;
+	cursor: pointer;
+	display: inline-block;
+	font-variant: normal;
+	text-decoration: none;
+	vertical-align: baseline;
+	white-space: nowrap;
+	outline: 0;
+	border: 0;
+	box-sizing: border-box;
+}
+
+.dont-have-account {
+	font-family: Roboto;
+	font-size: 13px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 1.92;
+	letter-spacing: normal;
+	text-align: center;
+	background-color: slate;
+	margin-left:5px;
+}
+
+.create-new-account {
+	font-family: Roboto;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 1.92;
+	letter-spacing: normal;
+	text-align: center;
+	color: #00ac75;
+	padding-left: 0px;
+}
+
+.recover-account {
+	font-family: Roboto;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	color: #00ac75;
+	margin-top: 400px;
+	margin-bottom: 40px;
+	position: relative;
+	text-align: center;
+	padding-top:10px;
+}
+
+.footer {
+	position: fixed;
+	left: 0;
+	top: 80%;
+	width: 100%;
+	color: white;
+}
+
+.path {
+	width: 100%;
+	height: 2px;
+	border: solid 1px #00a36a;
+	padding-left: 100px;
+	padding-right: 100px;
+	margin-bottom:18px
+}
+
+.top-10 {
+	margin-top: 10px;
+}
+
+hr.style {
+	color: #333;
+	text-align: center;
+	margin-top: 2rem;
+	margin-bottom: 2rem;
+	border: 0;
+	border-top: 1px solid rgba(0, 0, 0, .1);
+}
+
+hr.style:after {
+	content: "Or";
+	width: 20px;
+	height: 18px;
+	font-family: Roboto;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	position: relative;
+	top: -0.9em;
+	background: white;
+}
+
+.btn-app {
+	width: 100%;
+	margin-top: 20px;
+	height: 50px;
+	padding: 14px 0;
+	font-family: Roboto;
+	font-size: 17px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	color: #454f63;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: inline-block;
+	font-variant: normal;
+	text-decoration: none;
+	vertical-align: baseline;
+	white-space: nowrap;
+	outline: 0;
+	border: solid 1px #00ac75;
+	border-radius: 12px;
+	background-color: white;
+}
+
+@media ( min-width : 576px) {
+	.idn-input {
+		height: 58px;
+		font-size: 12px;
+	}
+	.btn-login {
+		height: 58px;
+	}
+	.btn-app {
+		height: 58px;
+	}
+}
+
+.menu {
+	font-family: Roboto;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: 0.11px;
+	color: #78849E;
+	padding-left: 10px;
+}
+
+.login-content {
+	width: 100%;
+	max-width: 450px;
+	padding: 0px 15px;
+}
+
+.authenticationMessages {
+	font-family: Roboto;
+	font-weight: normal;
+	font-stretch: normal;
+	font-style: normal;
+	line-height: 1.11;
+	letter-spacing: normal;
+	font-size: 14px;
+	color: #eb6d72;
+	text-align: left;
+	padding-bottom: 10px;
+}
+
+.input-rule-title {
+	font-family: Roboto;
+	font-size: 12px;
+	font-stretch: normal;
+	font-style: normal;
+	line-height: normal;
+	letter-spacing: 0.2px;
+	padding-top: 10px;
+	color: #454f63;
+}
+
+.input-rule-title-info1 {
+  font-family: Roboto;
+  font-size: 10px;
+  font-weight: normal;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: normal;  
+  color: #454f63;
+}
+
+.input-rule-title-info2 {
+	font-family: Roboto;
+	font-size: 8px;
+	font-weight: 500;
+	font-stretch: normal;
+	font-style: normal;
+	line-height: normal;
+	letter-spacing: 0.5px;
+	color: #78849e;
+}
+
+.img-pos {
+	height: 13px;
+	width: 13px;
+	left: 45px;
+	top: -223px;
+}
+
+.close {
+	height: 18px;
+	width: 18px;
+}
+
+/* Popup container for invalid identifier */
+.popup {
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	position: relative;
+	left: 480px;
+	top: 100px;
+	z-index: 1;
+	display: inline-block;
+	margin-top: -1rem;
+	margin: auto;
+	}
+
+.popup .popuptext {
+	visibility: hidden;
+	width: 190px;	
+	color: #454f63;
+	text-align: left;
+	border-radius: 6px;
+	margin-left: -48px;
+	padding: 10px 10px 20px 20px;
+	position: absolute;
+	bottom: 25%;	
+	font-size: 11px;
+	font-weight: 500;
+	background-image:url("../images/popup1.png");
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+/* Toggle hide and show the popup */
+.popup .show {
+	visibility: visible;
+	-webkit-animation: fadeIn 1s;
+	animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@
+-webkit-keyframes fadeIn {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+html[lang="ar"] .menu {
+	padding-right: 4px;
+	padding-left: initial;
+}
+
+@media ( min-width : 950px) {
+	.menu {
+		font-size: 15px;
+		padding-left: 20px;
+		padding-right: 20px;
+		margin-top: 20px;
+	}
+	.copyright {
+		font-size: 13px;		
+	}
+	
+	html[lang="ar"] .menu {
+		font-size: 13px;
+		padding-right: 15px;
+		padding-left: initial;
+	}
+}
+
+@media only screen and (max-width: 375px) {
+	html {
+		font-size: 75%;
+	}
+	.create-new-account {
+		font-size: 11px;
+	}
+	.recover-account {
+		font-size: 12px;
+	}
+	.dont-have-account {
+		font-size: 11px;
+	}
+	.container {
+		padding-top: 50px;
+	}
+}
+
+@media ( max-width : 950px) {
+	.spacing {
+		margin-top: 100px;
+	}
+}
+
+@media ( max-width : 500px) {
+	.popup {
+		left: 100px;
+		top: 200px;
+		margin: auto;
+	}
+	.authenticationMessages {
+		text-align: center;
+	}
+	.popup .popuptext {
+		background-image: url("../images/popup2.png");
+	}
+	.spacing {
+		margin-left:5px;
+	}
+}
+
+@media ( max-width : 575px) {
+	.footer {
+		top: 85%;
+	}
+	.copyright {
+		margin-top: 0px;
+	}
+}
+
+html[lang="ar"]  .page-title,
+html[lang="ar"]  .form-input,
+html[lang="ar"]  .login-to-uaepass ,
+html[lang="ar"] .btn-login ,
+html[lang="ar"] .dont-have-account,
+html[lang="ar"] .create-new-account,
+html[lang="ar"] .recover-account ,
+html[lang="ar"] hr.style:after ,
+html[lang="ar"] .btn-app ,
+html[lang="ar"] .menu,
+html[lang="ar"] .copyright{
+	font-family:'GESS', 'Roboto', sans-serif !important; 
+}
+
+html[lang="ar"] .form-check {
+	text-align: right;
+}
+
+html[lang="en"] .form-check {
+	text-align: left;
+}
+
+html[lang="ar"] .form-check .dont-have-account {
+	margin-right: 20px !important;
+}
+
+html[lang="ar"] .idn-input {
+	text-align: right;
+}
+
+html[lang="ar"] .text-left {
+	text-align: right !important;
+}
+
+html[lang="ar"] .text-right {
+	text-align: left !important;
+}
+
+html[lang="ar"] .authenticationMessages {
+	text-align: right;
+}
+
+html[lang="ar"] .popup {
+	left: 185px;
+}
+
+html[lang="ar"] .input-rule-title {
+	text-align: right;
+}
+
+html[lang="ar"] .input-rule-title-info1 {
+	text-align: right;
+}
+
+html[lang="ar"] .input-rule-title-info2 {
+	text-align: right;
+}
