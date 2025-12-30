@@ -1,641 +1,777 @@
 @font-face {
-	font-family: 'Roboto';
-	src: url('../fonts/roboto/Roboto-Bold.eot');
-	src: url('../fonts/roboto/Roboto-Bold.eot?#iefix')
-		format('embedded-opentype'), url('../fonts/roboto/Roboto-Bold.woff2')
-		format('woff2'), url('../fonts/roboto/Roboto-Bold.woff')
-		format('woff'), url('../fonts/roboto/Roboto-Bold.ttf')
-		format('truetype');
-	font-weight: bold;
-	font-style: normal;
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Bold.eot');
+    src: url('../fonts/roboto/Roboto-Bold.eot?#iefix')
+        format('embedded-opentype'), url('../fonts/roboto/Roboto-Bold.woff2')
+        format('woff2'), url('../fonts/roboto/Roboto-Bold.woff')
+        format('woff'), url('../fonts/roboto/Roboto-Bold.ttf')
+        format('truetype');
+    font-weight: bold;
+    font-style: normal;
 }
 
 @font-face {
-	font-family: 'Roboto';
-	src: url('../fonts/roboto/Roboto-Light.eot');
-	src: url('../fonts/roboto/Roboto-Light.eot?#iefix')
-		format('embedded-opentype'), url('../fonts/roboto/Roboto-Light.woff2')
-		format('woff2'), url('../fonts/roboto/Roboto-Light.woff')
-		format('woff'), url('../fonts/roboto/Roboto-Light.ttf')
-		format('truetype');
-	font-weight: 300;
-	font-style: normal;
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Light.eot');
+    src: url('../fonts/roboto/Roboto-Light.eot?#iefix')
+        format('embedded-opentype'), url('../fonts/roboto/Roboto-Light.woff2')
+        format('woff2'), url('../fonts/roboto/Roboto-Light.woff')
+        format('woff'), url('../fonts/roboto/Roboto-Light.ttf')
+        format('truetype');
+    font-weight: 300;
+    font-style: normal;
 }
 
 @font-face {
-	font-family: 'Roboto';
-	src: url('../fonts/roboto/Roboto-Regular.eot');
-	src: url('../fonts/roboto/Roboto-Regular.eot?#iefix')
-		format('embedded-opentype'),
-		url('../fonts/roboto/Roboto-Regular.woff2') format('woff2'),
-		url('../fonts/roboto/Roboto-Regular.woff') format('woff'),
-		url('../fonts/roboto/Roboto-Regular.ttf') format('truetype');
-	font-weight: normal;
-	font-style: normal;
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Regular.eot');
+    src: url('../fonts/roboto/Roboto-Regular.eot?#iefix')
+        format('embedded-opentype'),
+        url('../fonts/roboto/Roboto-Regular.woff2') format('woff2'),
+        url('../fonts/roboto/Roboto-Regular.woff') format('woff'),
+        url('../fonts/roboto/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-	font-family: 'Roboto';
-	src: url('../fonts/roboto/Roboto-Medium.eot');
-	src: url('../fonts/roboto/Roboto-Medium.eot?#iefix')
-		format('embedded-opentype'),
-		url('../fonts/roboto/Roboto-Medium.woff2') format('woff2'),
-		url('../fonts/roboto/Roboto-Medium.woff') format('woff'),
-		url('../fonts/roboto/Roboto-Medium.ttf') format('truetype');
-	font-weight: 500;
-	font-style: normal;
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Medium.eot');
+    src: url('../fonts/roboto/Roboto-Medium.eot?#iefix')
+        format('embedded-opentype'),
+        url('../fonts/roboto/Roboto-Medium.woff2') format('woff2'),
+        url('../fonts/roboto/Roboto-Medium.woff') format('woff'),
+        url('../fonts/roboto/Roboto-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
 }
 
 @font-face {
-	font-family: 'Roboto';
-	src: url('../fonts/roboto/Roboto-Medium.eot');
-	src: url('../fonts/roboto/Roboto-Medium.eot?#iefix')
-		format('embedded-opentype'),
-		url('../fonts/roboto/Roboto-Medium.woff2') format('woff2'),
-		url('../fonts/roboto/Roboto-Medium.woff') format('woff'),
-		url('../fonts/roboto/Roboto-Medium.ttf') format('truetype');
-	font-weight: 500;
-	font-style: normal;
+    font-family: 'Roboto';
+    font-display: auto;
+    src: url('../fonts/roboto/Roboto-Bold.woff2') format('woff2'),
+        url('../fonts/roboto/Roboto-Bold.woff') format('woff'),
+        url('../fonts/roboto/Roboto-Bold.ttf') format('truetype'),
+        url('../fonts/roboto/Roboto-Bold.eot?#iefix')
+        format('embedded-opentype');
+    font-weight: bold;
+    font-style: normal;
+    unicode-range: U+003A-FFFF;
 }
 
 @font-face {
-	font-family: 'Roboto';
-	font-display: auto;
-	src: url('../fonts/roboto/Roboto-Bold.woff2') format('woff2'),
-		url('../fonts/roboto/Roboto-Bold.woff') format('woff'),
-		url('../fonts/roboto/Roboto-Bold.ttf') format('truetype'),
-		url('../fonts/roboto/Roboto-Bold.eot?#iefix')
-		format('embedded-opentype');
-	font-weight: bold;
-	font-style: normal;
-	unicode-range: U+003A-FFFF;
+    font-family: 'GESS';
+    font-display: auto;
+    src: url('../fonts/gess/GESSTwoBold-Bold.woff2') format('woff2'),
+        url('../fonts/gess/GESSTwoBold-Bold.woff') format('woff'),
+        url('../fonts/gess/GESSTwoBold-Bold.ttf') format('truetype'),
+        url('../fonts/gess/GESSTwoBold-Bold.eot?#iefix')
+        format('embedded-opentype');
+    font-weight: bold;
+    font-style: normal;
+    unicode-range: U+003A-FFFF;
 }
 
 @font-face {
-	font-family: 'GESS';
-	font-display: auto;
-	src: url('../fonts/gess/GESSTwoBold-Bold.woff2') format('woff2'),
-		url('../fonts/gess/GESSTwoBold-Bold.woff') format('woff'),
-		url('../fonts/gess/GESSTwoBold-Bold.ttf') format('truetype'),
-		url('../fonts/gess/GESSTwoBold-Bold.eot?#iefix')
-		format('embedded-opentype');
-	font-weight: bold;
-	font-style: normal;
-	unicode-range: U+003A-FFFF;
+    font-family: 'GESS';
+    font-display: auto;
+    src: url('../fonts/gess/GESSTwoMedium-Medium.woff2') format('woff2'),
+        url('../fonts/gess/GESSTwoMedium-Medium.woff') format('woff'),
+        url('../fonts/gess/GESSTwoMedium-Medium.ttf') format('truetype'),
+        url('../fonts/gess/GESSTwoMedium-Medium.eot?#iefix')
+        format('embedded-opentype');
+    font-weight: 500;
+    font-style: normal;
+    unicode-range: U+003A-FFFF;
 }
 
 @font-face {
-	font-family: 'GESS';
-	font-display: auto;
-	src: url('../fonts/gess/GESSTwoMedium-Medium.woff2') format('woff2'),
-		url('../fonts/gess/GESSTwoMedium-Medium.woff') format('woff'),
-		url('../fonts/gess/GESSTwoMedium-Medium.ttf') format('truetype'),
-		url('../fonts/gess/GESSTwoMedium-Medium.eot?#iefix')
-		format('embedded-opentype');
-	font-weight: 500;
-	font-style: normal;
-	unicode-range: U+003A-FFFF;
-}
-
-@font-face {
-	font-family: 'GESS';
-	font-display: auto;
-	src: url('../fonts/gess/GESSTwoLight-Light.woff2') format('woff2'),
-		url('../fonts/gess/GESSTwoLight-Light.woff') format('woff'),
-		url('../fonts/gess/GESSTwoLight-Light.ttf') format('truetype'),
-		url('../fonts/gess/GESSTwoLight-Light.eot?#iefix')
-		format('embedded-opentype');
-	font-weight: 300;
-	font-style: normal;
-	unicode-range: U+003A-FFFF;
+    font-family: 'GESS';
+    font-display: auto;
+    src: url('../fonts/gess/GESSTwoLight-Light.woff2') format('woff2'),
+        url('../fonts/gess/GESSTwoLight-Light.woff') format('woff'),
+        url('../fonts/gess/GESSTwoLight-Light.ttf') format('truetype'),
+        url('../fonts/gess/GESSTwoLight-Light.eot?#iefix')
+        format('embedded-opentype');
+    font-weight: 300;
+    font-style: normal;
+    unicode-range: U+003A-FFFF;
 }
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-	color: #99a2b4;
-	opacity: 1; /* Firefox */
+    color: #99a2b4;
+    opacity: 1; /* Firefox */
 }
 
 :-ms-input-placeholder { /* Internet Explorer 10-11 */
-	color: #99a2b4;
+    color: #99a2b4;
 }
 
 ::-ms-input-placeholder { /* Microsoft Edge */
-	color: #99a2b4;
+    color: #99a2b4;
+}
+
+/* === تحسينات عامة === */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 15px;
+}
+
+/* === شعار === */
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 .logo img {
-	max-width: 177px;
-	padding-top: 20px;
-	padding-bottom: 30px;
+    max-width: 177px;
+    height: auto;
+    padding: 20px 0;
 }
 
+/* === عناصر النموذج === */
 .form-input {
-	width: 100%;
-	outline: 0;
-	border-radius: 12px;
-	background-color: #ffffff;
-	border: 1px solid #b9bfcc;
-	padding: 17px 21px;
-	font-family: Roboto;
-	font-size: 14px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: 1.43;
-	letter-spacing: 0.3px;
-	color: #99a2b4;
-	box-shadow: 0 4px 16px 0 rgba(69, 91, 99, 0.08);
+    width: 100%;
+    height: 50px;
+    outline: 0;
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #b9bfcc;
+    padding: 0 21px;
+    margin-bottom: 20px;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.43;
+    letter-spacing: 0.3px;
+    color: #454f63;
+    box-shadow: 0 4px 16px 0 rgba(69, 91, 99, 0.08);
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #00ac75;
+    box-shadow: 0 4px 16px 0 rgba(0, 172, 117, 0.2);
+}
+
+.form-group {
+    margin-bottom: 25px;
 }
 
 .form-group-button {
-	text-align: center;
-	padding-bottom: 0px;
-/* 	margin-top: 1rem; */
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
 }
 
-input[disabled]#basicPasswordForm-submitButton, input[disabled]#basicPasswordForm-submitButton:hover,
-	input[disabled]#basicPasswordForm-submitButton:active, input[disabled]#basicPasswordForm-submitButton:focus
-	{
-	background: #CCCCCC;
-	box-shadow: none;
-	outline: none;
-	opacity: 0.5;
-	text-decoration: none;
+input[disabled]#basicPasswordForm-submitButton, 
+input[disabled]#basicPasswordForm-submitButton:hover,
+input[disabled]#basicPasswordForm-submitButton:active, 
+input[disabled]#basicPasswordForm-submitButton:focus {
+    background: #CCCCCC;
+    box-shadow: none;
+    outline: none;
+    opacity: 0.5;
+    text-decoration: none;
+    cursor: not-allowed;
 }
 
-@media ( max-width : 489px) {
-	.logo img {
-		max-width: 150px;
-	}
-	.page-title {
-		font-size: 30px;
-	}
-	.form-input {
-		padding: 13px 18px;
-	}
-	.btn {
-		padding: 11px 0;
-	}
-	.text {
-		
-	}
-}
-
-.copyright {
-	font-family: 'Roboto';
-	font-size: 13px;
-	font-weight: bold;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: 0.13px;
-	color: #78849E;
-	padding-left: 6px;
-	margin-top: 10px;
-}
-
-.rectangle {
-	height: 8px;
-	border-radius: 2px;
-	width: 110%;
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#42e198', endColorstr='#0D98BA',GradientType=1 ); 
-	-ms-filter: progid:DXImageTransform.Microsoft.gradient (GradientType=0, startColorstr=#42e198, endColorstr=#0D98BA);
-	background-image: linear-gradient(272deg, #0D98BA, #42e198);
-}
-
-.login-to-uaepass {
-	font-family: Roboto;
-	font-size: 23px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: normal;
-	text-align: center;
-	color: #454f63;
-	padding-bottom: 10px;
-}
-
-.idn-input {
-	padding: 15px 15px;
-	color: #454f63;
-	height: 50px;
-	border-radius: 12px;
-	border: solid 1px #78849e;
-	background-color: white;
-	text-align: left;
-	font-size: 12px;
+/* === أزرار === */
+.btn {
+    display: inline-block;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-family: Roboto, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
 }
 
 .btn-login {
-	background-color: #78849e;
-	height: 50px;
-	border-radius: 12px;
-	font-family: Roboto;
-	width: 100%;
-	font-size: 20px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: normal;
-	text-align: center;
-	color: white;
-	padding: 14px 0;
-	cursor: pointer;
-	display: inline-block;
-	font-variant: normal;
-	text-decoration: none;
-	vertical-align: baseline;
-	white-space: nowrap;
-	outline: 0;
-	border: 0;
-	box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    background-color: #78849e;
+    border-radius: 12px;
+    font-family: Roboto, sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+    padding: 14px 0;
+    cursor: pointer;
+    border: 0;
+    transition: all 0.3s ease;
 }
 
-.dont-have-account {
-	font-family: Roboto;
-	font-size: 13px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: 1.92;
-	letter-spacing: normal;
-	text-align: center;
-	background-color: slate;
-	margin-left:5px;
-}
-
-.create-new-account {
-	font-family: Roboto;
-	font-size: 15px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: 1.92;
-	letter-spacing: normal;
-	text-align: center;
-	color: #00ac75;
-	padding-left: 0px;
-}
-
-.recover-account {
-	font-family: Roboto;
-	font-size: 15px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: normal;
-	color: #00ac75;
-	margin-top: 400px;
-	margin-bottom: 40px;
-	position: relative;
-	text-align: center;
-	padding-top:10px;
-}
-
-.footer {
-	position: fixed;
-	left: 0;
-	top: 80%;
-	width: 100%;
-	color: white;
-}
-
-.path {
-	width: 100%;
-	height: 2px;
-	border: solid 1px #00a36a;
-	padding-left: 100px;
-	padding-right: 100px;
-	margin-bottom:18px
-}
-
-.top-10 {
-	margin-top: 10px;
-}
-
-hr.style {
-	color: #333;
-	text-align: center;
-	margin-top: 2rem;
-	margin-bottom: 2rem;
-	border: 0;
-	border-top: 1px solid rgba(0, 0, 0, .1);
-}
-
-hr.style:after {
-	content: "Or";
-	width: 20px;
-	height: 18px;
-	font-family: Roboto;
-	font-size: 15px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: normal;
-	text-align: center;
-	position: relative;
-	top: -0.9em;
-	background: white;
+.btn-login:hover {
+    background-color: #5a657e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(120, 132, 158, 0.3);
 }
 
 .btn-app {
-	width: 100%;
-	margin-top: 20px;
-	height: 50px;
-	padding: 14px 0;
-	font-family: Roboto;
-	font-size: 17px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: normal;
-	text-align: center;
-	color: #454f63;
-	box-sizing: border-box;
-	cursor: pointer;
-	display: inline-block;
-	font-variant: normal;
-	text-decoration: none;
-	vertical-align: baseline;
-	white-space: nowrap;
-	outline: 0;
-	border: solid 1px #00ac75;
-	border-radius: 12px;
-	background-color: white;
+    width: 100%;
+    height: 50px;
+    margin-top: 20px;
+    padding: 14px 0;
+    font-family: Roboto, sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: #454f63;
+    background-color: white;
+    border: solid 1px #00ac75;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-@media ( min-width : 576px) {
-	.idn-input {
-		height: 58px;
-		font-size: 12px;
-	}
-	.btn-login {
-		height: 58px;
-	}
-	.btn-app {
-		height: 58px;
-	}
+.btn-app:hover {
+    background-color: #f5f5f5;
+    border-color: #009966;
+    transform: translateY(-2px);
 }
 
-.menu {
-	font-family: Roboto;
-	font-size: 15px;
-	font-weight: normal;
-	font-style: normal;
-	font-stretch: normal;
-	line-height: normal;
-	letter-spacing: 0.11px;
-	color: #78849E;
-	padding-left: 10px;
+/* === نصوص === */
+.page-title {
+    font-family: Roboto, sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: #454f63;
+    text-align: center;
+    margin-bottom: 30px;
 }
 
-.login-content {
-	width: 100%;
-	max-width: 450px;
-	padding: 0px 15px;
+.login-to-uaepass {
+    font-family: Roboto, sans-serif;
+    font-size: 23px;
+    font-weight: normal;
+    text-align: center;
+    color: #454f63;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
 }
 
-.authenticationMessages {
-	font-family: Roboto;
-	font-weight: normal;
-	font-stretch: normal;
-	font-style: normal;
-	line-height: 1.11;
-	letter-spacing: normal;
-	font-size: 14px;
-	color: #eb6d72;
-	text-align: left;
-	padding-bottom: 10px;
+.dont-have-account {
+    font-family: Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.92;
+    text-align: center;
+    color: #454f63;
+    margin: 20px 0;
 }
 
+.create-new-account {
+    font-family: Roboto, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.92;
+    text-align: center;
+    color: #00ac75;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.create-new-account:hover {
+    color: #009966;
+    text-decoration: underline;
+}
+
+.recover-account {
+    font-family: Roboto, sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+    color: #00ac75;
+    text-align: center;
+    margin: 30px 0;
+    padding-top: 20px;
+}
+
+.recover-account a {
+    color: #00ac75;
+    text-decoration: none;
+}
+
+.recover-account a:hover {
+    text-decoration: underline;
+}
+
+/* === فاصل === */
+hr.style {
+    color: #333;
+    text-align: center;
+    margin: 40px 0;
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, .1);
+    position: relative;
+}
+
+hr.style:after {
+    content: "Or";
+    width: 40px;
+    height: 20px;
+    font-family: Roboto, sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 0 10px;
+}
+
+/* === مدخلات خاصة === */
+.idn-input {
+    width: 100%;
+    height: 50px;
+    padding: 15px;
+    color: #454f63;
+    border-radius: 12px;
+    border: solid 1px #78849e;
+    background-color: white;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* === تذييل الصفحة === */
+.footer {
+    position: relative;
+    width: 100%;
+    padding: 20px 0;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.copyright {
+    font-family: 'Roboto', sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #78849E;
+    margin-top: 20px;
+}
+
+.rectangle {
+    height: 8px;
+    border-radius: 2px;
+    width: 100%;
+    background: linear-gradient(272deg, #0D98BA, #42e198);
+}
+
+.path {
+    width: 100%;
+    height: 2px;
+    border: solid 1px #00a36a;
+    margin: 40px 0;
+}
+
+/* === قواعد الإدخال === */
 .input-rule-title {
-	font-family: Roboto;
-	font-size: 12px;
-	font-stretch: normal;
-	font-style: normal;
-	line-height: normal;
-	letter-spacing: 0.2px;
-	padding-top: 10px;
-	color: #454f63;
+    font-family: Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #454f63;
+    margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .input-rule-title-info1 {
-  font-family: Roboto;
-  font-size: 10px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: normal;  
-  color: #454f63;
+    font-family: Roboto, sans-serif;
+    font-size: 10px;
+    font-weight: normal;
+    color: #454f63;
+    margin-bottom: 3px;
 }
 
 .input-rule-title-info2 {
-	font-family: Roboto;
-	font-size: 8px;
-	font-weight: 500;
-	font-stretch: normal;
-	font-style: normal;
-	line-height: normal;
-	letter-spacing: 0.5px;
-	color: #78849e;
+    font-family: Roboto, sans-serif;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: #78849e;
 }
 
-.img-pos {
-	height: 13px;
-	width: 13px;
-	left: 45px;
-	top: -223px;
+/* === رسائل المصادقة === */
+.authenticationMessages {
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    color: #eb6d72;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: rgba(235, 109, 114, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #eb6d72;
 }
 
-.close {
-	height: 18px;
-	width: 18px;
+/* === القائمة === */
+.menu {
+    font-family: Roboto, sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+    color: #78849E;
+    padding: 10px 15px;
+    display: inline-block;
 }
 
-/* Popup container for invalid identifier */
+.menu-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* === العنصر المنبثق === */
 .popup {
-	cursor: pointer;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	position: relative;
-	left: 480px;
-	top: 100px;
-	z-index: 1;
-	display: inline-block;
-	margin-top: -1rem;
-	margin: auto;
-	}
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
 
 .popup .popuptext {
-	visibility: hidden;
-	width: 190px;	
-	color: #454f63;
-	text-align: left;
-	border-radius: 6px;
-	margin-left: -48px;
-	padding: 10px 10px 20px 20px;
-	position: absolute;
-	bottom: 25%;	
-	font-size: 11px;
-	font-weight: 500;
-	background-image:url("../images/popup1.png");
-	background-repeat: no-repeat;
-	background-size: 100% 100%;
+    visibility: hidden;
+    width: 250px;
+    background-color: white;
+    color: #454f63;
+    text-align: left;
+    border-radius: 12px;
+    padding: 20px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e1e5eb;
 }
 
-/* Toggle hide and show the popup */
+.popup .popuptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
 .popup .show {
-	visibility: visible;
-	-webkit-animation: fadeIn 1s;
-	animation: fadeIn 1s;
-}
-
-/* Add animation (fade in the popup) */
-@
--webkit-keyframes fadeIn {
-  from {opacity: 0;} 
-  to {opacity: 1;}
+    visibility: visible;
+    animation: fadeIn 0.3s;
 }
 
 @keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity:1 ;}
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-html[lang="ar"] .menu {
-	padding-right: 4px;
-	padding-left: initial;
+/* === محتوى تسجيل الدخول === */
+.login-content {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
 }
 
-@media ( min-width : 950px) {
-	.menu {
-		font-size: 15px;
-		padding-left: 20px;
-		padding-right: 20px;
-		margin-top: 20px;
-	}
-	.copyright {
-		font-size: 13px;		
-	}
-	
-	html[lang="ar"] .menu {
-		font-size: 13px;
-		padding-right: 15px;
-		padding-left: initial;
-	}
+.top-10 {
+    margin-top: 10px;
+}
+
+.top-20 {
+    margin-top: 20px;
+}
+
+.top-30 {
+    margin-top: 30px;
+}
+
+.bottom-10 {
+    margin-bottom: 10px;
+}
+
+.bottom-20 {
+    margin-bottom: 20px;
+}
+
+.bottom-30 {
+    margin-bottom: 30px;
+}
+
+/* === أيقونات === */
+.img-pos {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.close {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* === استعلامات الوسائط === */
+@media (max-width: 489px) {
+    .logo img {
+        max-width: 150px;
+        padding: 15px 0;
+    }
+    
+    .page-title {
+        font-size: 28px;
+    }
+    
+    .login-to-uaepass {
+        font-size: 20px;
+        padding-bottom: 15px;
+    }
+    
+    .form-input {
+        height: 45px;
+        padding: 0 15px;
+        font-size: 13px;
+    }
+    
+    .btn-login {
+        height: 45px;
+        font-size: 18px;
+        padding: 12px 0;
+    }
+    
+    .btn-app {
+        height: 45px;
+        font-size: 15px;
+        padding: 12px 0;
+    }
+    
+    .login-content {
+        padding: 30px 15px;
+        margin: 0 10px;
+    }
+    
+    .dont-have-account {
+        font-size: 12px;
+    }
+    
+    .create-new-account {
+        font-size: 13px;
+    }
+    
+    .recover-account {
+        font-size: 13px;
+        margin: 25px 0;
+    }
+    
+    .copyright {
+        font-size: 11px;
+    }
+}
+
+@media (min-width: 576px) {
+    .idn-input {
+        height: 58px;
+        font-size: 14px;
+    }
+    
+    .btn-login {
+        height: 58px;
+        font-size: 18px;
+    }
+    
+    .btn-app {
+        height: 58px;
+        font-size: 16px;
+    }
+    
+    .form-input {
+        height: 58px;
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 950px) {
+    .menu {
+        font-size: 15px;
+        padding: 10px 20px;
+    }
+    
+    .copyright {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 500px) {
+    .popup {
+        left: 0;
+        top: 0;
+        margin: 0 auto;
+        display: block;
+        text-align: center;
+    }
+    
+    .popup .popuptext {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 300px;
+    }
+    
+    .authenticationMessages {
+        text-align: center;
+    }
+}
+
+@media (max-width: 575px) {
+    .footer {
+        position: relative;
+        top: 0;
+    }
+    
+    .copyright {
+        margin-top: 10px;
+    }
 }
 
 @media only screen and (max-width: 375px) {
-	html {
-		font-size: 75%;
-	}
-	.create-new-account {
-		font-size: 11px;
-	}
-	.recover-account {
-		font-size: 12px;
-	}
-	.dont-have-account {
-		font-size: 11px;
-	}
-	.container {
-		padding-top: 50px;
-	}
+    html {
+        font-size: 87.5%;
+    }
+    
+    .container {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+    
+    .create-new-account {
+        font-size: 12px;
+    }
+    
+    .recover-account {
+        font-size: 12px;
+    }
+    
+    .dont-have-account {
+        font-size: 12px;
+    }
 }
 
-@media ( max-width : 950px) {
-	.spacing {
-		margin-top: 100px;
-	}
+@media (max-width: 950px) {
+    .spacing {
+        margin-top: 80px;
+    }
 }
 
-@media ( max-width : 500px) {
-	.popup {
-		left: 100px;
-		top: 200px;
-		margin: auto;
-	}
-	.authenticationMessages {
-		text-align: center;
-	}
-	.popup .popuptext {
-		background-image: url("../images/popup2.png");
-	}
-	.spacing {
-		margin-left:5px;
-	}
-}
-
-@media ( max-width : 575px) {
-	.footer {
-		top: 85%;
-	}
-	.copyright {
-		margin-top: 0px;
-	}
-}
-
-html[lang="ar"]  .page-title,
-html[lang="ar"]  .form-input,
-html[lang="ar"]  .login-to-uaepass ,
-html[lang="ar"] .btn-login ,
+/* === دعم اللغة العربية === */
+html[lang="ar"] .page-title,
+html[lang="ar"] .form-input,
+html[lang="ar"] .login-to-uaepass,
+html[lang="ar"] .btn-login,
 html[lang="ar"] .dont-have-account,
 html[lang="ar"] .create-new-account,
-html[lang="ar"] .recover-account ,
-html[lang="ar"] hr.style:after ,
-html[lang="ar"] .btn-app ,
+html[lang="ar"] .recover-account,
+html[lang="ar"] hr.style:after,
+html[lang="ar"] .btn-app,
 html[lang="ar"] .menu,
-html[lang="ar"] .copyright{
-	font-family:'GESS', 'Roboto', sans-serif !important; 
+html[lang="ar"] .copyright,
+html[lang="ar"] .authenticationMessages,
+html[lang="ar"] .input-rule-title,
+html[lang="ar"] .input-rule-title-info1,
+html[lang="ar"] .input-rule-title-info2 {
+    font-family: 'GESS', 'Roboto', sans-serif !important;
+    direction: rtl;
 }
 
 html[lang="ar"] .form-check {
-	text-align: right;
+    text-align: right;
 }
 
 html[lang="en"] .form-check {
-	text-align: left;
+    text-align: left;
 }
 
 html[lang="ar"] .form-check .dont-have-account {
-	margin-right: 20px !important;
+    margin-right: 20px !important;
 }
 
 html[lang="ar"] .idn-input {
-	text-align: right;
+    text-align: right;
+    direction: rtl;
 }
 
 html[lang="ar"] .text-left {
-	text-align: right !important;
+    text-align: right !important;
 }
 
 html[lang="ar"] .text-right {
-	text-align: left !important;
+    text-align: left !important;
 }
 
 html[lang="ar"] .authenticationMessages {
-	text-align: right;
+    text-align: right;
+    border-left: none;
+    border-right: 3px solid #eb6d72;
 }
 
-html[lang="ar"] .popup {
-	left: 185px;
+html[lang="ar"] .popup .popuptext {
+    text-align: right;
+    direction: rtl;
 }
 
-html[lang="ar"] .input-rule-title {
-	text-align: right;
+html[lang="ar"] .img-pos {
+    margin-right: 0;
+    margin-left: 8px;
 }
 
-html[lang="ar"] .input-rule-title-info1 {
-	text-align: right;
+html[lang="ar"] .menu {
+    padding-right: 15px;
+    padding-left: 0;
 }
 
-html[lang="ar"] .input-rule-title-info2 {
-	text-align: right;
+/* === تحسينات إضافية للاستجابة === */
+.spacing {
+    padding: 0 15px;
 }
+
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mt-5 { margin-top: 3rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+.mb-5 { margin-bottom: 3rem; }
+
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 1rem; }
+.p-4 { padding: 1.5rem; }
+.p-5 { padding: 3rem; }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.justify-content-center { justify-content: center; }
+.align-items-center { align-items: center; }
