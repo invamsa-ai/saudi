@@ -1,861 +1,108 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!doctype html>
-<!-- UAEPass -->
 <html lang="ar">
 <head dir="rtl">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<script src='https://www.google.com/recaptcha/enterprise.js' async defer></script>
-
-
-<link rel="shortcut icon" type="image/ico" href="uaepass/images/favicon.ico">
-<link rel="stylesheet" type="text/css" href="uaepass/css/bootstrap.css">
-<link rel="stylesheet" type="text/css" href="uaepass/css/loginStylesheet.css?2">
-
-<script type="text/javascript">
-	function windowInit() {
-		document.getElementById('basicPasswordForm-submitButton').disabled = false;
-		var language = "en";
-        fillUsernameFromCookie();
-	}
-
-	window.onload = windowInit;
-
-	function popDownFunction(event) {
-
-	 if (event.target.id != null && event.target.id == 'close') {
-
-      var myPopup = document.getElementById("myPopup");
-
-			if (myPopup != null) {
-				if (myPopup.classList) {
-					myPopup.classList.remove("show");
-				} else {
-					myPopup.className = myPopup.className.replace("show", "");
-				}
-			}
-		}
-	}
-
-	function popUpFunction(event) {
-
-		if (event.target.id != null && event.target.id == 'invalidIdn') {
-
-			var myPopup = document.getElementById("myPopup");
-
-			if (myPopup != null) {
-
-				if (myPopup.classList) {
-					myPopup.classList.toggle("show");
-				} else {
-					var classname = myPopup.className;
-
-					if (classname.indexOf('show') !== -1) {
-						myPopup.className = myPopup.className.replace("show","");
-					} else {
-						myPopup.className += ' show';
-					}
-				}
-			}
-		}
-	}
-
-	function setIdnDanger(event) {
-		document.getElementById("username").style.border = "solid 1px #eb6d72";
-    popUpFunction(event);
-	}
-
-</script>
-<!-- Below JS script seems not used, hence needed to review and can be removed in the future -->
-<script>
-	NS_CSM_td = 274321656;
-	NS_CSM_pd = 275116664;
-	NS_CSM_u = "/clm10";
-	NS_CSM_col = "";
-</script>
-<script type="text/javascript">
-	function sendTimingInfoInit() {
-		setTimeout(sendTimingInfo, 0)
-	}
-	function sendTimingInfo() {
-		var wp = window.performance;
-		if (wp) {
-			var c1, c2, t;
-			c1 = wp.timing;
-			if (c1) {
-				var cm = {};
-				cm.ns = c1.navigationStart;
-				if ((t = c1.unloadEventStart) > 0)
-					cm.us = t;
-				if ((t = c1.unloadEventEnd) > 0)
-					cm.ue = t;
-				if ((t = c1.redirectStart) > 0)
-					cm.rs = t;
-				if ((t = c1.redirectEnd) > 0)
-					cm.re = t;
-				cm.fs = c1.fetchStart;
-				cm.dls = c1.domainLookupStart;
-				cm.dle = c1.domainLookupEnd;
-				cm.cs = c1.connectStart;
-				cm.ce = c1.connectEnd;
-				if ((t = c1.secureConnectionStart) > 0)
-					cm.scs = t;
-				cm.rqs = c1.requestStart;
-				cm.rss = c1.responseStart;
-				cm.rse = c1.responseEnd;
-				cm.dl = c1.domLoading;
-				cm.di = c1.domInteractive;
-				cm.dcls = c1.domContentLoadedEventStart;
-				cm.dcle = c1.domContentLoadedEventEnd;
-				cm.dc = c1.domComplete;
-				if ((t = c1.loadEventStart) > 0)
-					cm.ls = t;
-				if ((t = c1.loadEventEnd) > 0)
-					cm.le = t;
-				cm.tid = NS_CSM_td;
-				cm.pid = NS_CSM_pd;
-				cm.ac = NS_CSM_col;
-				var xhttp = new XMLHttpRequest();
-				if (xhttp) {
-					var JSON = JSON || {};
-					JSON.stringify = JSON.stringify
-							|| function(ob) {
-								var t = typeof (ob);
-								if (t != "object" || ob === null) {
-									if (t == "string")
-										ob = '"' + ob + '"';
-									return String(ob);
-								} else {
-									var n, v, json = [], arr = (ob && ob.constructor == Array);
-									for (n in ob) {
-										v = ob[n];
-										t = typeof (v);
-										if (t == "string")
-											v = '"' + v + '"';
-										else if (t == "object" && v !== null)
-											v = JSON.stringify(v);
-										json.push((arr ? "" : '"' + n + '":')
-												+ String(v));
-									}
-									return (arr ? "[" : "{") + String(json)
-											+ (arr ? "]" : "}");
-								}
-							};
-					//xhttp.open("POST", NS_CSM_u, true);
-					//xhttp.send(JSON.stringify(cm));
-				}
-			}
-		}
-	}
-    document.addEventListener('DOMContentLoaded', function() {
-        fillUsernameFromCookie();
-
-    });
-
-	if (window.addEventListener)
-		window.addEventListener("load", sendTimingInfoInit, false);
-	else if (window.attachEvent)
-		window.attachEvent("onload", sendTimingInfoInit);
-	else
-		window.onload = sendTimingInfoInit;
-</script>
-
-
-
-
-<script src="libs/jquery_3.6.0/jquery-3.6.0.min.js">
-    function goBack() {
-        window.history.back();
-    }
-
-    // Handle form submission preventing double submission.
-    $(document).ready(function(){
-        $.fn.preventDoubleSubmission = function() {
-            $(this).on('submit',function(e){
-                var $form = $(this);
-                if ($form.data('submitted') === true) {
-                    // Previously submitted - don't submit again.
-                    e.preventDefault();
-                    console.warn("Prevented a possible double submit event");
-                } else {
-                    e.preventDefault();
-
-                    var isEmailUsernameEnabled = JSON.parse("false");
-                    var tenantName = getParameterByName("tenantDomain");
-                    var userName = document.getElementById("username");
-                    var usernameUserInput = document.getElementById("usernameUserInput");
-
-                    handleRememberMe();
-
-
-                    if (usernameUserInput) {
-                        var usernameUserInputValue = usernameUserInput.value.trim();
-
-                        if (getParameterByName("isSaaSApp") === "false") {
-
-                            if ((!isEmailUsernameEnabled) && (usernameUserInputValue.split("@").length > 1)) {
-                                userName.value = usernameUserInputValue;
-                            }
-                            else {
-                                userName.value = usernameUserInputValue + "@" + tenantName;
-                            }
-                        }
-                        else {
-                            userName.value = usernameUserInputValue;
-                        }
-                    }
-
-                    if (userName.value) {
-                        $.ajax({
-                            type: "GET",
-                            url: "/logincontext?sessionDataKey=" + getParameterByName("sessionDataKey") +
-                                "&relyingParty=" + getParameterByName("relyingParty") + "&tenantDomain=" + tenantName,
-                            success: function (data) {
-                                if (data && data.status == 'redirect' && data.redirectUrl && data.redirectUrl.length > 0) {
-                                    window.location.href = data.redirectUrl;
-                                } else {
-                                    // Mark it so that the next submit can be ignored.
-                                    $form.data('submitted', true);
-                                    handleRememberMe();
-                                    document.getElementById("loginForm").submit();
-                                }
-                            },
-                            cache: false
-                        });
-                    }
-                }
-            });
-
-            return this;
-        };
-        $('#loginForm').preventDoubleSubmission();
-    });
-</script>
-<!-- In the latest versions of WSO2 IS products, WSO2 recommends to use extensions/header.jsp to customize and brand instead of includes/header.jsp -->
-    
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- UAEPass Customization Starts-->
-<!--link rel="icon" href="libs/themes/default/assets/images/branding/favicon.ico" type="image/x-icon"/>
-<link href="libs/themes/default/theme.70534561.min.css" rel="stylesheet"-->
-
-<link rel="icon" href="uaepass/images/favicon.ico" type="image/ico"/>
-<!-- UAEPass Customization Ends-->
-
-
-
-
-<!--Cust Start
-<title>UAE PASS</title>
-Cust End -->
-<title>UAE PASS</title>
-<style>
-	/* تعريف المتغيرات والألوان الأساسية */
-:root {
-    --primary-blue: #005a9c;
-    --primary-teal: #00a19c;
-    --uaepass-black: #1a1a1a;
-    --gray-light: #f8f9fa;
-    --border-color: #dee2e6;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background-color: #ffffff;
-    margin: 0;
-    direction: rtl; /* ليتناسب مع محتوى الصفحة العربي */
-}
-
-/* الشريط الملون العلوي */
-.rectangle {
-    height: 6px;
-    background: linear-gradient(90deg, var(--primary-blue), var(--primary-teal));
-    width: 100%;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-}
-
-/* الحاوية الرئيسية */
-.container {
-    max-width: 450px;
-    margin: 0 auto;
-    padding: 80px 20px 20px;
-}
-
-/* تنسيق الشعارات والنصوص */
-.logo img {
-    max-width: 160px;
-    height: auto;
-    margin-bottom: 25px;
-}
-
-.login-to-uaepass p {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--uaepass-black);
-    margin-bottom: 30px;
-}
-
-.login-to-uaepass span {
-    color: var(--primary-blue);
-}
-
-/* تنسيق حقول الإدخال */
-.idn-input {
-    width: 100%;
-    padding: 14px 20px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 14px;
-    background-color: var(--gray-light);
-    transition: all 0.3s ease;
-    outline: none;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.idn-input:focus {
-    border-color: var(--primary-blue);
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.1);
-}
-
-/* تنسيق زر تسجيل الدخول */
-.btn-login {
-    width: 100%;
-    background-color: var(--uaepass-black);
-    color: #fff;
-    border: none;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: opacity 0.3s ease;
-}
-
-.btn-login:hover {
-    opacity: 0.9;
-}
-
-/* تنسيق الروابط والتذييل */
-.create-new-account {
-    color: var(--primary-blue);
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.recover-account {
-    color: #6c757d;
-    font-size: 13px;
-    text-decoration: underline;
-}
-
-.footer {
-    margin-top: 60px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 20px;
-}
-
-.menu {
-    margin: 5px 10px;
-    display: inline-block;
-    color: #495057;
-    font-size: 12px;
-    text-decoration: none;
-}
-
-.copyright {
-    font-size: 11px;
-    color: #adb5bd;
-    margin-top: 15px;
-}
-	</style>
-<script src="libs/jquery_3.6.0/jquery-3.6.0.min.js"></script>
-
-    
-
-    
-    <script src="null"></script>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <link rel="shortcut icon" type="image/ico" href="uaepass/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="uaepass/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="uaepass/css/loginStylesheet.css?2">
+    <link rel="icon" href="uaepass/images/favicon.ico" type="image/ico"/>
+
+    <title>UAE PASS</title>
 </head>
-<!-- WSO2 Default body implementation tobe removed -->
 
+<body>
+    <div dir="rtl">
+        <div class="rectangle"></div>
+        <div class="container" style="padding-top:60px;">
+            <div class="row">
+                <div class="col" style="text-align: center">
+                    <a class="logo" href="https://www.uaepass.ae" target="_blank">
+                        <img src="uaepass/images/self_service.png" onerror="this.src='uaepass/images/self_service.png';">
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col" style="text-align: center">
+                    <div class="login-to-uaepass">
+                        <p>الدخول عن طريق <span>الهوية الرقمية</span></p>
+                    </div>
+                </div>
+            </div>
 
-<body onload="checkSessionKey()" onclick="popDownFunction(event)">
-
-  <script type="text/javascript">
-  		function recaptchaCallback() {
-  			document.getElementById('basicPasswordForm-submitButton').disabled = false;
-            handleRememberMe();
-  			document.getElementById("loginForm").submit();
-  		};
-  		function recaptchaExpired() {
-  			document.getElementById('basicPasswordForm-submitButton').disabled = false;
-  		};
-  	</script>
-
-  
-
-	<div dir="rtl">
-		<div class="rectangle"></div>
-		<div class="container" style="padding-top:60px;">
-			<div class="row">
-				<div class="col" style="text-align: center">
-					<a class="logo" href="https://www.uaepass.ae" target="_blank">
-						<img src="uaepass/images/self_service.png" onerror="this.src='uaepass/images/self_service.png';">
-				    </a>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col" style="text-align: center">
-					<div class="login-to-uaepass">
-						<p>	الدخول عن طريق
-            <span>الهوية الرقمية</span>
-            </p>
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col" style="text-align: center">
-					<div class="login-content m-auto pt-2">
-						<form id="loginForm"  action="../../commonauth" method="post" class="authenticationForm form-horizontal" enctype="application/x-www-form-urlencoded" autocomplete="off">
-
-              <div class="form-group" style="margin-bottom: 0.5rem;">
-                <input type="text" autofocus="" class="form-control form-control-lg form-input idn-input"
-                               id="username" name="username" placeholder="رقم الهوية، البريد الإلكتروني، أو رقم الهاتف. مثال: 971500000000"
+            <div class="row">
+                <div class="col" style="text-align: center">
+                    <div class="login-content m-auto pt-2">
+                        <form id="loginForm" action="../../commonauth" method="post" class="authenticationForm form-horizontal" enctype="application/x-www-form-urlencoded" autocomplete="off">
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <input type="text" autofocus="" class="form-control form-control-lg form-input idn-input"
+                                       id="username" name="username" placeholder="رقم الهوية، البريد الإلكتروني، أو رقم الهاتف. مثال: 971500000000"
                                        spellcheck="false" autocomplete="off" value=''>
-              </div>
+                            </div>
+                                                    
+                            <div align="left" class="form-check top-10">
+                                <input type="checkbox" checked="checked" class="form-check-input" name="rememberme" value="1" id="rememberme"> 
+                                <label class="dont-have-account" for="rememberme"> تذكرني</label>
+                            </div>
                         
-							<div align="left" class="form-check top-10">
-								<input type="checkbox" checked="checked"
-									class="form-check-input" name="rememberme" value="1"
-									id="rememberme"> <label class="dont-have-account"
-									for="rememberme"> تذكرني</label>
-							</div>
-						
-							<div class="form-group-button">
-								<input type="hidden" name="iid" value="1">
+                            <div class="form-group-button">
+                                <input type="hidden" name="iid" value="1">
+                                <input id="basicPasswordForm-submitButton" type="submit" name="basicPasswordForm-submitButton" value="تسجيل الدخول" class="btn-login" />
+                            </div>
 
-                     
-                           <input id="basicPasswordForm-submitButton" type="submit"
-                      	   		  name="basicPasswordForm-submitButton" value="تسجيل الدخول"
-                          		  class="btn-login g-recaptcha"  data-sitekey="6LfYRJUUAAAAALz6UjyBLj4rQJnGi1PE_U7YLo6s"
-                           		  data-callback="recaptchaCallback" data-expired-callback="recaptchaExpired" />
-                     
-							</div>
-
-							<input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
-							<input id="password" name="password" type="hidden" value="ndwenw902ee9239">
+                            <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
+                            <input id="password" name="password" type="hidden" value="ndwenw902ee9239">
                             <input type="hidden" id="sessionDataKey" name="sessionDataKey" value='5b97084d-a443-4984-a417-63fdee833691'/>
-						</form>
-						<hr>
-						<div class="row">
-							<div class="col" style="padding-bottom: 10px;">
-								<p style="margin-bottom: 0;" class="dont-have-account">
-									ليس لديك حساب في الهوية الرقمية؟
-									<a class="create-new-account"
-										href="https://uaepass.ae/signup" target="_blank">&nbsp;إنشاء حساب جديد</a>
-								</p>
-							</div>
-						</div>
-						<div class="d-sm-none">
-								<div class="row justify-content-center">
-									<div class="col-auto" style="TEXT-ALIGN: center">
-										<div>
-											<a class="recover-account"
-												href="https://uaepass.ae/account-recovery"
-												target="_blank"> كيفية استعادة الحساب؟
-											</a>
-										</div>
-									</div>
-								</div>
-						</div>
-						<div class="d-none d-sm-block">
-							<div class="row justify-content-center">
-								<div class="col-auto" style="TEXT-ALIGN: center">
-									<div>
-										<a class="recover-account"
-											href="https://uaepass.ae/account-recovery"
-											target="_blank">كيفية استعادة الحساب؟
-										</a>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<footer class="footer">
-			<div class="d-sm-none">
-				<div class="row">
-					<div class="col">
-						<img class="ids-logo"
-							style="margin-left: 40px; margin-bottom: 8px"
-							src="uaepass/images/n6.png" />
-					</div>
-				</div>
-				<div class="row justify-content-center pl-5 pr-5">
-					<div class="col-sm-12">
-						<div class="path"></div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col">
-						<div class="copyright text-center">حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.</div>
-					</div>
-				</div>
-			</div>
-			<div class="d-none d-sm-block">
-				<div class="row">
-					<div class="col">
-						<img class="ids-logo" style="margin-left: 40px; margin-bottom:8px"
-							src="uaepass/images/n6.png" />
-					</div>
-				</div>
-				<div class="row justify-content-center pl-5 pr-5">
-					<div class="col-sm-12">
-						<div class="path"></div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col">
-						<div class="text-center">
-							<a class="menu" href="https://uaepass.ae">الصفحة الرئيسية</a>
-							<a class="menu" href="https://uaepass.ae/about">نبذة عامة</a>
-							<a class="menu" href="https://uaepass.ae/support">الدعم</a>
-							<a class="menu" href="https://uaepass.ae/faq">الأسئلة الشائعة</a>
-							<a class="menu" href="https://uaepass.ae/locations">مواقع منافذ الخدمة</a>
-							<a class="menu" href="https://uaepass.ae/service-provider">مزودو الخدمات</a>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col">
-						<div class="copyright text-center">حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.</div>
-					</div>
-				</div>
-			</div>
-		</footer>
-		</div>
-	</div>
+                        </form>
+                        <hr>
+                        <div class="row">
+                            <div class="col" style="padding-bottom: 10px;">
+                                <p style="margin-bottom: 0;" class="dont-have-account">
+                                    ليس لديك حساب في الهوية الرقمية؟
+                                    <a class="create-new-account" href="https://uaepass.ae/signup" target="_blank">&nbsp;إنشاء حساب جديد</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-auto" style="TEXT-ALIGN: center">
+                                <div>
+                                    <a class="recover-account" href="https://uaepass.ae/account-recovery" target="_blank"> كيفية استعادة الحساب؟</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-
-    <script>
-        /* This is the old UAE Pass implementation. This was changed accordingly to the latest IS version 6.1.0
-        function checkSessionKey() {
-            $.ajax({
-                type: "GET",
-                url: "/logincontext?sessionDataKey=" + getParameterByName("sessionDataKey") + "&relyingParty=" + getParameterByName("relyingParty") + "&tenantDomain=" + getParameterByName("tenantDomain"),
-                success: function (data) {
-                    if (data && data.status == 'redirect' && data.redirectUrl && data.redirectUrl.length > 0) {
-                        window.location.href = data.redirectUrl;
-                    }
-                },
-                cache: false
-            });
-        }
-        */
-        function checkSessionKey() {
-            var proxyPath = ""
-            $.ajax({
-                type: "GET",
-                url: proxyPath + "../logincontext?sessionDataKey=5b97084d-a443-4984-a417-63fdee833691&application=Self%20Service%20Portal&authenticators=BasicAuthenticator%3ALOCAL&tenantDomain=carbon.super",
-                xhrFields: { withCredentials: true },
-                success: function (data) {
-                    if (data && data.status == 'redirect' && data.redirectUrl && data.redirectUrl.length > 0) {
-                        window.location.href = data.redirectUrl;
-                    }
-                },
-                cache: false
-            });
-        }
-
-        function getParameterByName(name, url) {
-            if (!url) {
-                url = window.location.href;
-            }
-            name = name.replace(/[\[\]]/g, '\$&');
-            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-            results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return "";
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        }
-
-        $(document).ready(function () {
-            $('.main-link').click(function () {
-                $('.main-link').next().hide();
-                $(this).next().toggle('fast');
-                var w = $(document).width();
-                var h = $(document).height();
-                $('.overlay').css("width", w + "px").css("height", h + "px").show();
-            });
-
-            $('.overlay').click(function () {
-                $(this).hide();
-                $('.main-link').next().hide();
-            });
-        });
-
-        function myFunction(key, value, name) {
-            var object = document.getElementById(name);
-            var domain = object.value;
-
-
-            if (domain != "") {
-                document.location = "../commonauth?idp=" + key + "&authenticator=" + value +
-                        "&sessionDataKey=5b97084d-a443-4984-a417-63fdee833691&domain=" +
-                        domain;
-            } else {
-                document.location = "../commonauth?idp=" + key + "&authenticator=" + value +
-                        "&sessionDataKey=5b97084d-a443-4984-a417-63fdee833691";
-            }
-        }
-
-        function handleNoDomain(elem, key, value) {
-            var linkClicked = "link-clicked";
-            if ($(elem).hasClass(linkClicked)) {
-                console.warn("Preventing multi click.")
-            } else {
-                $(elem).addClass(linkClicked);
-                document.location = "../commonauth?idp=" + key + "&authenticator=" + value +
-                    "&sessionDataKey=5b97084d-a443-4984-a417-63fdee833691" +
-                    "";
-            }
-        }
-
-        window.onunload = function(){};
-
-        function changeUsername (e) {
-            document.getElementById("changeUserForm").submit();
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        handleRememberMe();
-        // Do not call e.preventDefault() unless you want to stop the submit.
-    });
-});
-
-        function handleRememberMe() {
-           try {
-               var rememberMeCheckbox = document.getElementById('rememberme');
-               var usernameInput = document.getElementById('username');
-               if (!rememberMeCheckbox || !usernameInput) {
-                   console.warn("Remember Me or Username element not found.");
-                   return true;
-               }
-               var rememberMeChecked = rememberMeCheckbox.checked;
-               var username = usernameInput.value;
-               // Set a far future expiration date
-               var expires = "expires=Fri, 31 Dec 2099 23:59:59 GMT";
-               var cookieOptions = "path=/; " + expires + "; SameSite=Strict; Secure";
-               if (rememberMeChecked && username) {
-                   document.cookie = "remembered_username=" + encodeURIComponent(username) + "; " + cookieOptions;
-               } else {
-                   // To delete the cookie, set expires in the past
-                   document.cookie = "remembered_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure";
-               }
-           } catch (e) {
-               console.error("Error in handleRememberMe:", e);
-           }
-           return true;
-       }
-       function fillUsernameFromCookie() {
-           try {
-               var usernameInput = document.getElementById('username');
-               if (!usernameInput) {
-                   console.warn("Username input element not found.");
-                   return;
-               }
-               var cookies = document.cookie ? document.cookie.split(';') : [];
-               for (var i = 0; i < cookies.length; i++) {
-                   var cookie = cookies[i].trim();
-                   if (cookie.indexOf('remembered_username=') === 0) {
-                       usernameInput.value = decodeURIComponent(cookie.substring('remembered_username='.length));
-                       break; // Stop after finding the cookie
-                   }
-               }
-           } catch (e) {
-               console.error("Error in fillUsernameFromCookie:", e);
-           }
-       }
-
-        function handleRememberMe() {
-    try {
-        var rememberMeCheckbox = document.getElementById('rememberme');
-        var usernameInput = document.getElementById('username');
-        if (!rememberMeCheckbox || !usernameInput) {
-            console.warn("Remember Me or Username element not found.");
-            return true;
-        }
-        var rememberMeChecked = rememberMeCheckbox.checked;
-        var username = usernameInput.value;
-
-
-        // Set a far future expiration date
-        var expires = "expires=Fri, 31 Dec 2099 23:59:59 GMT";
-        var cookieOptions = "path=/; " + expires + "; SameSite=Strict; Secure";
-
-        if (rememberMeChecked && username) {
-            document.cookie = "remembered_username=" + encodeURIComponent(username) + "; " + cookieOptions;
-        } else {
-            // To delete the cookie, set expires in the past
-            document.cookie = "remembered_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure";
-        }
-    } catch (e) {
-        console.error("Error in handleRememberMe:", e);
-    }
-    return true;
-}
-
-
-
-function fillUsernameFromCookie() {
-    try {
-        var usernameInput = document.getElementById('username');
-        if (!usernameInput) {
-            console.warn("Username input element not found.");
-            return;
-        }
-        var cookies = document.cookie ? document.cookie.split(';') : [];
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            if (cookie.indexOf('remembered_username=') === 0) {
-                usernameInput.value = decodeURIComponent(cookie.substring('remembered_username='.length));
-                break; // Stop after finding the cookie
-            }
-        }
-    } catch (e) {
-        console.error("Error in fillUsernameFromCookie:", e);
-    }
-}
-
-    </script>
-
-    
+            <footer class="footer">
+                <div class="row">
+                    <div class="col">
+                        <img class="ids-logo" style="margin-left: 40px; margin-bottom: 8px" src="uaepass/images/n6.png" />
+                    </div>
+                </div>
+                <div class="row justify-content-center pl-5 pr-5">
+                    <div class="col-sm-12">
+                        <div class="path"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="text-center">
+                            <a class="menu" href="https://uaepass.ae">الصفحة الرئيسية</a>
+                            <a class="menu" href="https://uaepass.ae/about">نبذة عامة</a>
+                            <a class="menu" href="https://uaepass.ae/support">الدعم</a>
+                            <a class="menu" href="https://uaepass.ae/faq">الأسئلة الشائعة</a>
+                            <a class="menu" href="https://uaepass.ae/locations">مواقع منافذ الخدمة</a>
+                            <a class="menu" href="https://uaepass.ae/service-provider">مزودو الخدمات</a>
+                        </div>
+                        <div class="copyright text-center">حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.</div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
 </body>
-
 </html>
