@@ -11,11 +11,100 @@ html {
 }
 
 body {
-    font-family: 'GESS', 'Roboto', sans-serif;
+    font-family: 'Roboto', 'GESS', sans-serif;
     background-color: #f8fafc;
     min-height: 100%;
+    position: relative;
     line-height: 1.6;
-    color: #454f63;
+}
+
+/* ===== FONT FACES ===== */
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Bold.eot');
+    src: url('../fonts/roboto/Roboto-Bold.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/roboto/Roboto-Bold.woff2') format('woff2'),
+         url('../fonts/roboto/Roboto-Bold.woff') format('woff'),
+         url('../fonts/roboto/Roboto-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Light.eot');
+    src: url('../fonts/roboto/Roboto-Light.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/roboto/Roboto-Light.woff2') format('woff2'),
+         url('../fonts/roboto/Roboto-Light.woff') format('woff'),
+         url('../fonts/roboto/Roboto-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Regular.eot');
+    src: url('../fonts/roboto/Roboto-Regular.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/roboto/Roboto-Regular.woff2') format('woff2'),
+         url('../fonts/roboto/Roboto-Regular.woff') format('woff'),
+         url('../fonts/roboto/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/roboto/Roboto-Medium.eot');
+    src: url('../fonts/roboto/Roboto-Medium.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/roboto/Roboto-Medium.woff2') format('woff2'),
+         url('../fonts/roboto/Roboto-Medium.woff') format('woff'),
+         url('../fonts/roboto/Roboto-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GESS';
+    src: url('../fonts/gess/GESSTwoBold-Bold.woff2') format('woff2'),
+         url('../fonts/gess/GESSTwoBold-Bold.woff') format('woff'),
+         url('../fonts/gess/GESSTwoBold-Bold.ttf') format('truetype'),
+         url('../fonts/gess/GESSTwoBold-Bold.eot?#iefix') format('embedded-opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GESS';
+    src: url('../fonts/gess/GESSTwoMedium-Medium.woff2') format('woff2'),
+         url('../fonts/gess/GESSTwoMedium-Medium.woff') format('woff'),
+         url('../fonts/gess/GESSTwoMedium-Medium.ttf') format('truetype'),
+         url('../fonts/gess/GESSTwoMedium-Medium.eot?#iefix') format('embedded-opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GESS';
+    src: url('../fonts/gess/GESSTwoLight-Light.woff2') format('woff2'),
+         url('../fonts/gess/GESSTwoLight-Light.woff') format('woff'),
+         url('../fonts/gess/GESSTwoLight-Light.ttf') format('truetype'),
+         url('../fonts/gess/GESSTwoLight-Light.eot?#iefix') format('embedded-opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+/* ===== PLACEHOLDER STYLES ===== */
+::placeholder {
+    color: #99a2b4;
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    color: #99a2b4;
+}
+
+::-ms-input-placeholder {
+    color: #99a2b4;
 }
 
 /* ===== TOP GRADIENT BAR ===== */
@@ -36,7 +125,8 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 60px 20px 40px;
+    padding: 40px 20px;
+    padding-top: 48px; /* للتعويض عن الـ rectangle الثابت */
 }
 
 .container {
@@ -45,9 +135,8 @@ body {
     background: white;
     border-radius: 16px;
     box-shadow: 0 8px 40px rgba(69, 91, 99, 0.08);
-    padding: 40px;
+    padding: 40px 30px;
     text-align: center;
-    margin: 0 auto;
 }
 
 /* ===== HEADER & LOGO ===== */
@@ -56,7 +145,7 @@ body {
 }
 
 .logo {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .logo img {
@@ -67,6 +156,7 @@ body {
 }
 
 .login-to-uaepass {
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 23px;
     font-weight: 500;
     color: #454f63;
@@ -74,14 +164,8 @@ body {
     line-height: 1.4;
 }
 
-/* ===== LOGIN CONTENT ===== */
-.login-content {
-    width: 100%;
-}
-
 /* ===== LOGIN FORM ===== */
 .login-form {
-    width: 100%;
     margin-bottom: 30px;
 }
 
@@ -97,12 +181,11 @@ body {
     border: 1px solid #b9bfcc;
     border-radius: 12px;
     background: white;
-    font-family: inherit;
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 14px;
     color: #454f63;
     transition: all 0.3s ease;
     box-shadow: 0 4px 16px rgba(69, 91, 99, 0.08);
-    direction: rtl;
 }
 
 .form-input:focus {
@@ -111,18 +194,9 @@ body {
     box-shadow: 0 4px 16px rgba(0, 172, 117, 0.15);
 }
 
-.form-input::placeholder {
-    color: #99a2b4;
-    font-family: inherit;
-}
-
-/* ===== FORM OPTIONS ===== */
-.form-options {
-    margin-bottom: 25px;
-}
-
 .form-check {
     text-align: right;
+    margin: 15px 0 25px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -137,13 +211,12 @@ body {
 }
 
 .checkbox-label {
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 14px;
     color: #454f63;
     cursor: pointer;
-    font-family: inherit;
 }
 
-/* ===== LOGIN BUTTON ===== */
 .form-group-button {
     margin-bottom: 20px;
 }
@@ -155,7 +228,7 @@ body {
     color: white;
     border: none;
     border-radius: 12px;
-    font-family: inherit;
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 20px;
     font-weight: 500;
     cursor: pointer;
@@ -177,7 +250,6 @@ body {
 .divider {
     position: relative;
     margin: 30px 0;
-    height: 1px;
 }
 
 hr.style {
@@ -187,16 +259,17 @@ hr.style {
     margin: 0;
 }
 
-.divider-text {
+hr.style:after {
+    content: "أو";
     position: absolute;
     top: 50%;
     right: 50%;
     transform: translate(50%, -50%);
     background: white;
     padding: 0 15px;
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 14px;
     color: #78849e;
-    font-family: inherit;
 }
 
 /* ===== ACCOUNT ACTIONS ===== */
@@ -205,20 +278,19 @@ hr.style {
 }
 
 .dont-have-account {
+    font-family: 'GESS', 'Roboto', sans-serif;
+    font-size: 14px;
+    color: #454f63;
     margin-bottom: 15px;
 }
 
-.account-text {
-    font-size: 14px;
-    color: #454f63;
-    margin-left: 5px;
-}
-
 .create-new-account {
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 15px;
     font-weight: 500;
     color: #00ac75;
     text-decoration: none;
+    margin-right: 5px;
     transition: color 0.3s ease;
 }
 
@@ -231,14 +303,15 @@ hr.style {
     margin-bottom: 20px;
 }
 
-.recover-link {
+.recover-account a {
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 15px;
     color: #00ac75;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.recover-link:hover {
+.recover-account a:hover {
     color: #009966;
     text-decoration: underline;
 }
@@ -255,7 +328,7 @@ hr.style {
     border: 1px solid #00ac75;
     border-radius: 12px;
     color: #454f63;
-    font-family: inherit;
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 17px;
     font-weight: 500;
     cursor: pointer;
@@ -296,14 +369,15 @@ hr.style {
     flex-wrap: wrap;
 }
 
-.menu-link {
+.menu {
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 14px;
     color: #78849e;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.menu-link:hover {
+.menu:hover {
     color: #00ac75;
 }
 
@@ -313,6 +387,7 @@ hr.style {
 }
 
 .copyright {
+    font-family: 'GESS', 'Roboto', sans-serif;
     font-size: 13px;
     font-weight: 500;
     color: #78849e;
@@ -322,13 +397,14 @@ hr.style {
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-    .main-wrapper {
-        padding: 50px 15px 30px;
+    .container {
+        padding: 30px 20px;
+        margin: 20px;
     }
     
-    .container {
-        padding: 30px 25px;
-        margin: 20px;
+    .main-wrapper {
+        padding: 30px 15px;
+        padding-top: 48px;
     }
     
     .login-to-uaepass {
@@ -347,19 +423,18 @@ hr.style {
     .form-input {
         height: 48px;
         font-size: 13px;
-        padding: 0 15px;
     }
 }
 
 @media (max-width: 480px) {
-    .main-wrapper {
-        padding: 45px 10px 25px;
+    .container {
+        padding: 25px 15px;
+        margin: 10px;
     }
     
-    .container {
-        padding: 25px 20px;
-        margin: 15px;
-        border-radius: 12px;
+    .main-wrapper {
+        padding: 20px 10px;
+        padding-top: 48px;
     }
     
     .login-to-uaepass {
@@ -377,15 +452,14 @@ hr.style {
     
     .form-input {
         height: 45px;
-        padding: 0 12px;
-        font-size: 12px;
+        padding: 0 15px;
     }
     
     .footer-links {
         gap: 10px;
     }
     
-    .menu-link {
+    .menu {
         font-size: 13px;
     }
     
@@ -394,96 +468,65 @@ hr.style {
     }
     
     .create-new-account,
-    .recover-link {
+    .recover-account a {
         font-size: 14px;
     }
     
-    .account-text {
+    .dont-have-account {
         font-size: 13px;
-    }
-    
-    .divider-text {
-        font-size: 13px;
-        padding: 0 12px;
-    }
-}
-
-@media (max-width: 360px) {
-    .container {
-        padding: 20px 15px;
-        margin: 10px;
-    }
-    
-    .login-to-uaepass {
-        font-size: 16px;
-    }
-    
-    .logo img {
-        max-width: 110px;
-    }
-    
-    .btn-login, .btn-app {
-        height: 42px;
-        font-size: 15px;
-    }
-    
-    .form-input {
-        height: 42px;
-        font-size: 11px;
-    }
-    
-    .footer-links {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .menu-separator {
-        display: none;
     }
 }
 
 /* ===== DISABLED STATE ===== */
-.btn-login:disabled,
-.btn-app:disabled {
+input[disabled]#basicPasswordForm-submitButton,
+input[disabled]#basicPasswordForm-submitButton:hover,
+input[disabled]#basicPasswordForm-submitButton:active,
+input[disabled]#basicPasswordForm-submitButton:focus {
     background: #CCCCCC;
-    color: #666;
+    box-shadow: none;
+    outline: none;
+    opacity: 0.5;
+    text-decoration: none;
     cursor: not-allowed;
-    opacity: 0.6;
     transform: none !important;
-    box-shadow: none !important;
 }
 
-/* ===== FOCUS STATES FOR ACCESSIBILITY ===== */
-.form-input:focus,
-.btn-login:focus,
-.btn-app:focus,
-.menu-link:focus,
-.create-new-account:focus,
-.recover-link:focus {
-    outline: 2px solid #00ac75;
-    outline-offset: 2px;
+/* ===== RTL SPECIFIC STYLES ===== */
+html[lang="ar"] {
+    direction: rtl;
 }
 
-/* ===== LTR SUPPORT (ENGLISH) ===== */
-html[lang="en"] .container,
-html[lang="en"] .form-check,
-html[lang="en"] .form-input,
-html[lang="en"] .dont-have-account,
-html[lang="en"] .footer-links,
-html[lang="en"] .copyright {
-    direction: ltr;
-    text-align: left;
-}
-
-html[lang="en"] .form-check {
+html[lang="ar"] .form-check {
     justify-content: flex-start;
 }
 
-html[lang="en"] .divider-text {
+html[lang="ar"] .menu-separator {
+    transform: scaleX(-1);
+}
+
+/* ===== ENGLISH LANGUAGE SUPPORT ===== */
+html[lang="en"] {
+    direction: ltr;
+}
+
+html[lang="en"] .form-check {
+    text-align: left;
+    justify-content: flex-start;
+}
+
+html[lang="en"] .form-group {
+    text-align: left;
+}
+
+html[lang="en"] hr.style:after {
     content: "Or";
 }
 
-html[lang="en"] .account-text {
-    margin-left: 0;
+html[lang="en"] .dont-have-account span {
     margin-right: 5px;
+}
+
+html[lang="en"] .create-new-account {
+    margin-right: 0;
+    margin-left: 5px;
 }
