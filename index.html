@@ -1,0 +1,211 @@
+هذه ايضا 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة التوظيف - الوظائف المتاحة</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* الهيدر */
+        header {
+            background-color: #009846;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: -25px auto 30px auto;
+            padding: 0 20px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 16px;
+            font-family: 'Cairo';
+            outline: none;
+        }
+
+        /* شبكة الوظائف */
+        .jobs-grid {
+            max-width: 1000px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            border-color: #009846;
+        }
+
+        .job-title {
+            color: #009846;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .job-details {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .job-details div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .salary {
+            color: #2ecc71;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .apply-btn {
+            display: block;
+            text-align: center;
+            background-color: #009846;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .apply-btn:hover {
+            background-color: #007a3d;
+        }
+
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            color: #999;
+            padding: 40px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>بوابة الوظائف المتاحة</h1>
+    <p>ابحث عن فرصتك المهنية القادمة</p>
+</header>
+
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="ابحث عن مسمى وظيفي... (مثلاً: خدمة عملاء)">
+</div>
+
+<main class="jobs-grid" id="jobsGrid">
+    <div class="job-card" data-title="خدمة عملاء">
+        <div>
+            <div class="job-title">خدمة عملاء</div>
+            <div class="job-details">
+                <div>📍 الرياض، المملكة العربية السعودية</div>
+                <div>💼 دوام كامل</div>
+                <div class="salary">5000 ريال</div>
+            </div>
+        </div>
+        <a href="apply.html" class="apply-btn">قدم الآن</a>
+    </div>
+
+    <div class="job-card" data-title="محاسب مالي">
+        <div>
+            <div class="job-title">محاسب مالي</div>
+            <div class="job-details">
+                <div>📍 جدة، المملكة العربية السعودية</div>
+                <div>💼 دوام جزئي</div>
+                <div class="salary">7000 ريال</div>
+            </div>
+        </div>
+        <a href="apply.html" class="apply-btn">قدم الآن</a>
+    </div>
+
+    <div class="job-card" data-title="مدخل بيانات">
+        <div>
+            <div class="job-title">مدخل بيانات</div>
+            <div class="job-details">
+                <div>📍 العمل عن بعد</div>
+                <div>💼 عقد مؤقت</div>
+                <div class="salary">4000 ريال</div>
+            </div>
+        </div>
+        <a href="apply.html" class="apply-btn">قدم الآن</a>
+    </div>
+
+    <div class="job-card" data-title="مسوق إلكتروني">
+        <div>
+            <div class="job-title">مسوق إلكتروني</div>
+            <div class="job-details">
+                <div>📍 الدمام، المملكة العربية السعودية</div>
+                <div>💼 دوام كامل</div>
+                <div class="salary">6500 ريال</div>
+            </div>
+        </div>
+        <a href="apply.html" class="apply-btn">قدم الآن</a>
+    </div>
+
+    <div class="no-results" id="noResults">لا توجد وظائف تطابق بحثك حالياً.</div>
+</main>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const jobsGrid = document.getElementById('jobsGrid');
+    const jobCards = document.querySelectorAll('.job-card');
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let hasVisibleCards = false;
+
+        jobCards.forEach(card => {
+            const title = card.getAttribute('data-title').toLowerCase();
+            if (title.includes(searchTerm)) {
+                card.style.display = 'flex';
+                hasVisibleCards = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        noResults.style.display = hasVisibleCards ? 'none' : 'block';
+    });
+</script>
+
+</body>
+</html>
