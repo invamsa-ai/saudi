@@ -3,131 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UAE PASS - تسجيل الدخول</title>
+    <title>تسجيل الدخول - الهوية الرقمية</title>
     <style>
-        :root {
-            --primary-color: #6a2a8c; /* لون الهوية الرقمية الأرجواني */
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            background-color: #f4f7f6;
             margin: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
+            color: #333;
         }
 
         .login-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
+            background-color: transparent;
             text-align: center;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
         }
 
         .logo {
-            width: 150px;
-            margin-bottom: 1.5rem;
+            width: 80px;
+            margin-bottom: 20px;
         }
 
         h2 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        p {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 30px;
         }
 
         .input-group {
-            margin-bottom: 1.5rem;
-            text-align: right;
+            margin-bottom: 15px;
+            position: relative;
         }
 
-        input {
+        input[type="text"] {
             width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
             box-sizing: border-box;
-            outline: none;
-            transition: border 0.3s;
+            font-size: 16px;
+            text-align: right;
+            background-color: #fff;
         }
 
-        input:focus {
-            border-color: var(--primary-color);
+        .remember-me {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .remember-me input {
+            margin-left: 10px;
         }
 
         .btn-login {
-            background-color: var(--primary-color);
+            width: 100%;
+            padding: 15px;
+            background-color: #8e9dbd; /* لون مشابه للصورة */
             color: white;
             border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 6px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
             transition: background 0.3s;
         }
 
         .btn-login:hover {
-            background-color: #552170;
+            background-color: #7a8aab;
         }
 
-        .footer-links {
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
+        .links {
+            margin-top: 25px;
+            font-size: 14px;
         }
 
-        .footer-links a {
-            color: var(--primary-color);
+        .links a {
+            color: #008489;
             text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
         }
     </style>
 </head>
 <body>
 
     <div class="login-container">
-        <img src="https://selfcare.uaepass.ae/assets/images/uaepass-logo.svg" alt="UAE PASS Logo" class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/2618/2618237.png" alt="Logo" class="logo">
         
-        <h2>تسجيل الدخول</h2>
-        <p>قم بتسجيل الدخول باستخدام الهوية الرقمية</p>
+        <h2>الدخول عن طريق الهوية الرقمية</h2>
 
-        <form id="loginForm">
-            <div class="input-group">
-                <label>رقم الهوية أو البريد الإلكتروني</label>
-                <input type="text" id="username" placeholder="مثال: 784-1990-1234567-1" required>
-            </div>
+        <div class="input-group">
+            <input type="text" placeholder="رقم الهوية، البريد الإلكتروني، أو رقم الهاتف. مثال: 971500000000">
+        </div>
 
-            <button type="submit" class="btn-login">دخول</button>
-        </form>
+        <div class="remember-me">
+            <input type="checkbox" id="remember">
+            <label for="remember">تذكرني</label>
+        </div>
 
-        <div class="footer-links">
-            <p>ليس لديك حساب؟ <a href="#">إنشاء حساب جديد</a></p>
+        <button class="btn-login">تسجيل الدخول</button>
+
+        <div class="links">
+            ليس لديك حساب في الهوية الرقمية؟ <a href="#">إنشاء حساب جديد</a>
+            <br><br>
+            <a href="#">كيفية استعادة الحساب؟</a>
         </div>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            
-            if(username) {
-                alert('جاري محاولة تسجيل الدخول لـ: ' + username);
-                // هنا يتم الربط مع Backend أو API
-            }
-        });
-    </script>
+    <div class="footer">
+        حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.
+    </div>
 
 </body>
 </html>
