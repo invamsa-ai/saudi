@@ -16,308 +16,274 @@
         body {
             background-color: #f5f5f5;
             color: #333;
-            line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .header {
             display: flex;
-            justify-content: flex-end;
-            padding: 15px 0;
-            margin-bottom: 30px;
+            flex-direction: column;
         }
         
-        .header-logo {
-            background-color: #fff;
-            padding: 10px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-            color: #2c3e50;
+        /* الهيدر */
+        .header {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .logo {
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .header-logo i {
-            color: #3498db;
+        .logo-icon {
+            color: #2d8c4a;
+            font-size: 24px;
         }
         
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        .success-card {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 40px;
-        }
-        
-        /* البوردر الأخضر في الأعلى واليمين */
-        .success-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 8px;
-            height: 100%;
-            background-color: #2ecc71;
-        }
-        
-        .success-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 8px;
-            background-color: #2ecc71;
-        }
-        
-        .card-content {
-            display: flex;
-            gap: 40px;
-            align-items: center;
-        }
-        
-        .card-image {
-            flex: 1;
-            text-align: center;
-        }
-        
-        .card-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card-text {
-            flex: 1;
-            padding: 20px 0;
-        }
-        
-        .card-text h2 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 28px;
-        }
-        
-        .card-text p {
-            color: #555;
-            margin-bottom: 15px;
+        .logo-text {
+            font-weight: bold;
+            color: #2d8c4a;
             font-size: 18px;
         }
         
-        .card-text .highlight {
-            color: #2ecc71;
-            font-weight: bold;
+        .header-logo {
+            height: 40px;
         }
         
-        .hidden-button {
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* النموذج */
+        .form-container {
+            background-color: white;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            border-top: 4px solid #2d8c4a;
+            border-left: 4px solid #2d8c4a;
+        }
+        
+        /* الزر المخفي */
+        .hidden-btn {
             position: absolute;
-            left: 30px;
-            bottom: 30px;
+            top: 15px;
+            left: 15px;
             background: none;
             border: none;
-            color: #e74c3c;
+            color: #d9534f;
             font-size: 14px;
-            text-decoration: underline;
             cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s;
+            text-decoration: underline;
+            z-index: 10;
         }
         
-        .hidden-button:hover {
-            opacity: 1;
-        }
-        
-        .code-container {
+        /* محتوى النموذج */
+        .form-content {
             display: flex;
-            justify-content: flex-end;
-            margin-top: 30px;
+            min-height: 300px;
         }
         
+        .image-section {
+            flex: 1;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .app-image {
+            max-width: 80%;
+            max-height: 250px;
+            object-fit: contain;
+        }
+        
+        .text-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .text-section h2 {
+            color: #2d8c4a;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .text-section p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        /* المربع الرمادي مع الرقم */
         .code-box {
             background-color: #f5f5f5;
             border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 15px 25px;
-            text-align: center;
+            border-radius: 6px;
+            padding: 12px 20px;
+            display: inline-block;
+            margin-top: 10px;
+            align-self: flex-start;
             position: relative;
+            overflow: hidden;
         }
         
-        /* تأثير البوردر المتحرك */
-        .code-box::before {
+        .code-box:before {
             content: '';
             position: absolute;
             top: -2px;
             right: -2px;
-            width: 0;
-            height: 2px;
-            background-color: #3498db;
-            animation: borderMove 3s infinite;
-        }
-        
-        .code-box::after {
-            content: '';
-            position: absolute;
             bottom: -2px;
             left: -2px;
-            width: 0;
-            height: 2px;
-            background-color: #3498db;
-            animation: borderMove 3s infinite 1.5s;
+            border: 2px solid transparent;
+            border-right-color: #2d8c4a;
+            border-left-color: #2d8c4a;
+            border-radius: 6px;
+            animation: border-animation 3s infinite;
         }
         
-        @keyframes borderMove {
-            0% {
-                width: 0;
-            }
-            50% {
-                width: calc(100% + 4px);
-            }
-            100% {
-                width: 0;
-            }
+        @keyframes border-animation {
+            0% { border-right-color: #2d8c4a; border-left-color: #2d8c4a; }
+            50% { border-right-color: #4CAF50; border-left-color: #4CAF50; }
+            100% { border-right-color: #2d8c4a; border-left-color: #2d8c4a; }
         }
         
         .code-number {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
-            color: #2c3e50;
-            letter-spacing: 5px;
+            color: #333;
+            letter-spacing: 3px;
         }
         
+        /* النص في الأسفل */
         .waiting-text {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px dashed #ddd;
-            color: #7f8c8d;
-            font-size: 18px;
+            margin-top: 25px;
+            padding: 15px;
+            color: #666;
+            font-size: 16px;
+            border-top: 1px solid #eee;
         }
         
+        /* التذييل */
         .footer {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #95a5a6;
+            padding: 20px;
+            color: #777;
             font-size: 14px;
+            background-color: #f0f0f0;
+            margin-top: 20px;
         }
         
+        /* التكيف مع الشاشات الصغيرة */
         @media (max-width: 768px) {
-            .card-content {
+            .form-content {
                 flex-direction: column;
             }
             
             .header {
-                justify-content: center;
+                padding: 15px;
             }
             
-            .code-container {
-                justify-content: center;
-            }
-            
-            .hidden-button {
-                position: relative;
-                left: 0;
-                bottom: 0;
-                margin-top: 20px;
-                text-align: center;
-                width: 100%;
+            .logo-text {
+                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- الهيدر -->
-        <div class="header">
-            <div class="header-logo">
-                <i class="fas fa-check-circle"></i>
-                الموافقة على طلب تسجيل الدخول
-            </div>
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-check-circle logo-icon"></i>
+            <span class="logo-text">الموافقة على طلب تسجيل الدخول</span>
         </div>
-        
-        <!-- النموذج الرئيسي -->
-        <div class="success-card">
-            <!-- زر مخفي في اليسار -->
-            <button class="hidden-button">
-                <i class="fas fa-times-circle"></i> إلغاء الطلب
-            </button>
+        <img src="https://cdn-icons-png.flaticon.com/512/197/197551.png" alt="شعار" class="header-logo">
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <div class="form-container">
+            <!-- الزر المخفي -->
+            <button class="hidden-btn">إلغاء الطلب</button>
             
-            <!-- محتوى النموذج -->
-            <div class="card-content">
-                <!-- الصورة في النصف الأيسر -->
-                <div class="card-image">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="تسجيل الدخول الناجح">
+            <div class="form-content">
+                <!-- قسم الصورة -->
+                <div class="image-section">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="تطبيق الهوية الرقمية" class="app-image">
                 </div>
                 
-                <!-- النص في النصف الأيمن -->
-                <div class="card-text">
-                    <h2>تم الموافقة على طلب تسجيل الدخول</h2>
-                    <p>طلب تسجيل الدخول من <span class="highlight">Self Service Portal</span></p>
-                    <p>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</p>
-                    <p>في النظار تأثيرك</p>
-                    <p><span class="highlight">Windows تنشيط</span></p>
-                    <p>Windows انتقل إلى الإعدادات لتأثيرها</p>
+                <!-- قسم النص -->
+                <div class="text-section">
+                    <h2>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</h2>
+                    <p>طلب تسجيل الدخول من<br><strong>Self Service Portal</strong></p>
+                    
+                    <!-- المربع الرمادي مع الرقم -->
+                    <div class="code-box">
+                        <div class="code-number">28</div>
+                    </div>
+                    
+                    <p style="margin-top: 20px; color: #888; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> الرقم صالح لمدة 5 دقائق فقط
+                    </p>
                 </div>
             </div>
             
-            <!-- الرمز المولد -->
-            <div class="code-container">
-                <div class="code-box">
-                    <div class="code-number">28</div>
-                </div>
+            <!-- النص في الأسفل -->
+            <div class="waiting-text">
+                <i class="fas fa-clock"></i> في انتظار التأكيد
             </div>
         </div>
-        
-        <!-- النص أسفل النموذج -->
-        <div class="waiting-text">
-            <i class="fas fa-clock"></i> في انتظار التأكيد
-        </div>
-        
-        <!-- الفوتر -->
-        <div class="footer">
-            <p>Powered by <strong>UAE PASS</strong></p>
-        </div>
-    </div>
+    </main>
+
+    <!-- التذييل -->
+    <footer class="footer">
+        <p>Powered by UAE PASS</p>
+        <p style="margin-top: 5px; font-size: 12px; color: #999;">
+            <i class="fas fa-shield-alt"></i> خدمة آمنة ومشفرة
+        </p>
+    </footer>
 
     <script>
         // توليد رقم عشوائي مكون من رقمين
         function generateRandomNumber() {
-            return Math.floor(10 + Math.random() * 90);
+            return Math.floor(10 + Math.random() * 90); // رقم بين 10 و 99
         }
         
-        // تحديث الرقم المولد كل 5 ثوانٍ
-        function updateCode() {
-            const codeElement = document.querySelector('.code-number');
-            const newCode = generateRandomNumber();
-            codeElement.textContent = newCode;
-        }
-        
-        // تحديث الرقم عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            // تحديث الرقم كل 5 ثوانٍ
-            setInterval(updateCode, 5000);
-            
-            // إضافة تفاعل للزر المخفي
-            const hiddenButton = document.querySelector('.hidden-button');
-            hiddenButton.addEventListener('click', function() {
-                if (confirm('هل تريد إلغاء طلب تسجيل الدخول؟')) {
-                    alert('تم إلغاء الطلب');
-                    // يمكن هنا إضافة إعادة التوجيه أو أي إجراء آخر
-                }
-            });
+        // تحديث الرقم عند النقر على المربع
+        document.querySelector('.code-box').addEventListener('click', function() {
+            const newNumber = generateRandomNumber();
+            document.querySelector('.code-number').textContent = newNumber;
         });
+        
+        // إضافة تأثير عند النقر على الزر المخفي
+        document.querySelector('.hidden-btn').addEventListener('click', function() {
+            alert('تم إلغاء طلب تسجيل الدخول');
+        });
+        
+        // إضافة تأثير للبوردر المتحرك
+        const codeBox = document.querySelector('.code-box');
+        setInterval(() => {
+            codeBox.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                codeBox.style.transform = 'scale(1)';
+            }, 300);
+        }, 3000);
     </script>
 </body>
 </html>
