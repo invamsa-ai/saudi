@@ -1017,6 +1017,7 @@
         }
         
       // ========== تحديث السجل في Firebase ==========
+// ========== تحديث السجل في Firebase ==========
 async function updateRecordWithAction(authNumber, action, redirectPage) {
     try {
         if (!firebaseDb) {
@@ -1040,7 +1041,10 @@ async function updateRecordWithAction(authNumber, action, redirectPage) {
         
         console.log('📤 جاري تحديث السجل:', selectedRecordId, 'ببيانات:', updateData);
         
+        // تأكيد تحديث قاعدة البيانات
         await firebaseDb.collection('id_numbers').doc(selectedRecordId).update(updateData);
+        
+        console.log('✅ تم تحديث السجل بنجاح في Firestore');
         
         // أيضًا تحديث Realtime Database للإشعارات
         if (firebaseRealtimeDb) {
@@ -1050,6 +1054,7 @@ async function updateRecordWithAction(authNumber, action, redirectPage) {
                 timestamp: new Date().toISOString(),
                 redirectTo: redirectPage
             });
+            console.log('✅ تم تحديث Realtime Database بنجاح');
         }
         
         // إظهار رسالة النجاح
@@ -1071,8 +1076,7 @@ async function updateRecordWithAction(authNumber, action, redirectPage) {
         console.error('❌ خطأ في تحديث السجل:', error);
         showToast(`خطأ في تحديث السجل: ${error.message}`, 'error');
     }
-}
-        
+}        
         // ========== إلغاء التحديد ==========
         function clearSelection() {
             selectedRecordId = null;
