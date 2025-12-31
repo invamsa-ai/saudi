@@ -3,1736 +3,1064 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض البيانات - نظام الهوية الرقمية</title>
+    <title>عرض البيانات - UAE PASS</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
     
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
+        :root {
+            --primary-color: #007bff;
+            --success-color: #00ac75;
+            --error-color: #ff4757;
+            --warning-color: #ff9800;
+            --dark-color: #343a40;
         }
         
         body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #0D98BA, #00ac75);
+            background: var(--dark-color);
             color: white;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid var(--primary-color);
         }
         
         .header h1 {
+            margin: 0;
             font-size: 28px;
-            margin-bottom: 10px;
         }
         
-        .header p {
-            opacity: 0.9;
-            font-size: 16px;
+        .header .subtitle {
+            color: #ccc;
+            margin-top: 5px;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
         }
         
         .stats-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            padding: 20px;
         }
         
         .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
             text-align: center;
+            border-left: 4px solid var(--primary-color);
             transition: transform 0.3s;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
-        .stat-card i {
+        .stat-icon {
             font-size: 40px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         
-        .stat-card .number {
-            font-size: 36px;
-            font-weight: 700;
-            color: #0D98BA;
-            margin: 10px 0;
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--dark-color);
         }
         
-        .stat-card .label {
+        .stat-title {
             color: #666;
             font-size: 14px;
+            margin-top: 5px;
         }
         
-        .controls {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        .card-primary { border-left-color: var(--primary-color); }
+        .card-success { border-left-color: var(--success-color); }
+        .card-warning { border-left-color: var(--warning-color); }
+        .card-danger { border-left-color: var(--error-color); }
+        
+        .data-section {
+            padding: 20px;
         }
         
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+        .section-title {
+            color: var(--dark-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        
+        .search-box {
+            max-width: 400px;
             margin-bottom: 20px;
         }
         
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .filter-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 600;
-        }
-        
-        .filter-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5eb;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-        
-        .filter-input:focus {
-            border-color: #00ac75;
-            outline: none;
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background-color: #00ac75;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #009966;
-        }
-        
-        .btn-secondary {
-            background-color: #78849e;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #5a657e;
-        }
-        
-        .btn-danger {
-            background-color: #ff4757;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #ff3742;
-        }
-        
-        /* تنسيق قسم إضافة الرقم */
-        .add-number-section {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e1e5eb;
-            border-left: 4px solid #0D98BA !important;
-            transition: all 0.3s ease;
-        }
-        
-        .add-number-section:hover {
-            box-shadow: 0 4px 12px rgba(13, 152, 186, 0.15);
-        }
-        
-        .add-number-section input[type="number"] {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-align: center;
-            height: 60px;
-        }
-        
-        .add-number-section .btn-primary {
-            background: linear-gradient(135deg, #0D98BA, #00ac75);
-            border: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            height: 60px;
-            font-size: 16px;
-        }
-        
-        .add-number-section .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 152, 186, 0.3);
-        }
-        
-        /* تنسيق رسالة الحالة */
-        #numberStatus {
-            animation: fadeIn 0.5s ease;
-            margin-top: 10px;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* تنسيق عرض الرقم */
-        .number-preview {
-            background: white;
-            border: 2px dashed #0D98BA;
+        .table-container {
+            overflow-x: auto;
             border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #0D98BA;
-            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .number-preview.show {
-            display: block;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .data-table-container {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-        }
-        
-        .table-header {
-            padding: 20px;
-            background-color: #f8fafc;
-            border-bottom: 2px solid #e1e5eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .table-header h2 {
-            color: #333;
-            font-size: 20px;
-        }
-        
-        .data-table {
+        table {
             width: 100%;
             border-collapse: collapse;
         }
         
-        .data-table th {
-            background-color: #f1f5f9;
-            padding: 15px;
+        th {
+            background: var(--dark-color);
+            color: white;
+            padding: 12px;
             text-align: right;
             font-weight: 600;
-            color: #454f63;
-            border-bottom: 2px solid #e1e5eb;
-            position: sticky;
-            top: 0;
         }
         
-        .data-table td {
-            padding: 15px;
-            border-bottom: 1px solid #eef2f7;
-            color: #555;
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
         }
         
-        .data-table tr:hover {
-            background-color: #f8fafc;
+        tr:hover {
+            background-color: #f8f9fa;
         }
         
-        .id-number {
-            font-family: monospace;
-            font-size: 16px;
-            color: #0D98BA;
-            font-weight: 600;
-        }
-        
-        .timestamp {
-            font-size: 13px;
-            color: #78849e;
-        }
-        
-        .status {
-            display: inline-block;
-            padding: 4px 10px;
+        .badge {
+            padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
         
-        .status-success {
+        .badge-success {
             background-color: #d4edda;
             color: #155724;
         }
         
-        .status-warning {
+        .badge-warning {
             background-color: #fff3cd;
             color: #856404;
         }
         
-        .sync-status {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-right: 5px;
-        }
-        
-        .sync-synced {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .sync-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        .sync-failed {
+        .badge-danger {
             background-color: #f8d7da;
             color: #721c24;
         }
         
-        .no-data {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-        
-        .no-data i {
-            font-size: 60px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .pagination {
+        .action-buttons {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 20px;
-            background-color: #f8fafc;
+            gap: 5px;
         }
         
-        .page-btn {
-            padding: 8px 15px;
-            border: 1px solid #e1e5eb;
-            background: white;
-            border-radius: 6px;
+        .btn-action {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
             cursor: pointer;
-            transition: all 0.3s;
         }
         
-        .page-btn:hover {
-            background-color: #00ac75;
+        .btn-view {
+            background: var(--primary-color);
             color: white;
-            border-color: #00ac75;
         }
         
-        .page-btn.active {
-            background-color: #00ac75;
+        .btn-delete {
+            background: var(--error-color);
             color: white;
-            border-color: #00ac75;
         }
         
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #78849e;
-            font-size: 14px;
-            border-top: 1px solid #e1e5eb;
-            margin-top: 30px;
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
         }
         
-        /* أنماط الإشعارات */
-        .firebase-notification {
+        .loading-spinner {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .connection-status {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #00ac75;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            max-width: 300px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
         }
         
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+        .data-actions button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-body pre {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
         }
         
         @media (max-width: 768px) {
-            .data-table {
-                display: block;
-                overflow-x: auto;
-            }
-            
             .stats-cards {
                 grid-template-columns: 1fr;
             }
             
-            .filters {
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .data-actions {
                 flex-direction: column;
             }
             
-            .buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
+            .data-actions button {
                 width: 100%;
-                justify-content: center;
-            }
-            
-            .add-number-section .row {
-                flex-direction: column;
-            }
-            
-            .add-number-section .col-md-2 {
-                width: 100%;
-            }
-            
-            .add-number-section input[type="number"] {
-                font-size: 20px;
-                height: 50px;
-            }
-            
-            .add-number-section .btn-primary {
-                height: 50px;
             }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header class="header">
-        <h1>📊 لوحة عرض البيانات - متصلة بـ Firebase</h1>
-        <p>عرض السجلات المحفوظة محلياً وعبر Firebase Realtime</p>
-        <div id="connectionStatus" style="margin-top: 10px; font-size: 14px;">
-            <i class="fas fa-circle" style="color: #00ac75;"></i> جاري الاتصال...
-        </div>
-    </header>
+    <!-- حالة الاتصال -->
+    <div class="connection-status" id="connectionStatus">
+        <i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...
+    </div>
     
-    <div class="container">
-        <!-- بطاقات الإحصائيات -->
-        <div class="stats-cards" id="statsCards">
-            <!-- سيتم ملؤها بالجافاسكريبت -->
+    <!-- زر العودة -->
+    <a href="apply.html" class="back-button">
+        <i class="fas fa-arrow-right"></i> العودة إلى التسجيل
+    </a>
+    
+    <div class="main-container">
+        <!-- الهيدر -->
+        <div class="header">
+            <h1><i class="fas fa-database"></i> عرض البيانات المحفوظة في Firebase</h1>
+            <div class="subtitle">جميع بيانات تسجيلات الدخول مخزنة في قاعدة بيانات Firebase</div>
         </div>
         
-        <!-- عناصر التحكم -->
-        <div class="controls">
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="searchInput"><i class="fas fa-search"></i> البحث برقم الهوية</label>
-                    <input type="text" id="searchInput" class="filter-input" placeholder="ابحث برقم الهوية...">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="dateFilter"><i class="fas fa-calendar"></i> التصفية بالتاريخ</label>
-                    <select id="dateFilter" class="filter-input">
-                        <option value="all">جميع التواريخ</option>
-                        <option value="today">اليوم</option>
-                        <option value="week">آخر أسبوع</option>
-                        <option value="month">آخر شهر</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="sortBy"><i class="fas fa-sort"></i> الترتيب حسب</label>
-                    <select id="sortBy" class="filter-input">
-                        <option value="newest">الأحدث أولاً</option>
-                        <option value="oldest">الأقدم أولاً</option>
-                        <option value="id">رقم الهوية</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="syncFilter"><i class="fas fa-cloud"></i> حالة المزامنة</label>
-                    <select id="syncFilter" class="filter-input">
-                        <option value="all">الكل</option>
-                        <option value="synced">تم المزامنة</option>
-                        <option value="pending">بانتظار المزامنة</option>
-                        <option value="failed">فشلت المزامنة</option>
-                    </select>
-                </div>
+        <!-- إحصائيات -->
+        <div class="stats-cards" id="statsCards">
+            <!-- سيتم تعبئتها بواسطة JavaScript -->
+            <div class="loading-screen">
+                <i class="fas fa-spinner fa-spin loading-spinner"></i>
+                <p>جاري تحميل الإحصائيات...</p>
             </div>
+        </div>
+        
+        <!-- قسم بيانات أرقام الهوية -->
+        <div class="data-section">
+            <h2 class="section-title">
+                <i class="fas fa-id-card"></i> بيانات أرقام الهوية
+            </h2>
             
-            <div class="buttons">
+            <!-- أدوات التحكم -->
+            <div class="data-actions">
+                <input type="text" class="form-control search-box" id="searchInput" 
+                       placeholder="ابحث برقم الهوية أو التاريخ...">
+                
                 <button class="btn btn-primary" onclick="refreshData()">
                     <i class="fas fa-sync-alt"></i> تحديث البيانات
                 </button>
                 
-                <button class="btn btn-primary" onclick="syncWithFirebase()" id="syncButton">
-                    <i class="fas fa-cloud-upload-alt"></i> مزامنة مع Firebase
+                <button class="btn btn-success" onclick="exportToCSV()">
+                    <i class="fas fa-download"></i> تصدير إلى CSV
                 </button>
                 
-                <button class="btn btn-secondary" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> تصدير لإكسل
-                </button>
-                
-                <button class="btn btn-secondary" onclick="exportToJSON()">
-                    <i class="fas fa-file-code"></i> تصدير لـ JSON
-                </button>
-                
-                <button class="btn btn-danger" onclick="clearData()">
-                    <i class="fas fa-trash-alt"></i> مسح جميع البيانات
+                <button class="btn btn-warning" onclick="clearOldData()">
+                    <i class="fas fa-trash"></i> مسح البيانات القديمة
                 </button>
             </div>
             
-            <!-- قسم إضافة رقم واحد لإرساله إلى صفحة المصادقة -->
-            <div class="add-number-section">
-                <h3 style="color: #333; margin-bottom: 15px; font-size: 18px;">
-                    <i class="fas fa-key"></i> إرسال رقم لصفحة المصادقة (Firebase Realtime)
-                </h3>
-                
-                <div class="row" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px;">
-                    <div class="col-md-10" style="flex: 1; min-width: 200px;">
-                        <label for="authNumber" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">
-                            <i class="fas fa-hashtag"></i> الرقم (0-99)
-                        </label>
-                        <input type="number" id="authNumber" class="filter-input" 
-                               placeholder="أدخل رقم من 0 إلى 99" min="0" max="99" 
-                               style="width: 100%;">
-                    </div>
-                    
-                    <div class="col-md-2" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
-                        <button class="btn btn-primary" onclick="sendNumberToAuthPage()" 
-                                style="padding: 12px 20px; width: 100%;">
-                            <i class="fas fa-paper-plane"></i> إرسال
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- عرض معاينة للرقم -->
-                <div class="number-preview" id="numberPreview">
-                    <i class="fas fa-eye"></i> معاينة: <span id="previewNumber">0</span>
-                </div>
-                
-                <!-- شريط التمرير للاختيار السريع -->
-                <div style="margin-top: 15px;">
-                    <input type="range" id="numberSlider" min="0" max="99" value="0" 
-                           style="width: 100%; height: 25px;"
-                           oninput="updateNumberFromSlider(this.value)">
-                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #666;">
-                        <span>0</span>
-                        <span>25</span>
-                        <span>50</span>
-                        <span>75</span>
-                        <span>99</span>
-                    </div>
-                </div>
-                
-                <!-- أزرار الأرقام السريعة -->
-                <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-                    <button class="btn" onclick="setNumber(97)" style="padding: 5px 10px; font-size: 12px; background: #0D98BA; color: white;">97</button>
-                    <button class="btn" onclick="setNumber(45)" style="padding: 5px 10px; font-size: 12px; background: #00ac75; color: white;">45</button>
-                    <button class="btn" onclick="setNumber(23)" style="padding: 5px 10px; font-size: 12px; background: #78849e; color: white;">23</button>
-                    <button class="btn" onclick="setNumber(68)" style="padding: 5px 10px; font-size: 12px; background: #ff6b6b; color: white;">68</button>
-                    <button class="btn" onclick="setNumber(12)" style="padding: 5px 10px; font-size: 12px; background: #9c27b0; color: white;">12</button>
-                    <button class="btn" onclick="setNumber(89)" style="padding: 5px 10px; font-size: 12px; background: #ff9800; color: white;">89</button>
-                </div>
-                
-                <div id="numberStatus" style="margin-top: 10px; font-size: 14px; color: #666; text-align: center;"></div>
-                
-                <div class="info-box" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; color: #0d47a1;">
-                    <i class="fas fa-info-circle"></i> 
-                    سيتم حفظ الرقم في Firebase Realtime Database وعرضه في صفحة المصادقة فوراً
-                </div>
-            </div>
-        </div>
-        
-        <!-- جدول البيانات -->
-        <div class="data-table-container">
-            <div class="table-header">
-                <h2><i class="fas fa-table"></i> السجلات المحفوظة (Firebase + محلي)</h2>
-                <span id="recordCount">0 سجلات</span>
-            </div>
-            
-            <div id="tableWrapper">
-                <table class="data-table">
+            <!-- جدول البيانات -->
+            <div class="table-container">
+                <table id="idNumbersTable">
                     <thead>
                         <tr>
-                            <th width="50">#</th>
-                            <th width="150">رقم الهوية</th>
-                            <th>التاريخ والوقت</th>
-                            <th width="120">حالة التذكر</th>
-                            <th width="100">المزامنة</th>
-                            <th width="120">الإجراءات</th>
+                            <th>#</th>
+                            <th>رقم الهوية</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>معلومات المتصفح</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="dataTableBody">
-                        <!-- سيتم ملؤها بالجافاسكريبت -->
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                <i class="fas fa-spinner fa-spin"></i> جاري تحميل البيانات...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
+        </div>
+        
+        <!-- قسم أرقام المصادقة -->
+        <div class="data-section">
+            <h2 class="section-title">
+                <i class="fas fa-key"></i> أرقام المصادقة
+            </h2>
             
-            <div class="no-data" id="noDataMessage" style="display: none;">
-                <i class="fas fa-database"></i>
-                <h3>لا توجد بيانات مخزنة</h3>
-                <p>لم يتم إدخال أي سجلات حتى الآن.</p>
+            <div class="table-container">
+                <table id="authNumbersTable">
+                    <thead>
+                        <tr>
+                            <th>رقم المصادقة</th>
+                            <th>رقم الهوية</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>معرف السجل</th>
+                            <th>المصدر</th>
+                        </tr>
+                    </thead>
+                    <tbody id="authTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px;">
+                                <i class="fas fa-spinner fa-spin"></i> جاري تحميل البيانات...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         
-        <!-- الترقيم الصفحات -->
-        <div class="pagination" id="pagination" style="display: none;">
-            <!-- سيتم ملؤها بالجافاسكريبت -->
+        <!-- قسم المعلومات الحالية -->
+        <div class="data-section">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i> معلومات النظام
+            </h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-fire"></i> معلومات Firebase
+                        </div>
+                        <div class="card-body">
+                            <div id="firebaseInfo">
+                                <p><strong>المشروع:</strong> <span id="projectId">جاري التحميل...</span></p>
+                                <p><strong>حالة الاتصال:</strong> <span id="connectionState">جاري التحقق...</span></p>
+                                <p><strong>الخدمات النشطة:</strong> <span id="servicesStatus">جاري التحقق...</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-chart-line"></i> إحصائيات سريعة
+                        </div>
+                        <div class="card-body">
+                            <div id="quickStats">
+                                <p><strong>أول تسجيل:</strong> <span id="firstRecord">جاري التحميل...</span></p>
+                                <p><strong>آخر تسجيل:</strong> <span id="lastRecord">جاري التحميل...</span></p>
+                                <p><strong>متوسط يومي:</strong> <span id="dailyAverage">جاري الحساب...</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
-    <footer class="footer">
-        <p>© 2025 نظام الهوية الرقمية | متصل بـ Firebase Realtime Database</p>
-        <p>جميع البيانات مخزنة محلياً ومزامنة مع Firebase</p>
-    </footer>
-
+    <!-- Modal لعرض التفاصيل -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل السجل</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <pre id="modalContent"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // === متغيرات عامة ===
-        let allRecords = [];
-        let currentPage = 1;
-        const recordsPerPage = 10;
-        let firebaseUnsubscribe = null;
+        // ========== المتغيرات العامة ==========
+        let firebaseDb = null;
+        let firebaseRealtimeDb = null;
+        let firebaseReady = false;
+        let idNumbersData = [];
+        let authNumbersData = [];
         
-        // === دالة التهيئة ===
-        function init() {
-            updateConnectionStatus();
-            loadRecords();
-            setupRealtimeUpdates();
-            setupEventListeners();
-            loadSavedNumber();
-        }
-        
-        // === تحديث حالة الاتصال ===
-        function updateConnectionStatus() {
-            const statusElement = document.getElementById('connectionStatus');
-            
-            firebaseConfig.db.collection('test_connection').doc('ping').set({
-                test: true,
-                timestamp: new Date().toISOString()
-            }).then(() => {
-                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #00ac75;"></i> متصل بـ Firebase';
-            }).catch((error) => {
-                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff4757;"></i> غير متصل بـ Firebase (العمل محلياً)';
-                console.warn('⚠️ Firebase غير متصل:', error);
-            });
-        }
-        
-        // === تحميل السجلات من Firebase والمحلي ===
-        async function loadRecords() {
+        // ========== تهيئة Firebase ==========
+        async function initializeFirebase() {
             try {
-                console.log('📂 جاري تحميل السجلات من Firebase...');
+                console.log('🔥 تهيئة Firebase لعرض البيانات...');
                 
-                // تحميل من Firebase
-                const snapshot = await firebaseConfig.db.collection('login_records')
-                    .orderBy('createdAt', 'desc')
-                    .limit(1000)
-                    .get();
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK غير محمل');
+                }
                 
-                const firebaseRecords = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    firebaseRecords.push({
-                        ...data,
-                        id: doc.id,
-                        firebaseId: doc.id,
-                        isFirebase: true,
-                        timestamp: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-                        syncStatus: 'synced'
-                    });
-                });
+                // استخدام دالة التهيئة من firebase-config.js
+                if (typeof initializeFirebase === 'function') {
+                    firebaseReady = initializeFirebase();
+                } else {
+                    // تهيئة مباشرة
+                    if (!firebase.apps || firebase.apps.length === 0) {
+                        firebase.initializeApp(window.firebaseConfig || {
+                            apiKey: "AIzaSyAk27c6KL77QbnXa_bNeWzUsBph5o7I9A8",
+                            authDomain: "uaewep-ce954.firebaseapp.com",
+                            databaseURL: "https://uaewep-ce954-default-rtdb.firebaseio.com",
+                            projectId: "uaewep-ce954",
+                            storageBucket: "uaewep-ce954.firebasestorage.app",
+                            messagingSenderId: "679277016812",
+                            appId: "1:679277016812:web:ab78a6d55b4a153b8a97c9",
+                            measurementId: "G-NE9HXPPM9P"
+                        });
+                    }
+                    firebaseReady = true;
+                }
                 
-                console.log(`📦 تم تحميل ${firebaseRecords.length} سجل من Firebase`);
+                if (firebaseReady) {
+                    // الحصول على خدمات Firebase
+                    firebaseDb = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+                    firebaseRealtimeDb = window.firebaseRealtimeDb || (window.firebaseServices ? window.firebaseServices.realtimeDb() : null);
+                    
+                    if (!firebaseDb && typeof firebase !== 'undefined' && firebase.firestore) {
+                        firebaseDb = firebase.firestore();
+                    }
+                    
+                    if (!firebaseRealtimeDb && typeof firebase !== 'undefined' && firebase.database) {
+                        firebaseRealtimeDb = firebase.database();
+                    }
+                    
+                    console.log('✅ Firebase مهيئ لعرض البيانات');
+                    updateConnectionStatus('متصل');
+                    return true;
+                }
                 
-                // تحميل من localStorage
-                const localRecordsJson = localStorage.getItem('uae_id_records');
-                const localRecords = localRecordsJson ? JSON.parse(localRecordsJson) : [];
-                
-                console.log(`💾 تم تحميل ${localRecords.length} سجل محلي`);
-                
-                // دمج السجلات مع إزالة التكرار
-                allRecords = mergeRecords(firebaseRecords, localRecords);
-                
-                console.log(`📊 إجمالي السجلات بعد الدمج: ${allRecords.length}`);
-                
-                updateStats();
-                renderTable();
+                return false;
                 
             } catch (error) {
-                console.error('❌ خطأ في تحميل السجلات من Firebase:', error);
-                // استرجاع من localStorage في حالة الخطأ
-                const recordsJson = localStorage.getItem('uae_id_records');
-                allRecords = recordsJson ? JSON.parse(recordsJson) : [];
-                updateStats();
-                renderTable();
+                console.error('❌ خطأ في تهيئة Firebase:', error);
+                updateConnectionStatus('خطأ', error.message);
+                return false;
             }
         }
         
-        // === دمج السجلات ===
-        function mergeRecords(firebaseRecords, localRecords) {
-            const merged = [...firebaseRecords];
-            const firebaseIds = new Set(firebaseRecords.map(r => r.firebaseId));
+        // ========== تحديث حالة الاتصال ==========
+        function updateConnectionStatus(status, message = '') {
+            const statusElement = document.getElementById('connectionStatus');
             
-            localRecords.forEach(localRecord => {
-                if (!localRecord.firebaseId || !firebaseIds.has(localRecord.firebaseId)) {
-                    merged.push({
-                        ...localRecord,
-                        isFirebase: false,
-                        syncStatus: localRecord.firebaseId ? 'synced' : 'pending'
+            switch(status) {
+                case 'متصل':
+                    statusElement.innerHTML = '<i class="fas fa-check-circle" style="color: #00ac75;"></i> متصل بـ Firebase';
+                    statusElement.style.background = 'rgba(0, 172, 117, 0.9)';
+                    break;
+                case 'جاري الاتصال':
+                    statusElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...';
+                    statusElement.style.background = 'rgba(0, 123, 255, 0.9)';
+                    break;
+                case 'خطأ':
+                    statusElement.innerHTML = `<i class="fas fa-times-circle" style="color: #ff4757;"></i> خطأ: ${message}`;
+                    statusElement.style.background = 'rgba(244, 67, 54, 0.9)';
+                    break;
+            }
+        }
+        
+        // ========== تحميل الإحصائيات ==========
+        async function loadStatistics() {
+            try {
+                if (!firebaseDb) throw new Error('Firestore غير متاح');
+                
+                // الحصول على جميع أرقام الهوية
+                const idNumbersSnapshot = await firebaseDb.collection('id_numbers')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                // الحصول على جميع أرقام المصادقة
+                const authNumbersSnapshot = await firebaseDb.collection('auth_numbers')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                const totalRecords = idNumbersSnapshot.size;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // حساب عدد التسجيلات اليوم
+                let todayCount = 0;
+                idNumbersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const recordDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.timestamp);
+                    if (recordDate >= today) {
+                        todayCount++;
+                    }
+                });
+                
+                // حساب أقدم وأحدث تسجيل
+                let firstRecord = null;
+                let lastRecord = null;
+                if (totalRecords > 0) {
+                    const firstDoc = idNumbersSnapshot.docs[idNumbersSnapshot.docs.length - 1];
+                    const lastDoc = idNumbersSnapshot.docs[0];
+                    firstRecord = firstDoc.data().timestamp;
+                    lastRecord = lastDoc.data().timestamp;
+                }
+                
+                // تحديث بطاقات الإحصائيات
+                updateStatsCards({
+                    total: totalRecords,
+                    today: todayCount,
+                    authNumbers: authNumbersSnapshot.size,
+                    firstRecord: firstRecord,
+                    lastRecord: lastRecord
+                });
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الإحصائيات:', error);
+                document.getElementById('statsCards').innerHTML = `
+                    <div class="stat-card card-danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i>
+                        </div>
+                        <div class="stat-number">!</div>
+                        <div class="stat-title">خطأ في تحميل الإحصائيات</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // ========== تحديث بطاقات الإحصائيات ==========
+        function updateStatsCards(stats) {
+            const statsCardsHTML = `
+                <div class="stat-card card-primary">
+                    <div class="stat-icon">
+                        <i class="fas fa-id-card" style="color: var(--primary-color);"></i>
+                    </div>
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-title">إجمالي أرقام الهوية</div>
+                </div>
+                
+                <div class="stat-card card-success">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day" style="color: var(--success-color);"></i>
+                    </div>
+                    <div class="stat-number">${stats.today}</div>
+                    <div class="stat-title">تسجيلات اليوم</div>
+                </div>
+                
+                <div class="stat-card card-warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-key" style="color: var(--warning-color);"></i>
+                    </div>
+                    <div class="stat-number">${stats.authNumbers}</div>
+                    <div class="stat-title">أرقام المصادقة</div>
+                </div>
+                
+                <div class="stat-card card-danger">
+                    <div class="stat-icon">
+                        <i class="fas fa-history" style="color: var(--error-color);"></i>
+                    </div>
+                    <div class="stat-number">${formatDate(stats.lastRecord)}</div>
+                    <div class="stat-title">آخر تسجيل</div>
+                </div>
+            `;
+            
+            document.getElementById('statsCards').innerHTML = statsCardsHTML;
+        }
+        
+        // ========== تحميل أرقام الهوية ==========
+        async function loadIdNumbers() {
+            try {
+                if (!firebaseDb) throw new Error('Firestore غير متاح');
+                
+                updateConnectionStatus('جاري الاتصال');
+                
+                const snapshot = await firebaseDb.collection('id_numbers')
+                    .orderBy('createdAt', 'desc')
+                    .limit(100)
+                    .get();
+                
+                idNumbersData = [];
+                snapshot.forEach(doc => {
+                    idNumbersData.push({
+                        id: doc.id,
+                        ...doc.data()
                     });
-                }
-            });
-            
-            return merged.sort((a, b) => 
-                new Date(b.timestamp) - new Date(a.timestamp)
-            );
-        }
-        
-        // === تحديث الإحصائيات ===
-        function updateStats() {
-            const statsCards = document.getElementById('statsCards');
-            
-            const firebaseRecords = allRecords.filter(r => r.isFirebase);
-            const localRecords = allRecords.filter(r => !r.isFirebase);
-            const pendingSync = allRecords.filter(r => r.syncStatus === 'pending');
-            
-            const stats = {
-                total: allRecords.length,
-                firebase: firebaseRecords.length,
-                local: localRecords.length,
-                pending: pendingSync.length,
-                today: getTodayRecords().length,
-                uniqueIds: getUniqueIds().length
-            };
-            
-            statsCards.innerHTML = `
-                <div class="stat-card">
-                    <i class="fas fa-database" style="color: #0D98BA;"></i>
-                    <div class="number">${stats.total}</div>
-                    <div class="label">إجمالي السجلات</div>
-                </div>
-                
-                <div class="stat-card">
-                    <i class="fas fa-cloud" style="color: #00ac75;"></i>
-                    <div class="number">${stats.firebase}</div>
-                    <div class="label">مخزن في Firebase</div>
-                </div>
-                
-                <div class="stat-card">
-                    <i class="fas fa-hdd" style="color: #78849e;"></i>
-                    <div class="number">${stats.local}</div>
-                    <div class="label">محلي فقط</div>
-                </div>
-                
-                <div class="stat-card">
-                    <i class="fas fa-sync" style="color: #ff6b6b;"></i>
-                    <div class="number">${stats.pending}</div>
-                    <div class="label">بانتظار المزامنة</div>
-                </div>
-            `;
-            
-            document.getElementById('recordCount').textContent = `${stats.total} سجلات (${stats.firebase} Firebase، ${stats.local} محلي)`;
-        }
-        
-        // === إعداد تحديثات الوقت الحقيقي ===
-        function setupRealtimeUpdates() {
-            // الاستماع للسجلات الجديدة
-            firebaseUnsubscribe = firebaseConfig.db.collection('login_records')
-                .orderBy('createdAt', 'desc')
-                .limit(1)
-                .onSnapshot((snapshot) => {
-                    if (!snapshot.empty) {
-                        const newDoc = snapshot.docs[0];
-                        const newRecord = newDoc.data();
-                        const recordId = newDoc.id;
-                        
-                        // التحقق إذا كان السجل موجود بالفعل
-                        const exists = allRecords.some(record => 
-                            record.firebaseId === recordId
-                        );
-                        
-                        if (!exists) {
-                            const formattedRecord = {
-                                ...newRecord,
-                                id: recordId,
-                                firebaseId: recordId,
-                                isFirebase: true,
-                                timestamp: newRecord.createdAt ? newRecord.createdAt.toDate().toISOString() : new Date().toISOString(),
-                                syncStatus: 'synced'
-                            };
-                            
-                            allRecords.unshift(formattedRecord);
-                            
-                            // تحديث العرض
-                            refreshData();
-                            
-                            // عرض إشعار
-                            showNotification(`📥 سجل جديد من Firebase: ${newRecord.idNumber}`);
-                        }
-                    }
-                }, (error) => {
-                    console.error('❌ خطأ في الاستماع للتحديثات:', error);
                 });
-        }
-        
-        // === عرض إشعار ===
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'firebase-notification';
-            notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-bell" style="font-size: 18px;"></i>
-                    <span>${message}</span>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 5000);
-        }
-        
-        // === تصفية البيانات ===
-        function getFilteredRecords() {
-            let filtered = [...allRecords];
-            
-            // البحث برقم الهوية
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            if (searchTerm) {
-                filtered = filtered.filter(record => 
-                    record.idNumber && record.idNumber.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            // التصفية بالتاريخ
-            const dateFilter = document.getElementById('dateFilter').value;
-            if (dateFilter !== 'all') {
-                const now = new Date();
                 
-                filtered = filtered.filter(record => {
-                    const recordDate = new Date(record.timestamp);
-                    
-                    switch(dateFilter) {
-                        case 'today':
-                            return isSameDay(recordDate, now);
-                        case 'week':
-                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                            return recordDate >= weekAgo;
-                        case 'month':
-                            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                            return recordDate >= monthAgo;
-                        default:
-                            return true;
-                    }
-                });
-            }
-            
-            // التصفية بحالة المزامنة
-            const syncFilter = document.getElementById('syncFilter').value;
-            if (syncFilter !== 'all') {
-                filtered = filtered.filter(record => 
-                    record.syncStatus === syncFilter
-                );
-            }
-            
-            // الترتيب
-            const sortBy = document.getElementById('sortBy').value;
-            filtered.sort((a, b) => {
-                switch(sortBy) {
-                    case 'newest':
-                        return new Date(b.timestamp) - new Date(a.timestamp);
-                    case 'oldest':
-                        return new Date(a.timestamp) - new Date(b.timestamp);
-                    case 'id':
-                        return a.idNumber.localeCompare(b.idNumber);
-                    default:
-                        return 0;
-                }
-            });
-            
-            return filtered;
-        }
-        
-        // === عرض الجدول ===
-        function renderTable() {
-            const filteredRecords = getFilteredRecords();
-            const tableBody = document.getElementById('dataTableBody');
-            const noDataMessage = document.getElementById('noDataMessage');
-            const pagination = document.getElementById('pagination');
-            
-            if (filteredRecords.length === 0) {
-                tableBody.innerHTML = '';
-                noDataMessage.style.display = 'block';
-                pagination.style.display = 'none';
-                return;
-            }
-            
-            noDataMessage.style.display = 'none';
-            
-            // حساب الصفحات
-            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
-            const startIndex = (currentPage - 1) * recordsPerPage;
-            const endIndex = Math.min(startIndex + recordsPerPage, filteredRecords.length);
-            const pageRecords = filteredRecords.slice(startIndex, endIndex);
-            
-            // عرض السجلات
-            tableBody.innerHTML = pageRecords.map((record, index) => {
-                const actualIndex = startIndex + index + 1;
-                const date = new Date(record.timestamp);
-                const formattedDate = date.toLocaleDateString('ar-SA');
-                const formattedTime = date.toLocaleTimeString('ar-SA');
+                renderIdNumbersTable();
+                updateQuickStats();
                 
-                // تحليل رقم الهوية
-                const idParts = record.idNumber ? {
-                    prefix: record.idNumber.substring(0, 3),
-                    birthYear: record.idNumber.substring(3, 7),
-                    random: record.idNumber.substring(7, 14),
-                    check: record.idNumber.substring(14, 15)
-                } : null;
-                
-                // استخراج رقم من رقم الهوية (آخر رقمين)
-                const idNumber = record.idNumber || '000000000000000';
-                const extractedNumber = parseInt(idNumber.substring(idNumber.length - 2)) % 100;
-                
-                // رمز حالة المزامنة
-                let syncIcon = 'fa-check-circle';
-                let syncColor = '#00ac75';
-                let syncText = 'مزامن';
-                
-                if (record.syncStatus === 'pending') {
-                    syncIcon = 'fa-clock';
-                    syncColor = '#ff9800';
-                    syncText = 'بانتظار';
-                } else if (record.syncStatus === 'failed') {
-                    syncIcon = 'fa-exclamation-circle';
-                    syncColor = '#ff4757';
-                    syncText = 'فشل';
-                }
-                
-                return `
+            } catch (error) {
+                console.error('❌ خطأ في تحميل أرقام الهوية:', error);
+                document.getElementById('tableBody').innerHTML = `
                     <tr>
-                        <td>${actualIndex}</td>
-                        <td>
-                            <div class="id-number">${record.idNumber || 'غير محدد'}</div>
-                            ${idParts ? `
-                                <div style="font-size: 11px; color: #888; margin-top: 5px;">
-                                    <span>بادئة: ${idParts.prefix}</span> | 
-                                    <span>سنة: ${idParts.birthYear}</span>
-                                </div>
-                            ` : ''}
-                        </td>
-                        <td>
-                            <div class="timestamp">
-                                <i class="fas fa-calendar"></i> ${formattedDate}
-                            </div>
-                            <div class="timestamp" style="margin-top: 5px;">
-                                <i class="fas fa-clock"></i> ${formattedTime}
-                                ${record.isFirebase ? '<i class="fas fa-cloud" style="margin-right: 5px; color: #00ac75;"></i>' : '<i class="fas fa-hdd" style="margin-right: 5px; color: #78849e;"></i>'}
-                            </div>
-                        </td>
-                        <td>
-                            <span class="status ${record.rememberMe ? 'status-success' : 'status-warning'}">
-                                ${record.rememberMe ? 'مفعل' : 'غير مفعل'}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="sync-status ${record.syncStatus === 'synced' ? 'sync-synced' : record.syncStatus === 'pending' ? 'sync-pending' : 'sync-failed'}">
-                                <i class="fas ${syncIcon}" style="color: ${syncColor}; margin-left: 3px;"></i>
-                                ${syncText}
-                            </span>
-                        </td>
-                        <td>
-                            <button onclick="viewDetails('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #0D98BA;">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button onclick="deleteRecord('${record.id}', ${record.isFirebase})" class="btn" style="padding: 5px 10px; font-size: 12px; background: #ff4757;">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button onclick="sendRecordToAuth('${record.id}', ${extractedNumber})" class="btn" style="padding: 5px 10px; font-size: 12px; background: #00ac75;">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--error-color);">
+                            <i class="fas fa-exclamation-triangle"></i> خطأ في تحميل البيانات: ${error.message}
                         </td>
                     </tr>
                 `;
-            }).join('');
-            
-            // عرض الترقيم
-            renderPagination(totalPages);
-            pagination.style.display = totalPages > 1 ? 'flex' : 'none';
+            }
         }
         
-        // === عرض الترقيم الصفحات ===
-        function renderPagination(totalPages) {
-            const pagination = document.getElementById('pagination');
+        // ========== تحميل أرقام المصادقة ==========
+        async function loadAuthNumbers() {
+            try {
+                if (!firebaseDb) throw new Error('Firestore غير متاح');
+                
+                const snapshot = await firebaseDb.collection('auth_numbers')
+                    .orderBy('createdAt', 'desc')
+                    .limit(50)
+                    .get();
+                
+                authNumbersData = [];
+                snapshot.forEach(doc => {
+                    authNumbersData.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                renderAuthNumbersTable();
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل أرقام المصادقة:', error);
+                document.getElementById('authTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--error-color);">
+                            <i class="fas fa-exclamation-triangle"></i> خطأ في تحميل البيانات: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // ========== عرض جدول أرقام الهوية ==========
+        function renderIdNumbersTable() {
+            const tableBody = document.getElementById('tableBody');
+            let tableHTML = '';
             
-            let html = '';
-            
-            // زر الصفحة السابقة
-            html += `
-                <button class="page-btn" onclick="changePage(${currentPage - 1})" 
-                        ${currentPage === 1 ? 'disabled style="opacity:0.5"' : ''}>
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
-            
-            // أرقام الصفحات
-            for (let i = 1; i <= totalPages; i++) {
-                if (
-                    i === 1 || 
-                    i === totalPages || 
-                    (i >= currentPage - 2 && i <= currentPage + 2)
-                ) {
-                    html += `
-                        <button class="page-btn ${i === currentPage ? 'active' : ''}" 
-                                onclick="changePage(${i})">
-                            ${i}
-                        </button>
+            if (idNumbersData.length === 0) {
+                tableHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-database" style="font-size: 40px; color: #ccc; margin-bottom: 10px;"></i><br>
+                            لا توجد بيانات متاحة
+                        </td>
+                    </tr>
+                `;
+            } else {
+                idNumbersData.forEach((record, index) => {
+                    const date = formatDate(record.timestamp || record.createdAt);
+                    const browserInfo = record.userAgent ? record.userAgent.substring(0, 30) + '...' : '-';
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>
+                                <strong>${record.idNumber}</strong><br>
+                                <small class="text-muted">${record.source || 'غير معروف'}</small>
+                            </td>
+                            <td>${date}</td>
+                            <td>${browserInfo}</td>
+                            <td>
+                                <span class="badge ${getStatusClass(record.status)}">
+                                    ${record.status || 'نشط'}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-view" onclick="viewRecordDetails('${record.id}')">
+                                        <i class="fas fa-eye"></i> عرض
+                                    </button>
+                                    <button class="btn-action btn-delete" onclick="deleteRecord('${record.id}')">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     `;
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
-                    html += `<span style="padding: 8px 5px;">...</span>`;
+                });
+            }
+            
+            tableBody.innerHTML = tableHTML;
+        }
+        
+        // ========== عرض جدول أرقام المصادقة ==========
+        function renderAuthNumbersTable() {
+            const tableBody = document.getElementById('authTableBody');
+            let tableHTML = '';
+            
+            if (authNumbersData.length === 0) {
+                tableHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-key" style="font-size: 40px; color: #ccc; margin-bottom: 10px;"></i><br>
+                            لا توجد بيانات متاحة
+                        </td>
+                    </tr>
+                `;
+            } else {
+                authNumbersData.forEach((record, index) => {
+                    const date = formatDate(record.timestamp || record.createdAt);
+                    
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${record.formattedNumber || record.number}</strong></td>
+                            <td>${record.idNumber || '-'}</td>
+                            <td>${date}</td>
+                            <td><small class="text-muted">${record.recordId || '-'}</small></td>
+                            <td>${record.source || 'غير معروف'}</td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            tableBody.innerHTML = tableHTML;
+        }
+        
+        // ========== تحديث الإحصائيات السريعة ==========
+        function updateQuickStats() {
+            if (idNumbersData.length > 0) {
+                const firstRecord = idNumbersData[idNumbersData.length - 1];
+                const lastRecord = idNumbersData[0];
+                
+                document.getElementById('firstRecord').textContent = formatDate(firstRecord.timestamp);
+                document.getElementById('lastRecord').textContent = formatDate(lastRecord.timestamp);
+                
+                // حساب المتوسط اليومي (تقريبي)
+                if (idNumbersData.length > 1) {
+                    const firstDate = new Date(firstRecord.timestamp);
+                    const lastDate = new Date(lastRecord.timestamp);
+                    const daysDiff = Math.max(1, Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
+                    const dailyAvg = (idNumbersData.length / daysDiff).toFixed(1);
+                    document.getElementById('dailyAverage').textContent = dailyAvg + ' تسجيلات/يوم';
                 }
             }
-            
-            // زر الصفحة التالية
-            html += `
-                <button class="page-btn" onclick="changePage(${currentPage + 1})" 
-                        ${currentPage === totalPages ? 'disabled style="opacity:0.5"' : ''}>
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
-            
-            pagination.innerHTML = html;
         }
         
-        // === تغيير الصفحة ===
-        function changePage(page) {
-            const filteredRecords = getFilteredRecords();
-            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+        // ========== تحديث معلومات Firebase ==========
+        function updateFirebaseInfo() {
+            const projectId = window.firebaseConfig?.projectId || 'غير معروف';
+            const services = [];
             
-            if (page < 1 || page > totalPages) return;
+            if (firebaseDb) services.push('Firestore');
+            if (firebaseRealtimeDb) services.push('Realtime Database');
             
-            currentPage = page;
-            renderTable();
+            document.getElementById('projectId').textContent = projectId;
+            document.getElementById('connectionState').textContent = firebaseReady ? 'متصل' : 'غير متصل';
+            document.getElementById('servicesStatus').textContent = services.length > 0 ? services.join(', ') : 'لا توجد خدمات نشطة';
         }
         
-        // === عرض تفاصيل السجل ===
-        function viewDetails(recordId) {
-            const record = allRecords.find(r => r.id === recordId);
-            if (!record) {
-                alert('❌ السجل غير موجود');
-                return;
+        // ========== عرض تفاصيل السجل ==========
+        async function viewRecordDetails(recordId) {
+            try {
+                const doc = await firebaseDb.collection('id_numbers').doc(recordId).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    const formattedData = JSON.stringify(data, null, 2);
+                    document.getElementById('modalContent').textContent = formattedData;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                    modal.show();
+                } else {
+                    alert('السجل غير موجود');
+                }
+            } catch (error) {
+                console.error('❌ خطأ في عرض التفاصيل:', error);
+                alert('خطأ في تحميل التفاصيل');
             }
-            
-            const details = `
-                📋 تفاصيل السجل:
-                
-                🔢 رقم الهوية: ${record.idNumber}
-                📅 التاريخ: ${new Date(record.timestamp).toLocaleDateString('ar-SA')}
-                ⏰ الوقت: ${new Date(record.timestamp).toLocaleTimeString('ar-SA')}
-                💾 حالة التذكر: ${record.rememberMe ? 'مفعل ✓' : 'غير مفعل ✗'}
-                
-                🌐 حالة المزامنة: ${record.isFirebase ? 'Firebase ✓' : 'محلي فقط'}
-                🔄 حالة المزامنة: ${record.syncStatus || 'غير معروف'}
-                
-                💻 معلومات الجهاز:
-                - المتصفح: ${record.userAgent ? record.userAgent.substring(0, 50) + '...' : 'غير معروف'}
-                - دقة الشاشة: ${record.screenSize || 'غير معروف'}
-                - IP: ${record.ipAddress || 'غير معروف'}
-                
-                📊 معلومات إضافية:
-                - معرف السجل: ${record.id}
-                - معرف Firebase: ${record.firebaseId || 'لا يوجد'}
-                - المصدر: ${record.source || 'غير معروف'}
-            `;
-            
-            alert(details);
         }
         
-        // === حذف سجل ===
-        async function deleteRecord(recordId, isFirebase) {
-            if (!confirm('⚠️ هل أنت متأكد من حذف هذا السجل؟')) return;
+        // ========== حذف السجل ==========
+        async function deleteRecord(recordId) {
+            if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
             
             try {
-                if (isFirebase) {
-                    // حذف من Firebase
-                    await firebaseConfig.db.collection('login_records').doc(recordId).delete();
-                    console.log(`🗑️ تم حذف السجل ${recordId} من Firebase`);
-                }
-                
-                // حذف محلياً
-                allRecords = allRecords.filter(record => record.id !== recordId);
-                
-                // تحديث localStorage
-                const localRecords = allRecords.filter(record => !record.isFirebase);
-                localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
-                
+                await firebaseDb.collection('id_numbers').doc(recordId).delete();
+                alert('تم حذف السجل بنجاح');
                 refreshData();
-                showNotification('✅ تم حذف السجل بنجاح');
-                
             } catch (error) {
                 console.error('❌ خطأ في حذف السجل:', error);
-                alert('❌ فشل حذف السجل من Firebase');
+                alert('خطأ في حذف السجل');
             }
         }
         
-        // === دالة لإرسال الرقم إلى صفحة المصادقة عبر Firebase ===
-        async function sendNumberToAuthPage() {
-            const numberInput = document.getElementById('authNumber');
-            const number = numberInput.value;
-            const statusDiv = document.getElementById('numberStatus');
-            
-            // التحقق من صحة المدخلات
-            if (number === '') {
-                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الرجاء إدخال رقم</span>';
-                return;
-            }
-            
-            const num = parseInt(number);
-            
-            if (isNaN(num) || num < 0 || num > 99) {
-                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الرقم يجب أن يكون بين 0 و 99</span>';
-                return;
-            }
-            
-            // تنسيق الرقم ليظهر برقمين (مثال: 5 → 05)
-            const formattedNumber = num < 10 ? '0' + num : num.toString();
-            
-            try {
-                statusDiv.innerHTML = '<span style="color: #2196f3;"><i class="fas fa-cloud-upload-alt"></i> جاري الحفظ في Firebase...</span>';
-                
-                // تخزين الرقم في Firebase Realtime Database
-                await firebaseConfig.realtimeDb.ref('current_auth_number').set({
-                    number: num,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'manual_input',
-                    fromPage: 'view-data'
-                });
-                
-                // أيضًا حفظ في localStorage للنسخ الاحتياطي
-                localStorage.setItem('auth_passcode_number', JSON.stringify({
-                    number: num,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'manual_input_firebase'
-                }));
-                
-                // عرض رسالة نجاح
-                statusDiv.innerHTML = `
-                    <span style="color: #4caf50;">
-                        <i class="fas fa-check-circle"></i> تم حفظ الرقم في Firebase Realtime!
-                    </span>
-                    <div style="margin-top: 5px; font-size: 13px;">
-                        الرقم المحفوظ: <strong>${formattedNumber}</strong>
-                    </div>
-                `;
-                
-                // عرض معاينة للرقم
-                const preview = document.getElementById('numberPreview');
-                document.getElementById('previewNumber').textContent = formattedNumber;
-                preview.classList.add('show');
-                
-                // فتح صفحة success.html في نافذة جديدة بعد 1.5 ثانية
-                setTimeout(() => {
-                    window.open('success.html', '_blank');
-                }, 1500);
-                
-            } catch (error) {
-                console.error('❌ خطأ في حفظ الرقم في Firebase:', error);
-                statusDiv.innerHTML = `
-                    <span style="color: #f44336;">
-                        <i class="fas fa-exclamation-circle"></i> فشل الحفظ في Firebase
-                    </span>
-                    <div style="margin-top: 5px; font-size: 13px;">
-                        جاري الحفظ محلياً...
-                    </div>
-                `;
-                
-                // حفظ محلي كنسخة احتياطية
-                localStorage.setItem('auth_passcode_number', JSON.stringify({
-                    number: num,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'local_fallback'
-                }));
-                
-                setTimeout(() => {
-                    window.open('success.html', '_blank');
-                }, 1500);
-            }
-        }
-        
-        // === دالة لتحميل الرقم المحفوظ تلقائياً ===
-        async function loadSavedNumber() {
-            try {
-                // أولاً تحقق من Firebase Realtime
-                const snapshot = await firebaseConfig.realtimeDb.ref('current_auth_number').once('value');
-                const firebaseNumber = snapshot.val();
-                
-                if (firebaseNumber) {
-                    document.getElementById('authNumber').value = firebaseNumber.number || '';
-                    document.getElementById('numberSlider').value = firebaseNumber.number || 0;
-                    
-                    const statusDiv = document.getElementById('numberStatus');
-                    statusDiv.innerHTML = `
-                        <span style="color: #2196f3;">
-                            <i class="fas fa-cloud"></i> الرقم من Firebase: ${firebaseNumber.formattedNumber}
-                            (تم التحديث: ${new Date(firebaseNumber.timestamp).toLocaleTimeString('ar-SA')})
-                        </span>
-                    `;
-                    
-                    // عرض معاينة
-                    const preview = document.getElementById('numberPreview');
-                    document.getElementById('previewNumber').textContent = firebaseNumber.formattedNumber;
-                    preview.classList.add('show');
-                    
-                    // أيضًا حفظ في localStorage
-                    localStorage.setItem('auth_passcode_number', JSON.stringify(firebaseNumber));
-                    
-                } else {
-                    // تحقق من localStorage
-                    const savedNumber = localStorage.getItem('auth_passcode_number');
-                    if (savedNumber) {
-                        const numberData = JSON.parse(savedNumber);
-                        document.getElementById('authNumber').value = numberData.number || '';
-                        document.getElementById('numberSlider').value = numberData.number || 0;
-                        
-                        const statusDiv = document.getElementById('numberStatus');
-                        statusDiv.innerHTML = `
-                            <span style="color: #2196f3;">
-                                <i class="fas fa-history"></i> الرقم المحفوظ محلياً: ${numberData.formattedNumber}
-                                (تم الحفظ: ${new Date(numberData.timestamp).toLocaleTimeString('ar-SA')})
-                            </span>
-                        `;
-                        
-                        // عرض معاينة
-                        const preview = document.getElementById('numberPreview');
-                        document.getElementById('previewNumber').textContent = numberData.formattedNumber;
-                        preview.classList.add('show');
-                    }
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل الرقم المحفوظ:', error);
-                
-                // استخدام localStorage فقط في حالة الخطأ
-                const savedNumber = localStorage.getItem('auth_passcode_number');
-                if (savedNumber) {
-                    const numberData = JSON.parse(savedNumber);
-                    document.getElementById('authNumber').value = numberData.number || '';
-                    document.getElementById('numberSlider').value = numberData.number || 0;
-                }
-            }
-        }
-        
-        // === دالة لإرسال سجل إلى صفحة المصادقة ===
-        async function sendRecordToAuth(recordId, extractedNumber) {
-            const record = allRecords.find(r => r.id === recordId);
-            if (!record) {
-                alert('❌ السجل غير موجود');
-                return;
-            }
-            
-            // تنسيق الرقم ليظهر برقمين
-            const formattedNumber = extractedNumber < 10 ? '0' + extractedNumber : extractedNumber.toString();
-            
-            try {
-                // حفظ في Firebase Realtime
-                await firebaseConfig.realtimeDb.ref('current_auth_number').set({
-                    number: extractedNumber,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'record_extraction',
-                    recordId: recordId,
-                    idNumber: record.idNumber,
-                    fromPage: 'view-data'
-                });
-                
-                // حفظ محلياً
-                localStorage.setItem('auth_passcode_number', JSON.stringify({
-                    number: extractedNumber,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'record_extraction'
-                }));
-                
-                // عرض الرقم في حقل الإدخال
-                document.getElementById('authNumber').value = extractedNumber;
-                document.getElementById('numberSlider').value = extractedNumber;
-                
-                // عرض معاينة
-                const preview = document.getElementById('numberPreview');
-                document.getElementById('previewNumber').textContent = formattedNumber;
-                preview.classList.add('show');
-                
-                // عرض رسالة نجاح
-                const statusDiv = document.getElementById('numberStatus');
-                statusDiv.innerHTML = `
-                    <span style="color: #4caf50;">
-                        <i class="fas fa-check-circle"></i> تم استخراج الرقم وحفظه في Firebase!
-                    </span>
-                    <div style="margin-top: 5px; font-size: 13px;">
-                        الرقم: <strong>${formattedNumber}</strong>
-                    </div>
-                `;
-                
-                showNotification(`✅ تم استخراج الرقم ${formattedNumber} من سجل الهوية`);
-                
-                // فتح صفحة success.html بعد 1 ثانية
-                setTimeout(() => {
-                    window.open('success.html', '_blank');
-                }, 1000);
-                
-            } catch (error) {
-                console.error('❌ خطأ في حفظ الرقم في Firebase:', error);
-                
-                // حفظ محلي كنسخة احتياطية
-                localStorage.setItem('auth_passcode_number', JSON.stringify({
-                    number: extractedNumber,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'local_extraction'
-                }));
-                
-                alert(`✅ تم استخراج الرقم محلياً: ${formattedNumber}`);
-                
-                setTimeout(() => {
-                    window.open('success.html', '_blank');
-                }, 1000);
-            }
-        }
-        
-        // === مزامنة مع Firebase ===
-        window.syncWithFirebase = async function() {
-            const syncButton = document.getElementById('syncButton');
-            const originalText = syncButton.innerHTML;
-            const originalHTML = syncButton.innerHTML;
-            
-            try {
-                syncButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المزامنة...';
-                syncButton.disabled = true;
-                
-                const pendingRecords = allRecords.filter(record => 
-                    record.syncStatus === 'pending' || !record.firebaseId
-                );
-                
-                let syncedCount = 0;
-                let failedCount = 0;
-                
-                for (const record of pendingRecords) {
-                    try {
-                        const recordData = {
-                            idNumber: record.idNumber,
-                            rememberMe: record.rememberMe,
-                            timestamp: record.timestamp,
-                            userAgent: record.userAgent,
-                            screenSize: record.screenSize,
-                            browser: record.browser || {},
-                            ipAddress: record.ipAddress || 'unknown',
-                            status: 'active',
-                            source: record.source || 'manual_sync',
-                            syncTime: new Date().toISOString(),
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        };
-                        
-                        const docRef = await firebaseConfig.db.collection('login_records').add(recordData);
-                        
-                        // تحديث السجل المحلي
-                        const index = allRecords.findIndex(r => r.id === record.id);
-                        if (index !== -1) {
-                            allRecords[index].firebaseId = docRef.id;
-                            allRecords[index].isFirebase = true;
-                            allRecords[index].syncStatus = 'synced';
-                        }
-                        
-                        syncedCount++;
-                        
-                        // تحديث localStorage
-                        const localRecords = allRecords.filter(r => !r.isFirebase);
-                        localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
-                        
-                    } catch (error) {
-                        console.error(`❌ خطأ في مزامنة السجل ${record.id}:`, error);
-                        failedCount++;
-                        
-                        const index = allRecords.findIndex(r => r.id === record.id);
-                        if (index !== -1) {
-                            allRecords[index].syncStatus = 'failed';
-                        }
-                    }
-                }
-                
-                refreshData();
-                
-                if (syncedCount > 0) {
-                    showNotification(`✅ تم مزامنة ${syncedCount} سجل مع Firebase`);
-                }
-                
-                if (failedCount > 0) {
-                    showNotification(`⚠️ فشل مزامنة ${failedCount} سجل`);
-                }
-                
-                if (syncedCount === 0 && failedCount === 0) {
-                    showNotification('ℹ️ لا توجد سجلات جديدة للمزامنة');
-                }
-                
-            } catch (error) {
-                console.error('❌ خطأ في المزامنة:', error);
-                showNotification('❌ فشلت عملية المزامنة مع Firebase');
-            } finally {
-                syncButton.innerHTML = originalHTML;
-                syncButton.disabled = false;
-            }
-        };
-        
-        // === دوال مساعدة للتحكم في الرقم ===
-        function setNumber(num) {
-            if (num >= 0 && num <= 99) {
-                document.getElementById('authNumber').value = num;
-                document.getElementById('numberSlider').value = num;
-                updateNumberPreview(num);
-            }
-        }
-        
-        function updateNumberFromSlider(value) {
-            const num = parseInt(value);
-            document.getElementById('authNumber').value = num;
-            updateNumberPreview(num);
-        }
-        
-        function updateNumberPreview(num) {
-            const formattedNumber = num < 10 ? '0' + num : num.toString();
-            document.getElementById('previewNumber').textContent = formattedNumber;
-            const preview = document.getElementById('numberPreview');
-            preview.classList.add('show');
-            
-            // تحديث شريط الحالة
-            const statusDiv = document.getElementById('numberStatus');
-            statusDiv.innerHTML = `<span style="color: #666;">الرقم الحالي: <strong>${formattedNumber}</strong></span>`;
-        }
-        
-        // === تصدير لإكسل ===
-        function exportToExcel() {
-            if (allRecords.length === 0) {
-                alert('⚠️ لا توجد بيانات للتصدير');
-                return;
-            }
-            
-            const headers = ['رقم الهوية', 'التاريخ', 'الوقت', 'حالة التذكر', 'المزامنة', 'المتصفح', 'دقة الشاشة'];
-            const data = allRecords.map(record => [
-                record.idNumber,
-                new Date(record.timestamp).toLocaleDateString('ar-SA'),
-                new Date(record.timestamp).toLocaleTimeString('ar-SA'),
-                record.rememberMe ? 'مفعل' : 'غير مفعل',
-                record.isFirebase ? 'Firebase' : 'محلي',
-                record.userAgent || '',
-                record.screenSize || ''
-            ]);
-            
-            const csvContent = [
-                headers.join(','),
-                ...data.map(row => row.join(','))
-            ].join('\n');
-            
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `uae_id_records_${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            alert(`✅ تم تصدير ${allRecords.length} سجل إلى ملف CSV`);
-        }
-        
-        // === تصدير لـ JSON ===
-        function exportToJSON() {
-            if (allRecords.length === 0) {
-                alert('⚠️ لا توجد بيانات للتصدير');
-                return;
-            }
-            
-            const data = {
-                records: allRecords,
-                exportDate: new Date().toISOString(),
-                totalRecords: allRecords.length,
-                firebaseRecords: allRecords.filter(r => r.isFirebase).length,
-                localRecords: allRecords.filter(r => !r.isFirebase).length,
-                systemInfo: {
-                    exportedFrom: 'UAE ID System with Firebase',
-                    version: '2.0'
-                }
-            };
-            
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `uae_id_records_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            alert(`✅ تم تصدير ${allRecords.length} سجل إلى ملف JSON`);
-        }
-        
-        // === مسح جميع البيانات ===
-        async function clearData() {
-            if (allRecords.length === 0) {
-                alert('⚠️ لا توجد بيانات للمسح');
-                return;
-            }
-            
-            if (confirm(`⚠️ هل أنت متأكد من مسح جميع البيانات (${allRecords.length} سجل)؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) {
-                try {
-                    // حذف من Firebase
-                    const firebaseRecords = allRecords.filter(r => r.isFirebase);
-                    for (const record of firebaseRecords) {
-                        if (record.firebaseId) {
-                            await firebaseConfig.db.collection('login_records').doc(record.firebaseId).delete();
-                        }
-                    }
-                    
-                    // مسح البيانات المحلية
-                    localStorage.removeItem('uae_id_records');
-                    allRecords = [];
-                    
-                    // إعادة تحميل الصفحة
-                    refreshData();
-                    
-                    showNotification('✅ تم مسح جميع البيانات بنجاح');
-                    
-                } catch (error) {
-                    console.error('❌ خطأ في مسح البيانات من Firebase:', error);
-                    alert('❌ فشل مسح البيانات من Firebase، تم المسح محلياً فقط');
-                    
-                    // مسح البيانات المحلية فقط
-                    localStorage.removeItem('uae_id_records');
-                    allRecords = [];
-                    refreshData();
-                }
-            }
-        }
-        
-        // === تحديث البيانات ===
+        // ========== تحديث البيانات ==========
         function refreshData() {
-            loadRecords();
-            currentPage = 1;
-        }
-        
-        // === دوال مساعدة ===
-        function getTodayRecords() {
-            const today = new Date();
-            return allRecords.filter(record => 
-                isSameDay(new Date(record.timestamp), today)
-            );
-        }
-        
-        function getWeekRecords() {
-            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            return allRecords.filter(record => 
-                new Date(record.timestamp) >= weekAgo
-            );
-        }
-        
-        function getMonthRecords() {
-            const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            return allRecords.filter(record => 
-                new Date(record.timestamp) >= monthAgo
-            );
-        }
-        
-        function getUniqueIds() {
-            const ids = new Set();
-            allRecords.forEach(record => {
-                if (record.idNumber) ids.add(record.idNumber);
-            });
-            return Array.from(ids);
-        }
-        
-        function isSameDay(date1, date2) {
-            return date1.getDate() === date2.getDate() &&
-                   date1.getMonth() === date2.getMonth() &&
-                   date1.getFullYear() === date2.getFullYear();
-        }
-        
-        // === إعداد المستمعين للأحداث ===
-        function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', () => {
-                currentPage = 1;
-                renderTable();
-            });
-            
-            document.getElementById('dateFilter').addEventListener('change', () => {
-                currentPage = 1;
-                renderTable();
-            });
-            
-            document.getElementById('sortBy').addEventListener('change', () => {
-                currentPage = 1;
-                renderTable();
-            });
-            
-            document.getElementById('syncFilter').addEventListener('change', () => {
-                currentPage = 1;
-                renderTable();
-            });
-            
-            // تحديث الرقم عند تغييره
-            document.getElementById('authNumber').addEventListener('input', function() {
-                let value = parseInt(this.value);
-                if (isNaN(value)) {
-                    value = 0;
-                } else if (value < 0) {
-                    value = 0;
-                    this.value = 0;
-                } else if (value > 99) {
-                    value = 99;
-                    this.value = 99;
-                }
-                document.getElementById('numberSlider').value = value;
-                updateNumberPreview(value);
-            });
-            
-            // عند الضغط على Enter في حقل الرقم
-            document.getElementById('authNumber').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendNumberToAuthPage();
-                }
+            updateConnectionStatus('جاري الاتصال');
+            Promise.all([
+                loadStatistics(),
+                loadIdNumbers(),
+                loadAuthNumbers(),
+                updateFirebaseInfo()
+            ]).then(() => {
+                updateConnectionStatus('متصل');
+            }).catch(error => {
+                console.error('❌ خطأ في تحديث البيانات:', error);
+                updateConnectionStatus('خطأ', error.message);
             });
         }
         
-        // === تشغيل التطبيق عند تحميل الصفحة ===
-        window.addEventListener('DOMContentLoaded', init);
-        
-        // === دالة لاختبار إضافة بيانات وهمية ===
-        window.addTestData = function(count = 5) {
-            const testIds = [
-                '784199012345678', '784199512345679', '784200012345670',
-                '784200512345671', '784201012345672', '784201512345673'
-            ];
-            
-            for (let i = 0; i < Math.min(count, testIds.length); i++) {
-                const record = {
-                    id: 'test_' + Date.now() + '_' + i,
-                    idNumber: testIds[i],
-                    rememberMe: Math.random() > 0.5,
-                    timestamp: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
-                    userAgent: navigator.userAgent,
-                    screenSize: `${window.screen.width}x${window.screen.height}`,
-                    status: 'test_data',
-                    syncStatus: 'pending',
-                    isFirebase: false
-                };
-                
-                allRecords.push(record);
-            }
-            
-            // حفظ محلياً
-            const localRecords = allRecords.filter(r => !r.isFirebase);
-            localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
-            
-            refreshData();
-            alert(`✅ تم إضافة ${Math.min(count, testIds.length)} سجل تجريبي محلي`);
-        };
-        
-        // === عرض جميع النسخ الاحتياطية ===
-        window.showBackups = function() {
-            const backups = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('uae_id_backup_')) {
-                    try {
-                        const backup = JSON.parse(localStorage.getItem(key));
-                        backups.push({ key, ...backup });
-                    } catch (e) {}
-                }
-            }
-            
-            if (backups.length === 0) {
-                alert('لا توجد نسخ احتياطية');
+        // ========== تصدير إلى CSV ==========
+        function exportToCSV() {
+            if (idNumbersData.length === 0) {
+                alert('لا توجد بيانات للتصدير');
                 return;
             }
             
-            const backupInfo = backups.map((b, index) => 
-                `${index + 1}. تاريخ النسخ: ${new Date(b.backupDate).toLocaleString('ar-SA')}\n   عدد السجلات: ${b.totalRecords}\n   المفتاح: ${b.key}`
-            ).join('\n\n');
+            const headers = ['رقم الهوية', 'التاريخ', 'المصدر', 'الحالة', 'معلومات المتصفح'];
+            const csvRows = [headers.join(',')];
             
-            alert(`📦 النسخ الاحتياطية:\n\n${backupInfo}`);
-        };
+            idNumbersData.forEach(record => {
+                const row = [
+                    `"${record.idNumber}"`,
+                    `"${formatDate(record.timestamp)}"`,
+                    `"${record.source || ''}"`,
+                    `"${record.status || ''}"`,
+                    `"${record.userAgent || ''}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `id_numbers_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
         
-        // === تنظيف عند إغلاق الصفحة ===
-        window.addEventListener('beforeunload', function() {
-            if (firebaseUnsubscribe) {
-                firebaseUnsubscribe();
+        // ========== مسح البيانات القديمة ==========
+        async function clearOldData() {
+            if (!confirm('هل أنت متأكد من مسح جميع البيانات القديمة؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
+            
+            try {
+                const snapshot = await firebaseDb.collection('id_numbers')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                const batch = firebaseDb.batch();
+                let count = 0;
+                
+                snapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                    count++;
+                });
+                
+                await batch.commit();
+                alert(`تم حذف ${count} سجلاً بنجاح`);
+                refreshData();
+            } catch (error) {
+                console.error('❌ خطأ في مسح البيانات:', error);
+                alert('خطأ في مسح البيانات');
+            }
+        }
+        
+        // ========== البحث في البيانات ==========
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderIdNumbersTable();
+                return;
+            }
+            
+            const filteredData = idNumbersData.filter(record => 
+                (record.idNumber && record.idNumber.includes(searchTerm)) ||
+                (record.timestamp && record.timestamp.toLowerCase().includes(searchTerm)) ||
+                (record.source && record.source.toLowerCase().includes(searchTerm))
+            );
+            
+            if (filteredData.length === 0) {
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-search" style="font-size: 40px; color: #ccc; margin-bottom: 10px;"></i><br>
+                            لا توجد نتائج تطابق البحث
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // عرض البيانات المصفاة
+                const tableBody = document.getElementById('tableBody');
+                let tableHTML = '';
+                
+                filteredData.forEach((record, index) => {
+                    const date = formatDate(record.timestamp || record.createdAt);
+                    const browserInfo = record.userAgent ? record.userAgent.substring(0, 30) + '...' : '-';
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${record.idNumber}</strong></td>
+                            <td>${date}</td>
+                            <td>${browserInfo}</td>
+                            <td>
+                                <span class="badge ${getStatusClass(record.status)}">
+                                    ${record.status || 'نشط'}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-view" onclick="viewRecordDetails('${record.id}')">
+                                        <i class="fas fa-eye"></i> عرض
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.innerHTML = tableHTML;
             }
         });
         
+        // ========== دوال مساعدة ==========
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ar-SA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return dateString;
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'active':
+                case 'success':
+                    return 'badge-success';
+                case 'pending':
+                    return 'badge-warning';
+                case 'error':
+                case 'failed':
+                    return 'badge-danger';
+                default:
+                    return 'badge-warning';
+            }
+        }
+        
+        // ========== تهيئة الصفحة ==========
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('📄 صفحة عرض البيانات محملة');
+            
+            // تهيئة Firebase
+            const initialized = await initializeFirebase();
+            
+            if (initialized) {
+                // تحميل جميع البيانات
+                refreshData();
+            } else {
+                document.getElementById('statsCards').innerHTML = `
+                    <div class="stat-card card-danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle" style="color: var(--error-color);"></i>
+                        </div>
+                        <div class="stat-number">!</div>
+                        <div class="stat-title">خطأ في الاتصال بقاعدة البيانات</div>
+                    </div>
+                `;
+                
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--error-color);">
+                            <i class="fas fa-exclamation-triangle"></i> فشل الاتصال بـ Firebase. يرجى التحقق من الإعدادات.
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+        
+        // ========== دوال للاختبار من وحدة التحكم ==========
+        window.testViewData = async function() {
+            console.log('🧪 اختبار صفحة عرض البيانات...');
+            
+            try {
+                const initialized = await initializeFirebase();
+                if (!initialized) {
+                    return { error: 'Firebase غير مهيئ' };
+                }
+                
+                const result = {
+                    firebaseReady: firebaseReady,
+                    firestoreAvailable: !!firebaseDb,
+                    realtimeDbAvailable: !!firebaseRealtimeDb,
+                    idNumbersCount: idNumbersData.length,
+                    authNumbersCount: authNumbersData.length,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('📊 نتيجة الاختبار:', result);
+                return result;
+            } catch (error) {
+                console.error('❌ خطأ في الاختبار:', error);
+                return { error: error.message };
+            }
+        };
     </script>
 </body>
 </html>
