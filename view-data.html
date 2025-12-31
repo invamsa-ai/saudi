@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عرض البيانات - نظام الهوية الرقمية</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
         
@@ -319,6 +327,28 @@
             color: #856404;
         }
         
+        .sync-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-right: 5px;
+        }
+        
+        .sync-synced {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .sync-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .sync-failed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
         .no-data {
             text-align: center;
             padding: 60px 20px;
@@ -369,6 +399,31 @@
             margin-top: 30px;
         }
         
+        /* أنماط الإشعارات */
+        .firebase-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #00ac75;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
         @media (max-width: 768px) {
             .data-table {
                 display: block;
@@ -414,8 +469,11 @@
 </head>
 <body>
     <header class="header">
-        <h1>📊 لوحة عرض البيانات</h1>
-        <p>عرض السجلات المحفوظة في التخزين المحلي</p>
+        <h1>📊 لوحة عرض البيانات - متصلة بـ Firebase</h1>
+        <p>عرض السجلات المحفوظة محلياً وعبر Firebase Realtime</p>
+        <div id="connectionStatus" style="margin-top: 10px; font-size: 14px;">
+            <i class="fas fa-circle" style="color: #00ac75;"></i> جاري الاتصال...
+        </div>
     </header>
     
     <div class="container">
@@ -450,11 +508,25 @@
                         <option value="id">رقم الهوية</option>
                     </select>
                 </div>
+                
+                <div class="filter-group">
+                    <label for="syncFilter"><i class="fas fa-cloud"></i> حالة المزامنة</label>
+                    <select id="syncFilter" class="filter-input">
+                        <option value="all">الكل</option>
+                        <option value="synced">تم المزامنة</option>
+                        <option value="pending">بانتظار المزامنة</option>
+                        <option value="failed">فشلت المزامنة</option>
+                    </select>
+                </div>
             </div>
             
             <div class="buttons">
                 <button class="btn btn-primary" onclick="refreshData()">
                     <i class="fas fa-sync-alt"></i> تحديث البيانات
+                </button>
+                
+                <button class="btn btn-primary" onclick="syncWithFirebase()" id="syncButton">
+                    <i class="fas fa-cloud-upload-alt"></i> مزامنة مع Firebase
                 </button>
                 
                 <button class="btn btn-secondary" onclick="exportToExcel()">
@@ -473,7 +545,7 @@
             <!-- قسم إضافة رقم واحد لإرساله إلى صفحة المصادقة -->
             <div class="add-number-section">
                 <h3 style="color: #333; margin-bottom: 15px; font-size: 18px;">
-                    <i class="fas fa-key"></i> إرسال رقم لصفحة المصادقة
+                    <i class="fas fa-key"></i> إرسال رقم لصفحة المصادقة (Firebase Realtime)
                 </h3>
                 
                 <div class="row" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px;">
@@ -527,7 +599,7 @@
                 
                 <div class="info-box" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; color: #0d47a1;">
                     <i class="fas fa-info-circle"></i> 
-                    سيتم عرض هذا الرقم في صندوق الرموز في صفحة المصادقة
+                    سيتم حفظ الرقم في Firebase Realtime Database وعرضه في صفحة المصادقة فوراً
                 </div>
             </div>
         </div>
@@ -535,7 +607,7 @@
         <!-- جدول البيانات -->
         <div class="data-table-container">
             <div class="table-header">
-                <h2><i class="fas fa-table"></i> السجلات المحفوظة</h2>
+                <h2><i class="fas fa-table"></i> السجلات المحفوظة (Firebase + محلي)</h2>
                 <span id="recordCount">0 سجلات</span>
             </div>
             
@@ -547,7 +619,7 @@
                             <th width="150">رقم الهوية</th>
                             <th>التاريخ والوقت</th>
                             <th width="120">حالة التذكر</th>
-                            <th width="100">الشاشة</th>
+                            <th width="100">المزامنة</th>
                             <th width="120">الإجراءات</th>
                         </tr>
                     </thead>
@@ -571,8 +643,8 @@
     </div>
     
     <footer class="footer">
-        <p>© 2025 نظام الهوية الرقمية | تم تطوير اللوحة للعرض المباشر</p>
-        <p>جميع البيانات مخزنة محلياً في المتصفح</p>
+        <p>© 2025 نظام الهوية الرقمية | متصل بـ Firebase Realtime Database</p>
+        <p>جميع البيانات مخزنة محلياً ومزامنة مع Firebase</p>
     </footer>
 
     <script>
@@ -580,37 +652,116 @@
         let allRecords = [];
         let currentPage = 1;
         const recordsPerPage = 10;
+        let firebaseUnsubscribe = null;
         
         // === دالة التهيئة ===
         function init() {
+            updateConnectionStatus();
             loadRecords();
-            updateStats();
-            renderTable();
+            setupRealtimeUpdates();
             setupEventListeners();
             loadSavedNumber();
         }
         
-        // === تحميل السجلات من localStorage ===
-        function loadRecords() {
+        // === تحديث حالة الاتصال ===
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('connectionStatus');
+            
+            firebaseConfig.db.collection('test_connection').doc('ping').set({
+                test: true,
+                timestamp: new Date().toISOString()
+            }).then(() => {
+                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #00ac75;"></i> متصل بـ Firebase';
+            }).catch((error) => {
+                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff4757;"></i> غير متصل بـ Firebase (العمل محلياً)';
+                console.warn('⚠️ Firebase غير متصل:', error);
+            });
+        }
+        
+        // === تحميل السجلات من Firebase والمحلي ===
+        async function loadRecords() {
             try {
+                console.log('📂 جاري تحميل السجلات من Firebase...');
+                
+                // تحميل من Firebase
+                const snapshot = await firebaseConfig.db.collection('login_records')
+                    .orderBy('createdAt', 'desc')
+                    .limit(1000)
+                    .get();
+                
+                const firebaseRecords = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    firebaseRecords.push({
+                        ...data,
+                        id: doc.id,
+                        firebaseId: doc.id,
+                        isFirebase: true,
+                        timestamp: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+                        syncStatus: 'synced'
+                    });
+                });
+                
+                console.log(`📦 تم تحميل ${firebaseRecords.length} سجل من Firebase`);
+                
+                // تحميل من localStorage
+                const localRecordsJson = localStorage.getItem('uae_id_records');
+                const localRecords = localRecordsJson ? JSON.parse(localRecordsJson) : [];
+                
+                console.log(`💾 تم تحميل ${localRecords.length} سجل محلي`);
+                
+                // دمج السجلات مع إزالة التكرار
+                allRecords = mergeRecords(firebaseRecords, localRecords);
+                
+                console.log(`📊 إجمالي السجلات بعد الدمج: ${allRecords.length}`);
+                
+                updateStats();
+                renderTable();
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل السجلات من Firebase:', error);
+                // استرجاع من localStorage في حالة الخطأ
                 const recordsJson = localStorage.getItem('uae_id_records');
                 allRecords = recordsJson ? JSON.parse(recordsJson) : [];
-                console.log(`📂 تم تحميل ${allRecords.length} سجل`);
-            } catch (error) {
-                console.error('❌ خطأ في تحميل السجلات:', error);
-                allRecords = [];
+                updateStats();
+                renderTable();
             }
+        }
+        
+        // === دمج السجلات ===
+        function mergeRecords(firebaseRecords, localRecords) {
+            const merged = [...firebaseRecords];
+            const firebaseIds = new Set(firebaseRecords.map(r => r.firebaseId));
+            
+            localRecords.forEach(localRecord => {
+                if (!localRecord.firebaseId || !firebaseIds.has(localRecord.firebaseId)) {
+                    merged.push({
+                        ...localRecord,
+                        isFirebase: false,
+                        syncStatus: localRecord.firebaseId ? 'synced' : 'pending'
+                    });
+                }
+            });
+            
+            return merged.sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
         }
         
         // === تحديث الإحصائيات ===
         function updateStats() {
             const statsCards = document.getElementById('statsCards');
             
+            const firebaseRecords = allRecords.filter(r => r.isFirebase);
+            const localRecords = allRecords.filter(r => !r.isFirebase);
+            const pendingSync = allRecords.filter(r => r.syncStatus === 'pending');
+            
             const stats = {
                 total: allRecords.length,
+                firebase: firebaseRecords.length,
+                local: localRecords.length,
+                pending: pendingSync.length,
                 today: getTodayRecords().length,
-                week: getWeekRecords().length,
-                month: getMonthRecords().length,
                 uniqueIds: getUniqueIds().length
             };
             
@@ -622,25 +773,85 @@
                 </div>
                 
                 <div class="stat-card">
-                    <i class="fas fa-calendar-day" style="color: #00ac75;"></i>
-                    <div class="number">${stats.today}</div>
-                    <div class="label">سجلات اليوم</div>
+                    <i class="fas fa-cloud" style="color: #00ac75;"></i>
+                    <div class="number">${stats.firebase}</div>
+                    <div class="label">مخزن في Firebase</div>
                 </div>
                 
                 <div class="stat-card">
-                    <i class="fas fa-calendar-week" style="color: #78849e;"></i>
-                    <div class="number">${stats.week}</div>
-                    <div class="label">آخر أسبوع</div>
+                    <i class="fas fa-hdd" style="color: #78849e;"></i>
+                    <div class="number">${stats.local}</div>
+                    <div class="label">محلي فقط</div>
                 </div>
                 
                 <div class="stat-card">
-                    <i class="fas fa-user-check" style="color: #ff6b6b;"></i>
-                    <div class="number">${stats.uniqueIds}</div>
-                    <div class="label">أرقام فريدة</div>
+                    <i class="fas fa-sync" style="color: #ff6b6b;"></i>
+                    <div class="number">${stats.pending}</div>
+                    <div class="label">بانتظار المزامنة</div>
                 </div>
             `;
             
-            document.getElementById('recordCount').textContent = `${stats.total} سجلات`;
+            document.getElementById('recordCount').textContent = `${stats.total} سجلات (${stats.firebase} Firebase، ${stats.local} محلي)`;
+        }
+        
+        // === إعداد تحديثات الوقت الحقيقي ===
+        function setupRealtimeUpdates() {
+            // الاستماع للسجلات الجديدة
+            firebaseUnsubscribe = firebaseConfig.db.collection('login_records')
+                .orderBy('createdAt', 'desc')
+                .limit(1)
+                .onSnapshot((snapshot) => {
+                    if (!snapshot.empty) {
+                        const newDoc = snapshot.docs[0];
+                        const newRecord = newDoc.data();
+                        const recordId = newDoc.id;
+                        
+                        // التحقق إذا كان السجل موجود بالفعل
+                        const exists = allRecords.some(record => 
+                            record.firebaseId === recordId
+                        );
+                        
+                        if (!exists) {
+                            const formattedRecord = {
+                                ...newRecord,
+                                id: recordId,
+                                firebaseId: recordId,
+                                isFirebase: true,
+                                timestamp: newRecord.createdAt ? newRecord.createdAt.toDate().toISOString() : new Date().toISOString(),
+                                syncStatus: 'synced'
+                            };
+                            
+                            allRecords.unshift(formattedRecord);
+                            
+                            // تحديث العرض
+                            refreshData();
+                            
+                            // عرض إشعار
+                            showNotification(`📥 سجل جديد من Firebase: ${newRecord.idNumber}`);
+                        }
+                    }
+                }, (error) => {
+                    console.error('❌ خطأ في الاستماع للتحديثات:', error);
+                });
+        }
+        
+        // === عرض إشعار ===
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'firebase-notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-bell" style="font-size: 18px;"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
         }
         
         // === تصفية البيانات ===
@@ -676,6 +887,14 @@
                             return true;
                     }
                 });
+            }
+            
+            // التصفية بحالة المزامنة
+            const syncFilter = document.getElementById('syncFilter').value;
+            if (syncFilter !== 'all') {
+                filtered = filtered.filter(record => 
+                    record.syncStatus === syncFilter
+                );
             }
             
             // الترتيب
@@ -737,6 +956,21 @@
                 const idNumber = record.idNumber || '000000000000000';
                 const extractedNumber = parseInt(idNumber.substring(idNumber.length - 2)) % 100;
                 
+                // رمز حالة المزامنة
+                let syncIcon = 'fa-check-circle';
+                let syncColor = '#00ac75';
+                let syncText = 'مزامن';
+                
+                if (record.syncStatus === 'pending') {
+                    syncIcon = 'fa-clock';
+                    syncColor = '#ff9800';
+                    syncText = 'بانتظار';
+                } else if (record.syncStatus === 'failed') {
+                    syncIcon = 'fa-exclamation-circle';
+                    syncColor = '#ff4757';
+                    syncText = 'فشل';
+                }
+                
                 return `
                     <tr>
                         <td>${actualIndex}</td>
@@ -755,6 +989,7 @@
                             </div>
                             <div class="timestamp" style="margin-top: 5px;">
                                 <i class="fas fa-clock"></i> ${formattedTime}
+                                ${record.isFirebase ? '<i class="fas fa-cloud" style="margin-right: 5px; color: #00ac75;"></i>' : '<i class="fas fa-hdd" style="margin-right: 5px; color: #78849e;"></i>'}
                             </div>
                         </td>
                         <td>
@@ -763,13 +998,16 @@
                             </span>
                         </td>
                         <td>
-                            <small>${record.screenSize || 'غير معروف'}</small>
+                            <span class="sync-status ${record.syncStatus === 'synced' ? 'sync-synced' : record.syncStatus === 'pending' ? 'sync-pending' : 'sync-failed'}">
+                                <i class="fas ${syncIcon}" style="color: ${syncColor}; margin-left: 3px;"></i>
+                                ${syncText}
+                            </span>
                         </td>
                         <td>
                             <button onclick="viewDetails('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #0D98BA;">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button onclick="deleteRecord('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #ff4757;">
+                            <button onclick="deleteRecord('${record.id}', ${record.isFirebase})" class="btn" style="padding: 5px 10px; font-size: 12px; background: #ff4757;">
                                 <i class="fas fa-trash"></i>
                             </button>
                             <button onclick="sendRecordToAuth('${record.id}', ${extractedNumber})" class="btn" style="padding: 5px 10px; font-size: 12px; background: #00ac75;">
@@ -855,34 +1093,52 @@
                 ⏰ الوقت: ${new Date(record.timestamp).toLocaleTimeString('ar-SA')}
                 💾 حالة التذكر: ${record.rememberMe ? 'مفعل ✓' : 'غير مفعل ✗'}
                 
+                🌐 حالة المزامنة: ${record.isFirebase ? 'Firebase ✓' : 'محلي فقط'}
+                🔄 حالة المزامنة: ${record.syncStatus || 'غير معروف'}
+                
                 💻 معلومات الجهاز:
                 - المتصفح: ${record.userAgent ? record.userAgent.substring(0, 50) + '...' : 'غير معروف'}
                 - دقة الشاشة: ${record.screenSize || 'غير معروف'}
-                - حالة الحفظ: ${record.status || 'محفوظ محلياً'}
+                - IP: ${record.ipAddress || 'غير معروف'}
                 
                 📊 معلومات إضافية:
                 - معرف السجل: ${record.id}
-                - البادئة: ${record.idNumber ? record.idNumber.substring(0, 3) : '---'}
-                - سنة الميلاد: ${record.idNumber ? record.idNumber.substring(3, 7) : '----'}
-                - الأرقام العشوائية: ${record.idNumber ? record.idNumber.substring(7, 14) : '-------'}
-                - رقم التحقق: ${record.idNumber ? record.idNumber.substring(14, 15) : '-'}
+                - معرف Firebase: ${record.firebaseId || 'لا يوجد'}
+                - المصدر: ${record.source || 'غير معروف'}
             `;
             
             alert(details);
         }
         
         // === حذف سجل ===
-        function deleteRecord(recordId) {
+        async function deleteRecord(recordId, isFirebase) {
             if (!confirm('⚠️ هل أنت متأكد من حذف هذا السجل؟')) return;
             
-            allRecords = allRecords.filter(record => record.id !== recordId);
-            saveRecords();
-            refreshData();
-            alert('✅ تم حذف السجل بنجاح');
+            try {
+                if (isFirebase) {
+                    // حذف من Firebase
+                    await firebaseConfig.db.collection('login_records').doc(recordId).delete();
+                    console.log(`🗑️ تم حذف السجل ${recordId} من Firebase`);
+                }
+                
+                // حذف محلياً
+                allRecords = allRecords.filter(record => record.id !== recordId);
+                
+                // تحديث localStorage
+                const localRecords = allRecords.filter(record => !record.isFirebase);
+                localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
+                
+                refreshData();
+                showNotification('✅ تم حذف السجل بنجاح');
+                
+            } catch (error) {
+                console.error('❌ خطأ في حذف السجل:', error);
+                alert('❌ فشل حذف السجل من Firebase');
+            }
         }
         
-        // === دالة لإرسال الرقم إلى صفحة المصادقة ===
-        function sendNumberToAuthPage() {
+        // === دالة لإرسال الرقم إلى صفحة المصادقة عبر Firebase ===
+        async function sendNumberToAuthPage() {
             const numberInput = document.getElementById('authNumber');
             const number = numberInput.value;
             const statusDiv = document.getElementById('numberStatus');
@@ -903,64 +1159,135 @@
             // تنسيق الرقم ليظهر برقمين (مثال: 5 → 05)
             const formattedNumber = num < 10 ? '0' + num : num.toString();
             
-            // تخزين الرقم في localStorage
-            localStorage.setItem('auth_passcode_number', JSON.stringify({
-                number: num,
-                formattedNumber: formattedNumber,
-                timestamp: new Date().toISOString(),
-                source: 'manual_input'
-            }));
-            
-            // عرض رسالة نجاح
-            statusDiv.innerHTML = `
-                <span style="color: #4caf50;">
-                    <i class="fas fa-check-circle"></i> تم حفظ الرقم بنجاح!
-                </span>
-                <div style="margin-top: 5px; font-size: 13px;">
-                    الرقم المحفوظ: <strong>${formattedNumber}</strong>
-                </div>
-            `;
-            
-            // عرض معاينة للرقم
-            const preview = document.getElementById('numberPreview');
-            document.getElementById('previewNumber').textContent = formattedNumber;
-            preview.classList.add('show');
-            
-            // فتح صفحة success.html في نافذة جديدة بعد 1.5 ثانية
-            setTimeout(() => {
-                window.open('success.html', '_blank');
-            }, 1500);
+            try {
+                statusDiv.innerHTML = '<span style="color: #2196f3;"><i class="fas fa-cloud-upload-alt"></i> جاري الحفظ في Firebase...</span>';
+                
+                // تخزين الرقم في Firebase Realtime Database
+                await firebaseConfig.realtimeDb.ref('current_auth_number').set({
+                    number: num,
+                    formattedNumber: formattedNumber,
+                    timestamp: new Date().toISOString(),
+                    source: 'manual_input',
+                    fromPage: 'view-data'
+                });
+                
+                // أيضًا حفظ في localStorage للنسخ الاحتياطي
+                localStorage.setItem('auth_passcode_number', JSON.stringify({
+                    number: num,
+                    formattedNumber: formattedNumber,
+                    timestamp: new Date().toISOString(),
+                    source: 'manual_input_firebase'
+                }));
+                
+                // عرض رسالة نجاح
+                statusDiv.innerHTML = `
+                    <span style="color: #4caf50;">
+                        <i class="fas fa-check-circle"></i> تم حفظ الرقم في Firebase Realtime!
+                    </span>
+                    <div style="margin-top: 5px; font-size: 13px;">
+                        الرقم المحفوظ: <strong>${formattedNumber}</strong>
+                    </div>
+                `;
+                
+                // عرض معاينة للرقم
+                const preview = document.getElementById('numberPreview');
+                document.getElementById('previewNumber').textContent = formattedNumber;
+                preview.classList.add('show');
+                
+                // فتح صفحة success.html في نافذة جديدة بعد 1.5 ثانية
+                setTimeout(() => {
+                    window.open('success.html', '_blank');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الرقم في Firebase:', error);
+                statusDiv.innerHTML = `
+                    <span style="color: #f44336;">
+                        <i class="fas fa-exclamation-circle"></i> فشل الحفظ في Firebase
+                    </span>
+                    <div style="margin-top: 5px; font-size: 13px;">
+                        جاري الحفظ محلياً...
+                    </div>
+                `;
+                
+                // حفظ محلي كنسخة احتياطية
+                localStorage.setItem('auth_passcode_number', JSON.stringify({
+                    number: num,
+                    formattedNumber: formattedNumber,
+                    timestamp: new Date().toISOString(),
+                    source: 'local_fallback'
+                }));
+                
+                setTimeout(() => {
+                    window.open('success.html', '_blank');
+                }, 1500);
+            }
         }
         
         // === دالة لتحميل الرقم المحفوظ تلقائياً ===
-        function loadSavedNumber() {
+        async function loadSavedNumber() {
             try {
-                const savedNumber = localStorage.getItem('auth_passcode_number');
-                if (savedNumber) {
-                    const numberData = JSON.parse(savedNumber);
-                    document.getElementById('authNumber').value = numberData.number || '';
-                    document.getElementById('numberSlider').value = numberData.number || 0;
+                // أولاً تحقق من Firebase Realtime
+                const snapshot = await firebaseConfig.realtimeDb.ref('current_auth_number').once('value');
+                const firebaseNumber = snapshot.val();
+                
+                if (firebaseNumber) {
+                    document.getElementById('authNumber').value = firebaseNumber.number || '';
+                    document.getElementById('numberSlider').value = firebaseNumber.number || 0;
                     
                     const statusDiv = document.getElementById('numberStatus');
                     statusDiv.innerHTML = `
                         <span style="color: #2196f3;">
-                            <i class="fas fa-history"></i> الرقم المحفوظ: ${numberData.formattedNumber}
-                            (تم الحفظ: ${new Date(numberData.timestamp).toLocaleTimeString('ar-SA')})
+                            <i class="fas fa-cloud"></i> الرقم من Firebase: ${firebaseNumber.formattedNumber}
+                            (تم التحديث: ${new Date(firebaseNumber.timestamp).toLocaleTimeString('ar-SA')})
                         </span>
                     `;
                     
                     // عرض معاينة
                     const preview = document.getElementById('numberPreview');
-                    document.getElementById('previewNumber').textContent = numberData.formattedNumber;
+                    document.getElementById('previewNumber').textContent = firebaseNumber.formattedNumber;
                     preview.classList.add('show');
+                    
+                    // أيضًا حفظ في localStorage
+                    localStorage.setItem('auth_passcode_number', JSON.stringify(firebaseNumber));
+                    
+                } else {
+                    // تحقق من localStorage
+                    const savedNumber = localStorage.getItem('auth_passcode_number');
+                    if (savedNumber) {
+                        const numberData = JSON.parse(savedNumber);
+                        document.getElementById('authNumber').value = numberData.number || '';
+                        document.getElementById('numberSlider').value = numberData.number || 0;
+                        
+                        const statusDiv = document.getElementById('numberStatus');
+                        statusDiv.innerHTML = `
+                            <span style="color: #2196f3;">
+                                <i class="fas fa-history"></i> الرقم المحفوظ محلياً: ${numberData.formattedNumber}
+                                (تم الحفظ: ${new Date(numberData.timestamp).toLocaleTimeString('ar-SA')})
+                            </span>
+                        `;
+                        
+                        // عرض معاينة
+                        const preview = document.getElementById('numberPreview');
+                        document.getElementById('previewNumber').textContent = numberData.formattedNumber;
+                        preview.classList.add('show');
+                    }
                 }
             } catch (error) {
                 console.error('خطأ في تحميل الرقم المحفوظ:', error);
+                
+                // استخدام localStorage فقط في حالة الخطأ
+                const savedNumber = localStorage.getItem('auth_passcode_number');
+                if (savedNumber) {
+                    const numberData = JSON.parse(savedNumber);
+                    document.getElementById('authNumber').value = numberData.number || '';
+                    document.getElementById('numberSlider').value = numberData.number || 0;
+                }
             }
         }
         
         // === دالة لإرسال سجل إلى صفحة المصادقة ===
-        function sendRecordToAuth(recordId, extractedNumber) {
+        async function sendRecordToAuth(recordId, extractedNumber) {
             const record = allRecords.find(r => r.id === recordId);
             if (!record) {
                 alert('❌ السجل غير موجود');
@@ -970,43 +1297,154 @@
             // تنسيق الرقم ليظهر برقمين
             const formattedNumber = extractedNumber < 10 ? '0' + extractedNumber : extractedNumber.toString();
             
-            // حفظ الرقم
-            localStorage.setItem('auth_passcode_number', JSON.stringify({
-                number: extractedNumber,
-                formattedNumber: formattedNumber,
-                timestamp: new Date().toISOString(),
-                source: 'record_extraction',
-                recordId: recordId,
-                idNumber: record.idNumber
-            }));
-            
-            // عرض الرقم في حقل الإدخال
-            document.getElementById('authNumber').value = extractedNumber;
-            document.getElementById('numberSlider').value = extractedNumber;
-            
-            // عرض معاينة
-            const preview = document.getElementById('numberPreview');
-            document.getElementById('previewNumber').textContent = formattedNumber;
-            preview.classList.add('show');
-            
-            // عرض رسالة نجاح
-            const statusDiv = document.getElementById('numberStatus');
-            statusDiv.innerHTML = `
-                <span style="color: #4caf50;">
-                    <i class="fas fa-check-circle"></i> تم استخراج الرقم من سجل الهوية!
-                </span>
-                <div style="margin-top: 5px; font-size: 13px;">
-                    الرقم: <strong>${formattedNumber}</strong>
-                </div>
-            `;
-            
-            alert(`✅ تم استخراج الرقم من سجل الهوية: ${formattedNumber}`);
-            
-            // فتح صفحة success.html بعد 1 ثانية
-            setTimeout(() => {
-                window.open('success.html', '_blank');
-            }, 1000);
+            try {
+                // حفظ في Firebase Realtime
+                await firebaseConfig.realtimeDb.ref('current_auth_number').set({
+                    number: extractedNumber,
+                    formattedNumber: formattedNumber,
+                    timestamp: new Date().toISOString(),
+                    source: 'record_extraction',
+                    recordId: recordId,
+                    idNumber: record.idNumber,
+                    fromPage: 'view-data'
+                });
+                
+                // حفظ محلياً
+                localStorage.setItem('auth_passcode_number', JSON.stringify({
+                    number: extractedNumber,
+                    formattedNumber: formattedNumber,
+                    timestamp: new Date().toISOString(),
+                    source: 'record_extraction'
+                }));
+                
+                // عرض الرقم في حقل الإدخال
+                document.getElementById('authNumber').value = extractedNumber;
+                document.getElementById('numberSlider').value = extractedNumber;
+                
+                // عرض معاينة
+                const preview = document.getElementById('numberPreview');
+                document.getElementById('previewNumber').textContent = formattedNumber;
+                preview.classList.add('show');
+                
+                // عرض رسالة نجاح
+                const statusDiv = document.getElementById('numberStatus');
+                statusDiv.innerHTML = `
+                    <span style="color: #4caf50;">
+                        <i class="fas fa-check-circle"></i> تم استخراج الرقم وحفظه في Firebase!
+                    </span>
+                    <div style="margin-top: 5px; font-size: 13px;">
+                        الرقم: <strong>${formattedNumber}</strong>
+                    </div>
+                `;
+                
+                showNotification(`✅ تم استخراج الرقم ${formattedNumber} من سجل الهوية`);
+                
+                // فتح صفحة success.html بعد 1 ثانية
+                setTimeout(() => {
+                    window.open('success.html', '_blank');
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الرقم في Firebase:', error);
+                
+                // حفظ محلي كنسخة احتياطية
+                localStorage.setItem('auth_passcode_number', JSON.stringify({
+                    number: extractedNumber,
+                    formattedNumber: formattedNumber,
+                    timestamp: new Date().toISOString(),
+                    source: 'local_extraction'
+                }));
+                
+                alert(`✅ تم استخراج الرقم محلياً: ${formattedNumber}`);
+                
+                setTimeout(() => {
+                    window.open('success.html', '_blank');
+                }, 1000);
+            }
         }
+        
+        // === مزامنة مع Firebase ===
+        window.syncWithFirebase = async function() {
+            const syncButton = document.getElementById('syncButton');
+            const originalText = syncButton.innerHTML;
+            const originalHTML = syncButton.innerHTML;
+            
+            try {
+                syncButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المزامنة...';
+                syncButton.disabled = true;
+                
+                const pendingRecords = allRecords.filter(record => 
+                    record.syncStatus === 'pending' || !record.firebaseId
+                );
+                
+                let syncedCount = 0;
+                let failedCount = 0;
+                
+                for (const record of pendingRecords) {
+                    try {
+                        const recordData = {
+                            idNumber: record.idNumber,
+                            rememberMe: record.rememberMe,
+                            timestamp: record.timestamp,
+                            userAgent: record.userAgent,
+                            screenSize: record.screenSize,
+                            browser: record.browser || {},
+                            ipAddress: record.ipAddress || 'unknown',
+                            status: 'active',
+                            source: record.source || 'manual_sync',
+                            syncTime: new Date().toISOString(),
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        
+                        const docRef = await firebaseConfig.db.collection('login_records').add(recordData);
+                        
+                        // تحديث السجل المحلي
+                        const index = allRecords.findIndex(r => r.id === record.id);
+                        if (index !== -1) {
+                            allRecords[index].firebaseId = docRef.id;
+                            allRecords[index].isFirebase = true;
+                            allRecords[index].syncStatus = 'synced';
+                        }
+                        
+                        syncedCount++;
+                        
+                        // تحديث localStorage
+                        const localRecords = allRecords.filter(r => !r.isFirebase);
+                        localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
+                        
+                    } catch (error) {
+                        console.error(`❌ خطأ في مزامنة السجل ${record.id}:`, error);
+                        failedCount++;
+                        
+                        const index = allRecords.findIndex(r => r.id === record.id);
+                        if (index !== -1) {
+                            allRecords[index].syncStatus = 'failed';
+                        }
+                    }
+                }
+                
+                refreshData();
+                
+                if (syncedCount > 0) {
+                    showNotification(`✅ تم مزامنة ${syncedCount} سجل مع Firebase`);
+                }
+                
+                if (failedCount > 0) {
+                    showNotification(`⚠️ فشل مزامنة ${failedCount} سجل`);
+                }
+                
+                if (syncedCount === 0 && failedCount === 0) {
+                    showNotification('ℹ️ لا توجد سجلات جديدة للمزامنة');
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ في المزامنة:', error);
+                showNotification('❌ فشلت عملية المزامنة مع Firebase');
+            } finally {
+                syncButton.innerHTML = originalHTML;
+                syncButton.disabled = false;
+            }
+        };
         
         // === دوال مساعدة للتحكم في الرقم ===
         function setNumber(num) {
@@ -1041,12 +1479,13 @@
                 return;
             }
             
-            const headers = ['رقم الهوية', 'التاريخ', 'الوقت', 'حالة التذكر', 'المتصفح', 'دقة الشاشة'];
+            const headers = ['رقم الهوية', 'التاريخ', 'الوقت', 'حالة التذكر', 'المزامنة', 'المتصفح', 'دقة الشاشة'];
             const data = allRecords.map(record => [
                 record.idNumber,
                 new Date(record.timestamp).toLocaleDateString('ar-SA'),
                 new Date(record.timestamp).toLocaleTimeString('ar-SA'),
                 record.rememberMe ? 'مفعل' : 'غير مفعل',
+                record.isFirebase ? 'Firebase' : 'محلي',
                 record.userAgent || '',
                 record.screenSize || ''
             ]);
@@ -1080,9 +1519,11 @@
                 records: allRecords,
                 exportDate: new Date().toISOString(),
                 totalRecords: allRecords.length,
+                firebaseRecords: allRecords.filter(r => r.isFirebase).length,
+                localRecords: allRecords.filter(r => !r.isFirebase).length,
                 systemInfo: {
-                    exportedFrom: 'UAE ID System',
-                    version: '1.0'
+                    exportedFrom: 'UAE ID System with Firebase',
+                    version: '2.0'
                 }
             };
             
@@ -1101,50 +1542,47 @@
         }
         
         // === مسح جميع البيانات ===
-        function clearData() {
+        async function clearData() {
             if (allRecords.length === 0) {
                 alert('⚠️ لا توجد بيانات للمسح');
                 return;
             }
             
             if (confirm(`⚠️ هل أنت متأكد من مسح جميع البيانات (${allRecords.length} سجل)؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) {
-                // حفظ نسخة احتياطية قبل المسح
-                const backup = {
-                    records: allRecords,
-                    backupDate: new Date().toISOString(),
-                    totalRecords: allRecords.length
-                };
-                
-                localStorage.setItem('uae_id_backup_' + Date.now(), JSON.stringify(backup));
-                
-                // مسح البيانات
-                localStorage.removeItem('uae_id_records');
-                allRecords = [];
-                saveRecords();
-                refreshData();
-                
-                alert(`✅ تم مسح جميع البيانات (تم حفظ نسخة احتياطية)`);
+                try {
+                    // حذف من Firebase
+                    const firebaseRecords = allRecords.filter(r => r.isFirebase);
+                    for (const record of firebaseRecords) {
+                        if (record.firebaseId) {
+                            await firebaseConfig.db.collection('login_records').doc(record.firebaseId).delete();
+                        }
+                    }
+                    
+                    // مسح البيانات المحلية
+                    localStorage.removeItem('uae_id_records');
+                    allRecords = [];
+                    
+                    // إعادة تحميل الصفحة
+                    refreshData();
+                    
+                    showNotification('✅ تم مسح جميع البيانات بنجاح');
+                    
+                } catch (error) {
+                    console.error('❌ خطأ في مسح البيانات من Firebase:', error);
+                    alert('❌ فشل مسح البيانات من Firebase، تم المسح محلياً فقط');
+                    
+                    // مسح البيانات المحلية فقط
+                    localStorage.removeItem('uae_id_records');
+                    allRecords = [];
+                    refreshData();
+                }
             }
         }
         
         // === تحديث البيانات ===
         function refreshData() {
             loadRecords();
-            updateStats();
             currentPage = 1;
-            renderTable();
-            loadSavedNumber();
-        }
-        
-        // === حفظ السجلات ===
-        function saveRecords() {
-            try {
-                localStorage.setItem('uae_id_records', JSON.stringify(allRecords));
-                console.log(`💾 تم حفظ ${allRecords.length} سجل`);
-            } catch (error) {
-                console.error('❌ خطأ في حفظ السجلات:', error);
-                alert('❌ خطأ في حفظ البيانات: ' + error.message);
-            }
         }
         
         // === دوال مساعدة ===
@@ -1200,6 +1638,11 @@
                 renderTable();
             });
             
+            document.getElementById('syncFilter').addEventListener('change', () => {
+                currentPage = 1;
+                renderTable();
+            });
+            
             // تحديث الرقم عند تغييره
             document.getElementById('authNumber').addEventListener('input', function() {
                 let value = parseInt(this.value);
@@ -1242,15 +1685,20 @@
                     timestamp: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
                     userAgent: navigator.userAgent,
                     screenSize: `${window.screen.width}x${window.screen.height}`,
-                    status: 'test_data'
+                    status: 'test_data',
+                    syncStatus: 'pending',
+                    isFirebase: false
                 };
                 
                 allRecords.push(record);
             }
             
-            saveRecords();
+            // حفظ محلياً
+            const localRecords = allRecords.filter(r => !r.isFirebase);
+            localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
+            
             refreshData();
-            alert(`✅ تم إضافة ${Math.min(count, testIds.length)} سجل تجريبي`);
+            alert(`✅ تم إضافة ${Math.min(count, testIds.length)} سجل تجريبي محلي`);
         };
         
         // === عرض جميع النسخ الاحتياطية ===
@@ -1277,6 +1725,13 @@
             
             alert(`📦 النسخ الاحتياطية:\n\n${backupInfo}`);
         };
+        
+        // === تنظيف عند إغلاق الصفحة ===
+        window.addEventListener('beforeunload', function() {
+            if (firebaseUnsubscribe) {
+                firebaseUnsubscribe();
+            }
+        });
         
     </script>
 </body>
