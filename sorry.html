@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>UAE PASS - Error</title>
+    <style>
+        /* Bootstrap core styles (extracted from your file) */
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        
+        :after, :before {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            background-color: whitesmoke;
+        }
+        
+        .container {
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                width: 750px;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .container {
+                width: 970px;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .container {
+                width: 1170px;
+            }
+        }
+        
+        .row {
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+        
+        .col {
+            position: relative;
+            min-height: 1px;
+            padding-right: 15px;
+            padding-left: 15px;
+            float: left;
+            width: 100%;
+        }
+        
+        .col-12 {
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .col-md-8 {
+                width: 66.66666667%;
+            }
+            .col-md-6 {
+                width: 50%;
+            }
+            .col-md-4 {
+                width: 33.33333333%;
+            }
+        }
+        
+        .d-flex {
+            display: flex !important;
+        }
+        
+        .flex-column {
+            flex-direction: column !important;
+        }
+        
+        .m-auto {
+            margin: auto !important;
+        }
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .mt-5 {
+            margin-top: 3rem !important;
+        }
+        
+        .pt-5 {
+            padding-top: 3rem !important;
+        }
+        
+        .pb-5 {
+            padding-bottom: 3rem !important;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175) !important;
+        }
+        
+        .p-3 {
+            padding: 1rem !important;
+        }
+        
+        .p-5 {
+            padding: 3rem !important;
+        }
+        
+        .bg-white {
+            background-color: #fff !important;
+        }
+        
+        .rounded {
+            border-radius: 0.25rem !important;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-bottom: 0;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.5;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-image: none;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+        }
+        
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+            color: #fff;
+            background-color: #286090;
+            border-color: #204d74;
+            text-decoration: none;
+        }
+        
+        /* Custom styles */
+        .rectangle {
+            height: 35px;
+            border-radius: 2px;
+            width: 100%;
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#42e198', endColorstr='#0D98BA',GradientType=1); 
+            -ms-filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#42e198, endColorstr=#0D98BA);
+            background-image: linear-gradient(274deg, #0D98BA, #42e198);
+        }
+        
+        .uaepasslogo {
+            height: 35px;
+            object-fit: contain;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 10px;
+        }
+        
+        .error-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.49px;
+            text-align: center;
+            color: #eb6d72;
+            margin-bottom: 1rem;
+        }
+        
+        .error-description {
+            font-size: 1.4rem;
+            font-weight: 500;
+            line-height: 1.6;
+            color: #78849e;
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .error-detail {
+            font-size: 1.1rem;
+            font-weight: 400;
+            line-height: 1.6;
+            color: #666;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .error-img {
+            max-width: 300px;
+            width: 100%;
+            object-fit: contain;
+            margin-bottom: 2rem;
+        }
+        
+        /* Custom design adjustments */
+        .main-content {
+            margin: 24px !important;
+            padding: 32px !important;
+            border-radius: 12px !important;
+            max-width: 800px;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            max-width: 250px;
+            background-color: #78849e;
+            border-color: #78849e;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+            background-color: #99a2b4;
+            border-color: #99a2b4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 16px !important;
+                padding: 24px !important;
+            }
+            
+            .error-title {
+                font-size: 2rem;
+            }
+            
+            .error-description {
+                font-size: 1.2rem;
+            }
+            
+            .error-img {
+                max-width: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                margin: 12px !important;
+                padding: 20px !important;
+            }
+            
+            .error-title {
+                font-size: 1.8rem;
+            }
+            
+            .error-description {
+                font-size: 1.1rem;
+            }
+            
+            .error-img {
+                max-width: 200px;
+            }
+        }
+        
+        /* Footer styling */
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            color: #78849e;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: #0D98BA;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top gradient bar with logo -->
+    <div class="rectangle">
+        <img class="uaepasslogo" src="404-error.png" alt="UAE PASS Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x35/0D98BA/FFFFFF?text=UAE+PASS';" />
+    </div>
+    
+    <!-- Main content -->
+    <div class="container mt-5">
+        <div class="row d-flex">
+            <div class="col-12">
+                <div class="flex-column m-auto shadow-lg bg-white rounded main-content">
+                    <div class="error-title">Sorry!</div>
+                    <div class="error-description">Looks like something went wrong at our end.</div>
+                    
+                    <div class="error-detail">
+                        We're working to fix the issue. Please try again later or contact support if the problem persists.
+                    </div>
+
+                    <!-- Error image from GitHub repository -->
+                    <div class="text-center pt-2">
+                        <img class="error-img" src="404-error.png" alt="404 Error Illustration" 
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200/78849e/FFFFFF?text=404+Error';" />
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <div class="text-center pb-3">
+                        <a class="btn btn-primary" href="https://uaepass.ae">Back to Home</a>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a class="btn" href="#" style="background-color: #f8f9fa; color: #78849e; border: 1px solid #ddd;" onclick="window.location.reload(); return false;">
+                            Try Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>UAE PASS - The UAE's national digital identity platform</p>
+            <p>Need help? <a href="https://uaepass.ae/en/contact-us">Contact Support</a> | <a href="https://uaepass.ae/en/faq">FAQ</a></p>
+            <p>© 2024 UAE PASS. All rights reserved.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Simple JavaScript for error handling and user interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('UAE PASS Error Page Loaded');
+            
+            // Add click event to Try Again button
+            document.querySelector('.btn-primary').addEventListener('click', function(e) {
+                console.log('Back to Home clicked');
+                // You can add additional tracking or logic here
+            });
+            
+            // Check if images loaded successfully
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    console.log('Image failed to load: ' + this.src);
+                });
+                
+                img.addEventListener('load', function() {
+                    console.log('Image loaded successfully: ' + this.src);
+                });
+            });
+            
+            // Optional: Add a simple fade-in animation
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+        
+        // Function to handle Try Again button click
+        function tryAgain() {
+            console.log('Trying again...');
+            // You could add logic to retry the failed action here
+            alert('Please try again. If the problem persists, contact support.');
+        }
+    </script>
+</body>
+</html>
