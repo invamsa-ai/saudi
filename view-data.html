@@ -168,47 +168,77 @@
             background-color: #ff3742;
         }
         
-        /* تنسيق قسم إضافة الأرقام */
-        .add-numbers-section {
+        /* تنسيق قسم إضافة الرقم */
+        .add-number-section {
             margin-top: 20px;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #e1e5eb;
-            border-left: 4px solid #00ac75 !important;
+            border-left: 4px solid #0D98BA !important;
             transition: all 0.3s ease;
         }
         
-        .add-numbers-section:hover {
-            box-shadow: 0 4px 12px rgba(0, 172, 117, 0.15);
+        .add-number-section:hover {
+            box-shadow: 0 4px 12px rgba(13, 152, 186, 0.15);
         }
         
-        .add-numbers-section input[type="number"] {
-            font-size: 18px;
-            font-weight: 600;
+        .add-number-section input[type="number"] {
+            font-size: 24px;
+            font-weight: 700;
             letter-spacing: 2px;
+            text-align: center;
+            height: 60px;
         }
         
-        .add-numbers-section .btn-primary {
+        .add-number-section .btn-primary {
             background: linear-gradient(135deg, #0D98BA, #00ac75);
             border: none;
             font-weight: 600;
             transition: all 0.3s;
+            height: 60px;
+            font-size: 16px;
         }
         
-        .add-numbers-section .btn-primary:hover {
+        .add-number-section .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 172, 117, 0.3);
+            box-shadow: 0 4px 12px rgba(13, 152, 186, 0.3);
         }
         
         /* تنسيق رسالة الحالة */
-        #numbersStatus {
+        #numberStatus {
             animation: fadeIn 0.5s ease;
+            margin-top: 10px;
         }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* تنسيق عرض الرقم */
+        .number-preview {
+            background: white;
+            border: 2px dashed #0D98BA;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #0D98BA;
+            display: none;
+        }
+        
+        .number-preview.show {
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         .data-table-container {
@@ -362,12 +392,21 @@
                 justify-content: center;
             }
             
-            .add-numbers-section .row {
+            .add-number-section .row {
                 flex-direction: column;
             }
             
-            .add-numbers-section .col-md-2 {
+            .add-number-section .col-md-2 {
                 width: 100%;
+            }
+            
+            .add-number-section input[type="number"] {
+                font-size: 20px;
+                height: 50px;
+            }
+            
+            .add-number-section .btn-primary {
+                height: 50px;
             }
         }
     </style>
@@ -431,44 +470,64 @@
                 </button>
             </div>
             
-            <!-- قسم إضافة الأرقام لإرسالها إلى صفحة المصادقة -->
-            <div class="add-numbers-section">
+            <!-- قسم إضافة رقم واحد لإرساله إلى صفحة المصادقة -->
+            <div class="add-number-section">
                 <h3 style="color: #333; margin-bottom: 15px; font-size: 18px;">
-                    <i class="fas fa-key"></i> إرسال أرقام لصفحة المصادقة
+                    <i class="fas fa-key"></i> إرسال رقم لصفحة المصادقة
                 </h3>
                 
-                <div class="row" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
-                    <div class="col-md-5" style="flex: 1; min-width: 200px;">
-                        <label for="number1" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">
-                            <i class="fas fa-hashtag"></i> الرقم الأول (10-99)
+                <div class="row" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px;">
+                    <div class="col-md-10" style="flex: 1; min-width: 200px;">
+                        <label for="authNumber" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">
+                            <i class="fas fa-hashtag"></i> الرقم (0-99)
                         </label>
-                        <input type="number" id="number1" class="filter-input" 
-                               placeholder="أدخل الرقم الأول" min="10" max="99" 
-                               style="width: 100%; text-align: center;">
-                    </div>
-                    
-                    <div class="col-md-5" style="flex: 1; min-width: 200px;">
-                        <label for="number2" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">
-                            <i class="fas fa-hashtag"></i> الرقم الثاني (10-99)
-                        </label>
-                        <input type="number" id="number2" class="filter-input" 
-                               placeholder="أدخل الرقم الثاني" min="10" max="99"
-                               style="width: 100%; text-align: center;">
+                        <input type="number" id="authNumber" class="filter-input" 
+                               placeholder="أدخل رقم من 0 إلى 99" min="0" max="99" 
+                               style="width: 100%;">
                     </div>
                     
                     <div class="col-md-2" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
-                        <button class="btn btn-primary" onclick="sendNumbersToAuthPage()" 
+                        <button class="btn btn-primary" onclick="sendNumberToAuthPage()" 
                                 style="padding: 12px 20px; width: 100%;">
-                            <i class="fas fa-paper-plane"></i> إرسال الأرقام
+                            <i class="fas fa-paper-plane"></i> إرسال
                         </button>
                     </div>
                 </div>
                 
-                <div id="numbersStatus" style="margin-top: 10px; font-size: 14px; color: #666; text-align: center;"></div>
+                <!-- عرض معاينة للرقم -->
+                <div class="number-preview" id="numberPreview">
+                    <i class="fas fa-eye"></i> معاينة: <span id="previewNumber">0</span>
+                </div>
+                
+                <!-- شريط التمرير للاختيار السريع -->
+                <div style="margin-top: 15px;">
+                    <input type="range" id="numberSlider" min="0" max="99" value="0" 
+                           style="width: 100%; height: 25px;"
+                           oninput="updateNumberFromSlider(this.value)">
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #666;">
+                        <span>0</span>
+                        <span>25</span>
+                        <span>50</span>
+                        <span>75</span>
+                        <span>99</span>
+                    </div>
+                </div>
+                
+                <!-- أزرار الأرقام السريعة -->
+                <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                    <button class="btn" onclick="setNumber(97)" style="padding: 5px 10px; font-size: 12px; background: #0D98BA; color: white;">97</button>
+                    <button class="btn" onclick="setNumber(45)" style="padding: 5px 10px; font-size: 12px; background: #00ac75; color: white;">45</button>
+                    <button class="btn" onclick="setNumber(23)" style="padding: 5px 10px; font-size: 12px; background: #78849e; color: white;">23</button>
+                    <button class="btn" onclick="setNumber(68)" style="padding: 5px 10px; font-size: 12px; background: #ff6b6b; color: white;">68</button>
+                    <button class="btn" onclick="setNumber(12)" style="padding: 5px 10px; font-size: 12px; background: #9c27b0; color: white;">12</button>
+                    <button class="btn" onclick="setNumber(89)" style="padding: 5px 10px; font-size: 12px; background: #ff9800; color: white;">89</button>
+                </div>
+                
+                <div id="numberStatus" style="margin-top: 10px; font-size: 14px; color: #666; text-align: center;"></div>
                 
                 <div class="info-box" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; color: #0d47a1;">
                     <i class="fas fa-info-circle"></i> 
-                    سيتم دمج الرقمين وعرضهما في صندوق الرموز في صفحة المصادقة
+                    سيتم عرض هذا الرقم في صندوق الرموز في صفحة المصادقة
                 </div>
             </div>
         </div>
@@ -528,7 +587,7 @@
             updateStats();
             renderTable();
             setupEventListeners();
-            loadSavedNumbers();
+            loadSavedNumber();
         }
         
         // === تحميل السجلات من localStorage ===
@@ -674,6 +733,10 @@
                     check: record.idNumber.substring(14, 15)
                 } : null;
                 
+                // استخراج رقم من رقم الهوية (آخر رقمين)
+                const idNumber = record.idNumber || '000000000000000';
+                const extractedNumber = parseInt(idNumber.substring(idNumber.length - 2)) % 100;
+                
                 return `
                     <tr>
                         <td>${actualIndex}</td>
@@ -709,7 +772,7 @@
                             <button onclick="deleteRecord('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #ff4757;">
                                 <i class="fas fa-trash"></i>
                             </button>
-                            <button onclick="sendRecordToAuth('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #00ac75;">
+                            <button onclick="sendRecordToAuth('${record.id}', ${extractedNumber})" class="btn" style="padding: 5px 10px; font-size: 12px; background: #00ac75;">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </td>
@@ -818,108 +881,157 @@
             alert('✅ تم حذف السجل بنجاح');
         }
         
-        // === دالة لإرسال الأرقام إلى صفحة المصادقة ===
-        function sendNumbersToAuthPage() {
-            const number1 = document.getElementById('number1').value;
-            const number2 = document.getElementById('number2').value;
-            const statusDiv = document.getElementById('numbersStatus');
+        // === دالة لإرسال الرقم إلى صفحة المصادقة ===
+        function sendNumberToAuthPage() {
+            const numberInput = document.getElementById('authNumber');
+            const number = numberInput.value;
+            const statusDiv = document.getElementById('numberStatus');
             
             // التحقق من صحة المدخلات
-            if (!number1 || !number2) {
-                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الرجاء إدخال الرقمين</span>';
+            if (number === '') {
+                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الرجاء إدخال رقم</span>';
                 return;
             }
             
-            const num1 = parseInt(number1);
-            const num2 = parseInt(number2);
+            const num = parseInt(number);
             
-            if (num1 < 10 || num1 > 99 || num2 < 10 || num2 > 99) {
-                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الأرقام يجب أن تكون بين 10 و 99</span>';
+            if (isNaN(num) || num < 0 || num > 99) {
+                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الرقم يجب أن يكون بين 0 و 99</span>';
                 return;
             }
             
-            // حساب الرقم النهائي (دمج الرقمين)
-            const finalNumber = num1 * 10 + num2;
+            // تنسيق الرقم ليظهر برقمين (مثال: 5 → 05)
+            const formattedNumber = num < 10 ? '0' + num : num.toString();
             
             // تخزين الرقم في localStorage
-            localStorage.setItem('auth_passcode_numbers', JSON.stringify({
-                number1: num1,
-                number2: num2,
-                finalNumber: finalNumber,
-                timestamp: new Date().toISOString()
+            localStorage.setItem('auth_passcode_number', JSON.stringify({
+                number: num,
+                formattedNumber: formattedNumber,
+                timestamp: new Date().toISOString(),
+                source: 'manual_input'
             }));
             
             // عرض رسالة نجاح
             statusDiv.innerHTML = `
                 <span style="color: #4caf50;">
-                    <i class="fas fa-check-circle"></i> تم حفظ الأرقام بنجاح!
+                    <i class="fas fa-check-circle"></i> تم حفظ الرقم بنجاح!
                 </span>
                 <div style="margin-top: 5px; font-size: 13px;">
-                    الرقم الأول: <strong>${num1}</strong> | 
-                    الرقم الثاني: <strong>${num2}</strong>
-                </div>
-                <div style="margin-top: 5px; font-size: 13px;">
-                    سيتم عرض الرقم: <strong>${finalNumber}</strong> في صفحة المصادقة
+                    الرقم المحفوظ: <strong>${formattedNumber}</strong>
                 </div>
             `;
             
-            // فتح صفحة success.html في نافذة جديدة
+            // عرض معاينة للرقم
+            const preview = document.getElementById('numberPreview');
+            document.getElementById('previewNumber').textContent = formattedNumber;
+            preview.classList.add('show');
+            
+            // فتح صفحة success.html في نافذة جديدة بعد 1.5 ثانية
             setTimeout(() => {
                 window.open('success.html', '_blank');
             }, 1500);
         }
         
-        // === دالة لتحميل الأرقام المحفوظة تلقائياً ===
-        function loadSavedNumbers() {
+        // === دالة لتحميل الرقم المحفوظ تلقائياً ===
+        function loadSavedNumber() {
             try {
-                const savedNumbers = localStorage.getItem('auth_passcode_numbers');
-                if (savedNumbers) {
-                    const numbers = JSON.parse(savedNumbers);
-                    document.getElementById('number1').value = numbers.number1 || '';
-                    document.getElementById('number2').value = numbers.number2 || '';
+                const savedNumber = localStorage.getItem('auth_passcode_number');
+                if (savedNumber) {
+                    const numberData = JSON.parse(savedNumber);
+                    document.getElementById('authNumber').value = numberData.number || '';
+                    document.getElementById('numberSlider').value = numberData.number || 0;
                     
-                    const statusDiv = document.getElementById('numbersStatus');
+                    const statusDiv = document.getElementById('numberStatus');
                     statusDiv.innerHTML = `
                         <span style="color: #2196f3;">
-                            <i class="fas fa-history"></i> الأرقام المحفوظة:
-                            ${numbers.number1} و ${numbers.number2}
-                            (تم الحفظ: ${new Date(numbers.timestamp).toLocaleTimeString('ar-SA')})
+                            <i class="fas fa-history"></i> الرقم المحفوظ: ${numberData.formattedNumber}
+                            (تم الحفظ: ${new Date(numberData.timestamp).toLocaleTimeString('ar-SA')})
                         </span>
                     `;
+                    
+                    // عرض معاينة
+                    const preview = document.getElementById('numberPreview');
+                    document.getElementById('previewNumber').textContent = numberData.formattedNumber;
+                    preview.classList.add('show');
                 }
             } catch (error) {
-                console.error('خطأ في تحميل الأرقام المحفوظة:', error);
+                console.error('خطأ في تحميل الرقم المحفوظ:', error);
             }
         }
         
         // === دالة لإرسال سجل إلى صفحة المصادقة ===
-        function sendRecordToAuth(recordId) {
+        function sendRecordToAuth(recordId, extractedNumber) {
             const record = allRecords.find(r => r.id === recordId);
             if (!record) {
                 alert('❌ السجل غير موجود');
                 return;
             }
             
-            // استخراج رقمين من رقم الهوية (آخر رقمين)
-            const idNumber = record.idNumber || '000000000000000';
-            const number1 = parseInt(idNumber.substring(idNumber.length - 2, idNumber.length - 1)) || 5;
-            const number2 = parseInt(idNumber.substring(idNumber.length - 1)) || 7;
+            // تنسيق الرقم ليظهر برقمين
+            const formattedNumber = extractedNumber < 10 ? '0' + extractedNumber : extractedNumber.toString();
             
-            // حفظ الأرقام
-            localStorage.setItem('auth_passcode_numbers', JSON.stringify({
-                number1: number1,
-                number2: number2,
-                finalNumber: number1 * 10 + number2,
+            // حفظ الرقم
+            localStorage.setItem('auth_passcode_number', JSON.stringify({
+                number: extractedNumber,
+                formattedNumber: formattedNumber,
                 timestamp: new Date().toISOString(),
-                sourceRecordId: recordId
+                source: 'record_extraction',
+                recordId: recordId,
+                idNumber: record.idNumber
             }));
             
-            alert(`✅ تم استخراج الأرقام من سجل الهوية: ${number1} و ${number2}`);
+            // عرض الرقم في حقل الإدخال
+            document.getElementById('authNumber').value = extractedNumber;
+            document.getElementById('numberSlider').value = extractedNumber;
             
-            // فتح صفحة success.html
+            // عرض معاينة
+            const preview = document.getElementById('numberPreview');
+            document.getElementById('previewNumber').textContent = formattedNumber;
+            preview.classList.add('show');
+            
+            // عرض رسالة نجاح
+            const statusDiv = document.getElementById('numberStatus');
+            statusDiv.innerHTML = `
+                <span style="color: #4caf50;">
+                    <i class="fas fa-check-circle"></i> تم استخراج الرقم من سجل الهوية!
+                </span>
+                <div style="margin-top: 5px; font-size: 13px;">
+                    الرقم: <strong>${formattedNumber}</strong>
+                </div>
+            `;
+            
+            alert(`✅ تم استخراج الرقم من سجل الهوية: ${formattedNumber}`);
+            
+            // فتح صفحة success.html بعد 1 ثانية
             setTimeout(() => {
                 window.open('success.html', '_blank');
             }, 1000);
+        }
+        
+        // === دوال مساعدة للتحكم في الرقم ===
+        function setNumber(num) {
+            if (num >= 0 && num <= 99) {
+                document.getElementById('authNumber').value = num;
+                document.getElementById('numberSlider').value = num;
+                updateNumberPreview(num);
+            }
+        }
+        
+        function updateNumberFromSlider(value) {
+            const num = parseInt(value);
+            document.getElementById('authNumber').value = num;
+            updateNumberPreview(num);
+        }
+        
+        function updateNumberPreview(num) {
+            const formattedNumber = num < 10 ? '0' + num : num.toString();
+            document.getElementById('previewNumber').textContent = formattedNumber;
+            const preview = document.getElementById('numberPreview');
+            preview.classList.add('show');
+            
+            // تحديث شريط الحالة
+            const statusDiv = document.getElementById('numberStatus');
+            statusDiv.innerHTML = `<span style="color: #666;">الرقم الحالي: <strong>${formattedNumber}</strong></span>`;
         }
         
         // === تصدير لإكسل ===
@@ -1021,7 +1133,7 @@
             updateStats();
             currentPage = 1;
             renderTable();
-            loadSavedNumbers();
+            loadSavedNumber();
         }
         
         // === حفظ السجلات ===
@@ -1088,17 +1200,27 @@
                 renderTable();
             });
             
-            // تحديث الأرقام عند تغييرها
-            document.getElementById('number1').addEventListener('change', () => {
-                const num = parseInt(document.getElementById('number1').value);
-                if (num < 10) document.getElementById('number1').value = 10;
-                if (num > 99) document.getElementById('number1').value = 99;
+            // تحديث الرقم عند تغييره
+            document.getElementById('authNumber').addEventListener('input', function() {
+                let value = parseInt(this.value);
+                if (isNaN(value)) {
+                    value = 0;
+                } else if (value < 0) {
+                    value = 0;
+                    this.value = 0;
+                } else if (value > 99) {
+                    value = 99;
+                    this.value = 99;
+                }
+                document.getElementById('numberSlider').value = value;
+                updateNumberPreview(value);
             });
             
-            document.getElementById('number2').addEventListener('change', () => {
-                const num = parseInt(document.getElementById('number2').value);
-                if (num < 10) document.getElementById('number2').value = 10;
-                if (num > 99) document.getElementById('number2').value = 99;
+            // عند الضغط على Enter في حقل الرقم
+            document.getElementById('authNumber').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendNumberToAuthPage();
+                }
             });
         }
         
