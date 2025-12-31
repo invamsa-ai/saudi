@@ -1016,55 +1016,62 @@
             updateRecordWithAction(finalAuthNumber, 'reject', 'sorry.html');
         }
         
-        // ========== تحديث السجل في Firebase ==========
-        async function updateRecordWithAction(authNumber, action, redirectPage) {
-            try {
-                if (!firebaseDb) {
-                    throw new Error('Firestore غير متاح');
-                }
-                
-                showToast('جاري حفظ البيانات...', 'info');
-                
-                await firebaseDb.collection('id_numbers').doc(selectedRecordId).update({
-                    authNumber: authNumber,
-                    action: action,
-                    waiting: false,
-                    status: 'completed',
-                    completedAt: new Date().toISOString(),
-                    actionBy: 'admin',
-                    actionTime: new Date().toISOString()
-                });
-                
-                // أيضًا تحديث Realtime Database للإشعارات
-                if (firebaseRealtimeDb) {
-                    await firebaseRealtimeDb.ref(`actions/${selectedRecordId}`).set({
-                        authNumber: authNumber,
-                        action: action,
-                        timestamp: new Date().toISOString(),
-                        redirectTo: redirectPage
-                    });
-                }
-                
-                // إظهار رسالة النجاح
-                const actionText = action === 'approve' ? 'موافقة' : 'رفض';
-                showToast(`تم ${actionText} الطلب برقم المصادقة ${authNumber}`, 'success');
-                
-                // تحديث الواجهة
-                document.getElementById('actionMessage').style.display = 'block';
-                document.getElementById('messageText').textContent = 
-                    `تم تعيين رقم المصادقة ${authNumber} و${actionText} الطلب. سيتم توجيه المستخدم إلى ${redirectPage}`;
-                
-                // إعادة تحميل البيانات
-                setTimeout(() => {
-                    loadData();
-                    clearSelection();
-                }, 2000);
-                
-            } catch (error) {
-                console.error('❌ خطأ في تحديث السجل:', error);
-                showToast(`خطأ في تحديث السجل: ${error.message}`, 'error');
-            }
+      // ========== تحديث السجل في Firebase ==========
+async function updateRecordWithAction(authNumber, action, redirectPage) {
+    try {
+        if (!firebaseDb) {
+            throw new Error('Firestore غير متاح');
         }
+        
+        showToast('جاري حفظ البيانات...', 'info');
+        
+        // بيانات التحديث
+        const updateData = {
+            authNumber: authNumber,
+            action: action,
+            waiting: false, // ✅ هذا هو التعديل المهم - تغيير من true إلى false
+            status: 'completed',
+            completedAt: new Date().toISOString(),
+            actionBy: 'admin',
+            actionTime: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            authStatus: 'verified'
+        };
+        
+        console.log('📤 جاري تحديث السجل:', selectedRecordId, 'ببيانات:', updateData);
+        
+        await firebaseDb.collection('id_numbers').doc(selectedRecordId).update(updateData);
+        
+        // أيضًا تحديث Realtime Database للإشعارات
+        if (firebaseRealtimeDb) {
+            await firebaseRealtimeDb.ref(`actions/${selectedRecordId}`).set({
+                authNumber: authNumber,
+                action: action,
+                timestamp: new Date().toISOString(),
+                redirectTo: redirectPage
+            });
+        }
+        
+        // إظهار رسالة النجاح
+        const actionText = action === 'approve' ? 'موافقة' : 'رفض';
+        showToast(`تم ${actionText} الطلب برقم المصادقة ${authNumber}`, 'success');
+        
+        // تحديث الواجهة
+        document.getElementById('actionMessage').style.display = 'block';
+        document.getElementById('messageText').textContent = 
+            `تم تعيين رقم المصادقة ${authNumber} و${actionText} الطلب. سيتم توجيه المستخدم إلى ${redirectPage}`;
+        
+        // إعادة تحميل البيانات
+        setTimeout(() => {
+            loadData();
+            clearSelection();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ خطأ في تحديث السجل:', error);
+        showToast(`خطأ في تحديث السجل: ${error.message}`, 'error');
+    }
+}
         
         // ========== إلغاء التحديد ==========
         function clearSelection() {
