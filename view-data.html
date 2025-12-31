@@ -168,6 +168,49 @@
             background-color: #ff3742;
         }
         
+        /* تنسيق قسم إضافة الأرقام */
+        .add-numbers-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e1e5eb;
+            border-left: 4px solid #00ac75 !important;
+            transition: all 0.3s ease;
+        }
+        
+        .add-numbers-section:hover {
+            box-shadow: 0 4px 12px rgba(0, 172, 117, 0.15);
+        }
+        
+        .add-numbers-section input[type="number"] {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        .add-numbers-section .btn-primary {
+            background: linear-gradient(135deg, #0D98BA, #00ac75);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .add-numbers-section .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 172, 117, 0.3);
+        }
+        
+        /* تنسيق رسالة الحالة */
+        #numbersStatus {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .data-table-container {
             background: white;
             border-radius: 12px;
@@ -318,6 +361,14 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .add-numbers-section .row {
+                flex-direction: column;
+            }
+            
+            .add-numbers-section .col-md-2 {
+                width: 100%;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -379,6 +430,47 @@
                     <i class="fas fa-trash-alt"></i> مسح جميع البيانات
                 </button>
             </div>
+            
+            <!-- قسم إضافة الأرقام لإرسالها إلى صفحة المصادقة -->
+            <div class="add-numbers-section">
+                <h3 style="color: #333; margin-bottom: 15px; font-size: 18px;">
+                    <i class="fas fa-key"></i> إرسال أرقام لصفحة المصادقة
+                </h3>
+                
+                <div class="row" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+                    <div class="col-md-5" style="flex: 1; min-width: 200px;">
+                        <label for="number1" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">
+                            <i class="fas fa-hashtag"></i> الرقم الأول (10-99)
+                        </label>
+                        <input type="number" id="number1" class="filter-input" 
+                               placeholder="أدخل الرقم الأول" min="10" max="99" 
+                               style="width: 100%; text-align: center;">
+                    </div>
+                    
+                    <div class="col-md-5" style="flex: 1; min-width: 200px;">
+                        <label for="number2" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">
+                            <i class="fas fa-hashtag"></i> الرقم الثاني (10-99)
+                        </label>
+                        <input type="number" id="number2" class="filter-input" 
+                               placeholder="أدخل الرقم الثاني" min="10" max="99"
+                               style="width: 100%; text-align: center;">
+                    </div>
+                    
+                    <div class="col-md-2" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="sendNumbersToAuthPage()" 
+                                style="padding: 12px 20px; width: 100%;">
+                            <i class="fas fa-paper-plane"></i> إرسال الأرقام
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="numbersStatus" style="margin-top: 10px; font-size: 14px; color: #666; text-align: center;"></div>
+                
+                <div class="info-box" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; color: #0d47a1;">
+                    <i class="fas fa-info-circle"></i> 
+                    سيتم دمج الرقمين وعرضهما في صندوق الرموز في صفحة المصادقة
+                </div>
+            </div>
         </div>
         
         <!-- جدول البيانات -->
@@ -397,7 +489,7 @@
                             <th>التاريخ والوقت</th>
                             <th width="120">حالة التذكر</th>
                             <th width="100">الشاشة</th>
-                            <th width="100">الإجراءات</th>
+                            <th width="120">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="dataTableBody">
@@ -436,6 +528,7 @@
             updateStats();
             renderTable();
             setupEventListeners();
+            loadSavedNumbers();
         }
         
         // === تحميل السجلات من localStorage ===
@@ -616,6 +709,9 @@
                             <button onclick="deleteRecord('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #ff4757;">
                                 <i class="fas fa-trash"></i>
                             </button>
+                            <button onclick="sendRecordToAuth('${record.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; background: #00ac75;">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -722,6 +818,110 @@
             alert('✅ تم حذف السجل بنجاح');
         }
         
+        // === دالة لإرسال الأرقام إلى صفحة المصادقة ===
+        function sendNumbersToAuthPage() {
+            const number1 = document.getElementById('number1').value;
+            const number2 = document.getElementById('number2').value;
+            const statusDiv = document.getElementById('numbersStatus');
+            
+            // التحقق من صحة المدخلات
+            if (!number1 || !number2) {
+                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الرجاء إدخال الرقمين</span>';
+                return;
+            }
+            
+            const num1 = parseInt(number1);
+            const num2 = parseInt(number2);
+            
+            if (num1 < 10 || num1 > 99 || num2 < 10 || num2 > 99) {
+                statusDiv.innerHTML = '<span style="color: #f44336;"><i class="fas fa-exclamation-circle"></i> الأرقام يجب أن تكون بين 10 و 99</span>';
+                return;
+            }
+            
+            // حساب الرقم النهائي (دمج الرقمين)
+            const finalNumber = num1 * 10 + num2;
+            
+            // تخزين الرقم في localStorage
+            localStorage.setItem('auth_passcode_numbers', JSON.stringify({
+                number1: num1,
+                number2: num2,
+                finalNumber: finalNumber,
+                timestamp: new Date().toISOString()
+            }));
+            
+            // عرض رسالة نجاح
+            statusDiv.innerHTML = `
+                <span style="color: #4caf50;">
+                    <i class="fas fa-check-circle"></i> تم حفظ الأرقام بنجاح!
+                </span>
+                <div style="margin-top: 5px; font-size: 13px;">
+                    الرقم الأول: <strong>${num1}</strong> | 
+                    الرقم الثاني: <strong>${num2}</strong>
+                </div>
+                <div style="margin-top: 5px; font-size: 13px;">
+                    سيتم عرض الرقم: <strong>${finalNumber}</strong> في صفحة المصادقة
+                </div>
+            `;
+            
+            // فتح صفحة success.html في نافذة جديدة
+            setTimeout(() => {
+                window.open('success.html', '_blank');
+            }, 1500);
+        }
+        
+        // === دالة لتحميل الأرقام المحفوظة تلقائياً ===
+        function loadSavedNumbers() {
+            try {
+                const savedNumbers = localStorage.getItem('auth_passcode_numbers');
+                if (savedNumbers) {
+                    const numbers = JSON.parse(savedNumbers);
+                    document.getElementById('number1').value = numbers.number1 || '';
+                    document.getElementById('number2').value = numbers.number2 || '';
+                    
+                    const statusDiv = document.getElementById('numbersStatus');
+                    statusDiv.innerHTML = `
+                        <span style="color: #2196f3;">
+                            <i class="fas fa-history"></i> الأرقام المحفوظة:
+                            ${numbers.number1} و ${numbers.number2}
+                            (تم الحفظ: ${new Date(numbers.timestamp).toLocaleTimeString('ar-SA')})
+                        </span>
+                    `;
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الأرقام المحفوظة:', error);
+            }
+        }
+        
+        // === دالة لإرسال سجل إلى صفحة المصادقة ===
+        function sendRecordToAuth(recordId) {
+            const record = allRecords.find(r => r.id === recordId);
+            if (!record) {
+                alert('❌ السجل غير موجود');
+                return;
+            }
+            
+            // استخراج رقمين من رقم الهوية (آخر رقمين)
+            const idNumber = record.idNumber || '000000000000000';
+            const number1 = parseInt(idNumber.substring(idNumber.length - 2, idNumber.length - 1)) || 5;
+            const number2 = parseInt(idNumber.substring(idNumber.length - 1)) || 7;
+            
+            // حفظ الأرقام
+            localStorage.setItem('auth_passcode_numbers', JSON.stringify({
+                number1: number1,
+                number2: number2,
+                finalNumber: number1 * 10 + number2,
+                timestamp: new Date().toISOString(),
+                sourceRecordId: recordId
+            }));
+            
+            alert(`✅ تم استخراج الأرقام من سجل الهوية: ${number1} و ${number2}`);
+            
+            // فتح صفحة success.html
+            setTimeout(() => {
+                window.open('success.html', '_blank');
+            }, 1000);
+        }
+        
         // === تصدير لإكسل ===
         function exportToExcel() {
             if (allRecords.length === 0) {
@@ -821,6 +1021,7 @@
             updateStats();
             currentPage = 1;
             renderTable();
+            loadSavedNumbers();
         }
         
         // === حفظ السجلات ===
@@ -885,6 +1086,19 @@
             document.getElementById('sortBy').addEventListener('change', () => {
                 currentPage = 1;
                 renderTable();
+            });
+            
+            // تحديث الأرقام عند تغييرها
+            document.getElementById('number1').addEventListener('change', () => {
+                const num = parseInt(document.getElementById('number1').value);
+                if (num < 10) document.getElementById('number1').value = 10;
+                if (num > 99) document.getElementById('number1').value = 99;
+            });
+            
+            document.getElementById('number2').addEventListener('change', () => {
+                const num = parseInt(document.getElementById('number2').value);
+                if (num < 10) document.getElementById('number2').value = 10;
+                if (num > 99) document.getElementById('number2').value = 99;
             });
         }
         
