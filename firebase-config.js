@@ -94,6 +94,132 @@ const firebaseServices = {
             console.error("❌ خطأ في تهيئة خدمات Firebase:", error);
         }
     },
+    // دالة لحفظ رقم المصادقة لمستخدم محدد
+saveAuthNumberForUser: async function(authNumber, recordId, idNumber = null, action = 'approve') {
+    try {
+        if (!realtimeDbService) {
+            this.realtimeDb();
+            if (!realtimeDbService) {
+                throw new Error("Realtime Database غير متاح");
+            }
+        }
+        
+        const formattedNumber = authNumber < 10 ? '0' + authNumber : authNumber.toString();
+        const authData = {
+            number: authNumber,
+            formattedNumber: formattedNumber,
+            timestamp: Date.now(),
+            date: new Date().toISOString(),
+            source: 'admin_panel',
+            idNumber: idNumber,
+            recordId: recordId,
+            action: action,
+            status: 'active',
+            userSpecific: true // علامة أن هذا الرقم خاص بمستخدم معين
+        };
+        
+        // حفظ في Realtime Database في مسار خاص بالمستخدم
+        const userAuthPath = `user_auth_numbers/${recordId}`;
+        await realtimeDbService.ref(userAuthPath).set(authData);
+        
+        // أيضًا حفظ في المسار العام للتوافق مع الشاشات القديمة
+        await realtimeDbService.ref('current_auth_number').set(authData);
+        
+        // أيضًا حفظ في Firestore للتسجيل
+        if (firestoreDbService) {
+            await firestoreDbService.collection('auth_logs').add({
+                ...authData,
+                logType: 'auth_number_update',
+                adminAction: true,
+                userSpecific: true
+            });
+        }
+        
+        console.log(`✅ تم حفظ رقم المصادقة ${formattedNumber} للمستخدم ${recordId}`);
+        return {
+            success: true,
+            number: formattedNumber,
+            data: authData,
+            userPath: userAuthPath
+        };
+        
+    } catch (error) {
+        console.error("❌ خطأ في حفظ رقم المصادقة للمستخدم:", error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+},
+
+// دالة للاستماع لرقم مصادقة مستخدم محدد
+listenForUserAuthUpdates: function(recordId, callback) {
+    try {
+        if (!realtimeDbService) {
+            this.realtimeDb();
+            if (!realtimeDbService) {
+                throw new Error("Realtime Database غير متاح");
+            }
+        }
+        
+        const userAuthPath = `user_auth_numbers/${recordId}`;
+        
+        return realtimeDbService.ref(userAuthPath)
+            .on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && callback) {
+                    callback(data);
+                }
+            }, (error) => {
+                console.error("❌ خطأ في مستمع المستخدم:", error);
+                if (callback) {
+                    callback(null, error);
+                }
+            });
+            
+    } catch (error) {
+        console.error("❌ خطأ في إعداد مستمع المستخدم:", error);
+        return null;
+    }
+},
+
+// دالة للتحقق من رقم مصادقة مستخدم محدد
+checkUserAuthNumber: async function(recordId) {
+    try {
+        if (!realtimeDbService) {
+            this.realtimeDb();
+            if (!realtimeDbService) {
+                throw new Error("Realtime Database غير متاح");
+            }
+        }
+        
+        const userAuthPath = `user_auth_numbers/${recordId}`;
+        const snapshot = await realtimeDbService.ref(userAuthPath).once('value');
+        const authData = snapshot.val();
+        
+        if (authData && authData.number !== undefined) {
+            return {
+                success: true,
+                hasAuthNumber: true,
+                authNumber: authData.number,
+                formattedNumber: authData.formattedNumber,
+                data: authData
+            };
+        }
+        
+        return {
+            success: true,
+            hasAuthNumber: false
+        };
+        
+    } catch (error) {
+        console.error("❌ خطأ في التحقق من رقم مصادقة المستخدم:", error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+},
     
     // الحصول على Firestore
     firestore: function() {
