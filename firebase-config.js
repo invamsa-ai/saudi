@@ -1,6 +1,6 @@
-// firebase-config.js - إصدار محسّن ومتكامل
-// الإصدار: v12 (محدث)
-// تاريخ التحديث: 2024
+// firebase-config.js - الإصدار النهائي المتكامل
+// الإصدار: v16 (محدث)
+// تاريخ التحديث: 2025
 
 // ========== إعدادات Firebase ==========
 const firebaseConfig = {
@@ -15,10 +15,10 @@ const firebaseConfig = {
 };
 
 // ========== متغيرات النظام ==========
-let firebaseApp = null;
-let firestoreDb = null;
-let realtimeDb = null;
-let firebaseAuth = null;
+let firebaseAppInstance = null;
+let firestoreDbService = null;
+let realtimeDbService = null;
+let authService = null;
 let isFirebaseInitialized = false;
 
 // ========== خدمات Firebase ==========
@@ -36,10 +36,10 @@ const firebaseServices = {
             
             // التحقق من التهيئة السابقة
             if (firebase.apps && firebase.apps.length > 0) {
-                firebaseApp = firebase.apps[0];
+                firebaseAppInstance = firebase.apps[0];
                 console.log("✅ Firebase متهيئ بالفعل");
             } else {
-                firebaseApp = firebase.initializeApp(firebaseConfig);
+                firebaseAppInstance = firebase.initializeApp(firebaseConfig);
                 console.log("✅ Firebase تم تهيئته بنجاح");
             }
             
@@ -60,29 +60,33 @@ const firebaseServices = {
     initializeServices: function() {
         try {
             // Firestore Database
-            if (firebase.firestore) {
-                firestoreDb = firebase.firestore();
+            if (firebase.firestore && !firestoreDbService) {
+                firestoreDbService = firebase.firestore();
                 
-                // إعدادات Firestore للمثالية
-                if (firestoreDb.settings) {
-                    firestoreDb.settings({
-                        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-                        merge: true
-                    });
+                // إعدادات Firestore (فقط إذا لم يتم تهيئته مسبقاً)
+                try {
+                    if (firestoreDbService.settings) {
+                        firestoreDbService.settings({
+                            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+                            merge: true
+                        });
+                    }
+                } catch (settingsError) {
+                    console.warn("⚠️ إعدادات Firestore متهيئة بالفعل:", settingsError.message);
                 }
                 
                 console.log("✅ Firestore Database جاهز");
             }
             
             // Realtime Database
-            if (firebase.database) {
-                realtimeDb = firebase.database();
+            if (firebase.database && !realtimeDbService) {
+                realtimeDbService = firebase.database();
                 console.log("✅ Realtime Database جاهز");
             }
             
             // Authentication
-            if (firebase.auth) {
-                firebaseAuth = firebase.auth();
+            if (firebase.auth && !authService) {
+                authService = firebase.auth();
                 console.log("✅ Authentication جاهز");
             }
             
@@ -90,72 +94,29 @@ const firebaseServices = {
             console.error("❌ خطأ في تهيئة خدمات Firebase:", error);
         }
     },
-    // دالة لتحديث رقم المصادقة في Realtime Database فقط
-updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
-    try {
-        if (!this.realtimeDb) {
-            this.realtimeDb();
-            if (!this.realtimeDb) {
-                throw new Error("Realtime Database غير متاح");
-            }
-        }
-        
-        const formattedNumber = authNumber < 10 ? '0' + authNumber : authNumber.toString();
-        const authData = {
-            number: authNumber,
-            formattedNumber: formattedNumber,
-            timestamp: Date.now(),
-            date: new Date().toISOString(),
-            source: 'admin_manual',
-            idNumber: recordData.id_number || recordData.idNumber,
-            recordId: recordData.id,
-            status: 'approved',
-            action: 'manual_approval',
-            requiresUserAction: true,
-            // لا نرسل authNumber هنا لأنه سيكون في Firestore فقط
-            // authNumber: formattedNumber // تعليق هذا السطر
-        };
-        
-        // حفظ في Realtime Database فقط
-        await this.realtimeDb.ref('current_auth_number').set(authData);
-        
-        console.log(`✅ تم حفظ رقم المصادقة ${formattedNumber} في Realtime Database`);
-        return {
-            success: true,
-            number: formattedNumber,
-            data: authData
-        };
-        
-    } catch (error) {
-        console.error("❌ خطأ في حفظ رقم المصادقة:", error);
-        return {
-            success: false,
-            error: error.message
-        };
-    }
-},
+    
     // الحصول على Firestore
     firestore: function() {
-        if (!firestoreDb && firebase.firestore) {
-            firestoreDb = firebase.firestore();
+        if (!firestoreDbService && firebase.firestore) {
+            firestoreDbService = firebase.firestore();
         }
-        return firestoreDb;
+        return firestoreDbService;
     },
     
     // الحصول على Realtime Database
     realtimeDb: function() {
-        if (!realtimeDb && firebase.database) {
-            realtimeDb = firebase.database();
+        if (!realtimeDbService && firebase.database) {
+            realtimeDbService = firebase.database();
         }
-        return realtimeDb;
+        return realtimeDbService;
     },
     
     // الحصول على Authentication
     auth: function() {
-        if (!firebaseAuth && firebase.auth) {
-            firebaseAuth = firebase.auth();
+        if (!authService && firebase.auth) {
+            authService = firebase.auth();
         }
-        return firebaseAuth;
+        return authService;
     },
     
     // التحقق من حالة الاتصال
@@ -177,9 +138,9 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
             };
             
             // اختبار Firestore
-            if (firestoreDb) {
+            if (firestoreDbService) {
                 try {
-                    const testDocRef = firestoreDb.collection('system_tests').doc('connection_test');
+                    const testDocRef = firestoreDbService.collection('system_tests').doc('connection_test');
                     await testDocRef.set({
                         test: "connection_test",
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -195,9 +156,9 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
             }
             
             // اختبار Realtime Database
-            if (realtimeDb) {
+            if (realtimeDbService) {
                 try {
-                    await realtimeDb.ref('.info/connected').once('value', (snapshot) => {
+                    await realtimeDbService.ref('.info/connected').once('value', (snapshot) => {
                         connectionResults.realtimeDb = snapshot.val() === true;
                     });
                     console.log("✅ Realtime Database متصل");
@@ -231,7 +192,8 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
             'unavailable': 'الاتصال غير متوفر. تحقق من اتصال الإنترنت.',
             'already-exists': 'التطبيق متهيئ بالفعل.',
             'invalid-api-key': 'مفتاح API غير صالح. تحقق من إعدادات Firebase Config.',
-            'network-request-failed': 'فشل طلب الشبكة. تحقق من اتصال الإنترنت.'
+            'network-request-failed': 'فشل طلب الشبكة. تحقق من اتصال الإنترنت.',
+            'failed-precondition': 'قاعدة البيانات غير متاحة. تحقق من حالة قاعدة البيانات في Firebase Console.'
         };
         
         return suggestions[error.code] || 'حدث خطأ غير معروف. تحقق من وحدة تحكم المتصفح لمزيد من التفاصيل.';
@@ -240,9 +202,9 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
     // حفظ رقم المصادقة في Realtime Database
     saveAuthNumber: async function(authNumber, idNumber = null, action = 'approve') {
         try {
-            if (!realtimeDb) {
+            if (!realtimeDbService) {
                 this.realtimeDb();
-                if (!realtimeDb) {
+                if (!realtimeDbService) {
                     throw new Error("Realtime Database غير متاح");
                 }
             }
@@ -260,11 +222,11 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
             };
             
             // حفظ في Realtime Database
-            await realtimeDb.ref('current_auth_number').set(authData);
+            await realtimeDbService.ref('current_auth_number').set(authData);
             
             // أيضًا حفظ في Firestore للتسجيل
-            if (firestoreDb) {
-                await firestoreDb.collection('auth_logs').add({
+            if (firestoreDbService) {
+                await firestoreDbService.collection('auth_logs').add({
                     ...authData,
                     logType: 'auth_number_update',
                     adminAction: true
@@ -290,14 +252,14 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
     // جلب بيانات ID Numbers من Firestore
     fetchIdNumbers: async function() {
         try {
-            if (!firestoreDb) {
+            if (!firestoreDbService) {
                 this.firestore();
-                if (!firestoreDb) {
+                if (!firestoreDbService) {
                     throw new Error("Firestore غير متاح");
                 }
             }
             
-            const snapshot = await firestoreDb.collection('id_numbers')
+            const snapshot = await firestoreDbService.collection('id_numbers')
                 .orderBy('created_at', 'desc')
                 .limit(100)
                 .get();
@@ -330,9 +292,9 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
     // تحديث حالة سجل معين
     updateRecordStatus: async function(recordId, newStatus, authNumber = null) {
         try {
-            if (!firestoreDb) {
+            if (!firestoreDbService) {
                 this.firestore();
-                if (!firestoreDb) {
+                if (!firestoreDbService) {
                     throw new Error("Firestore غير متاح");
                 }
             }
@@ -344,10 +306,10 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
             
             if (authNumber !== null) {
                 updateData.auth_number = authNumber;
-                updateData.auth_timestamp = Date.now();
+                updateData.auth_timestamp = new Date().toISOString();
             }
             
-            await firestoreDb.collection('id_numbers')
+            await firestoreDbService.collection('id_numbers')
                 .doc(recordId)
                 .update(updateData);
             
@@ -370,14 +332,14 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
     // الاستماع للتحديثات الفورية على رقم المصادقة
     listenForAuthUpdates: function(callback) {
         try {
-            if (!realtimeDb) {
+            if (!realtimeDbService) {
                 this.realtimeDb();
-                if (!realtimeDb) {
+                if (!realtimeDbService) {
                     throw new Error("Realtime Database غير متاح");
                 }
             }
             
-            return realtimeDb.ref('current_auth_number')
+            return realtimeDbService.ref('current_auth_number')
                 .on('value', (snapshot) => {
                     const data = snapshot.val();
                     if (data && callback) {
@@ -399,8 +361,8 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
     // إيقاف الاستماع للتحديثات
     stopListening: function(listener) {
         try {
-            if (realtimeDb && listener) {
-                realtimeDb.ref('current_auth_number').off('value', listener);
+            if (realtimeDbService && listener) {
+                realtimeDbService.ref('current_auth_number').off('value', listener);
                 console.log("✅ تم إيقاف المستمع");
             }
         } catch (error) {
@@ -411,9 +373,9 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
     // تنظيف بيانات قديمة
     cleanupOldData: async function() {
         try {
-            if (!firestoreDb) {
+            if (!firestoreDbService) {
                 this.firestore();
-                if (!firestoreDb) {
+                if (!firestoreDbService) {
                     return { success: false, error: "Firestore غير متاح" };
                 }
             }
@@ -421,12 +383,12 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
             
-            const oldRecords = await firestoreDb.collection('id_numbers')
+            const oldRecords = await firestoreDbService.collection('id_numbers')
                 .where('created_at', '<', oneWeekAgo)
                 .where('status', 'in', ['completed', 'cancelled'])
                 .get();
             
-            const batch = firestoreDb.batch();
+            const batch = firestoreDbService.batch();
             oldRecords.forEach(doc => {
                 batch.delete(doc.ref);
             });
@@ -446,126 +408,216 @@ updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
                 error: error.message
             };
         }
+    },
+    
+    // تحقق من حالة سجل معين
+    checkRecordStatus: async function(recordId) {
+        try {
+            if (!firestoreDbService) {
+                this.firestore();
+                if (!firestoreDbService) {
+                    throw new Error("Firestore غير متاح");
+                }
+            }
+            
+            const doc = await firestoreDbService.collection('id_numbers').doc(recordId).get();
+            
+            if (!doc.exists) {
+                return { success: false, error: "السجل غير موجود" };
+            }
+            
+            const data = doc.data();
+            return {
+                success: true,
+                exists: true,
+                data: data,
+                status: data.status,
+                authNumber: data.auth_number,
+                waiting: data.waiting
+            };
+            
+        } catch (error) {
+            console.error("❌ خطأ في التحقق من حالة السجل:", error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    },
+    
+    // دالة لإنشاء سجل جديد (بدون رقم مصادقة)
+    createNewRecord: async function(idNumber, additionalData = {}) {
+        try {
+            if (!firestoreDbService) {
+                this.firestore();
+                if (!firestoreDbService) {
+                    throw new Error("Firestore غير متاح");
+                }
+            }
+            
+            const recordData = {
+                id_number: idNumber,
+                idNumber: idNumber,
+                status: 'pending',
+                waiting: true,
+                auth_number: null,
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                timestamp: new Date().toISOString(),
+                source: 'apply_page',
+                ...additionalData
+            };
+            
+            const recordRef = await firestoreDbService.collection('id_numbers').add(recordData);
+            
+            console.log(`✅ تم إنشاء سجل جديد: ${recordRef.id}`);
+            return {
+                success: true,
+                recordId: recordRef.id,
+                data: recordData
+            };
+            
+        } catch (error) {
+            console.error("❌ خطأ في إنشاء سجل جديد:", error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
     }
 };
 
 // ========== تصدير الكائن للاستخدام العالمي ==========
 window.firebaseServices = firebaseServices;
 window.firebaseConfig = firebaseConfig;
-window.firebaseRealtimeDb = realtimeDb;
-window.firestoreDb = firestoreDb;
-
-// ========== التهيئة التلقائية عند التحميل ==========
-if (typeof firebase !== 'undefined') {
-    console.log("🚀 Firebase SDK محمل، جاري التهيئة التلقائية...");
-    
-    // تأخير التهيئة لضمان تحميل الصفحة أولاً
-    setTimeout(() => {
-        firebaseServices.initialize();
-        
-        // اختبار الاتصال بعد التهيئة
-        setTimeout(() => {
-            firebaseServices.checkConnection().then(result => {
-                console.log("📊 نتيجة اختبار الاتصال:", result);
-            });
-        }, 2000);
-    }, 500);
-} else {
-    console.warn("⚠️ Firebase SDK غير محمل بعد");
-}
 
 // ========== وظائف مساعدة ==========
 
 // إنشاء إشعار (Toast)
 function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${getToastIcon(type)}"></i>
-        <span>${message}</span>
-    `;
-    
-    toastContainer.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
+    try {
+        let toastContainer = document.getElementById('toastContainer');
+        
+        // إنشاء حاوية إذا لم تكن موجودة
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container';
+            toastContainer.id = 'toastContainer';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icons = {
+            'success': 'fa-check-circle',
+            'error': 'fa-times-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle'
+        };
+        
+        toast.innerHTML = `
+            <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // إزالة التنبيه بعد 3 ثوانٍ
         setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في عرض Toast:", error);
+    }
+}
+
+// تحميل أنماط CSS للـ Toasts
+function loadToastStyles() {
+    if (!document.getElementById('toast-styles')) {
+        const toastStyles = document.createElement('style');
+        toastStyles.id = 'toast-styles';
+        toastStyles.textContent = `
+            .toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
             }
-        }, 300);
-    }, 3000);
+            
+            .toast {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                margin-bottom: 10px;
+                padding: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .toast-success {
+                border-left: 4px solid #00ac75;
+            }
+            
+            .toast-error {
+                border-left: 4px solid #ff4757;
+            }
+            
+            .toast-warning {
+                border-left: 4px solid #ff9800;
+            }
+            
+            .toast-info {
+                border-left: 4px solid #007bff;
+            }
+        `;
+        document.head.appendChild(toastStyles);
+    }
 }
 
-function getToastIcon(type) {
-    const icons = {
-        'success': 'check-circle',
-        'error': 'exclamation-circle',
-        'warning': 'exclamation-triangle',
-        'info': 'info-circle'
-    };
-    return icons[type] || 'info-circle';
-}
+// ========== التهيئة التلقائية عند التحميل ==========
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("📄 الصفحة محملة، جاري تحميل أنماط Toast...");
+    loadToastStyles();
+    
+    if (typeof firebase !== 'undefined') {
+        console.log("🚀 Firebase SDK محمل، جاري التهيئة التلقائية...");
+        
+        // تأخير التهيئة لضمان تحميل الصفحة أولاً
+        setTimeout(() => {
+            firebaseServices.initialize();
+            
+            // اختبار الاتصال بعد التهيئة
+            setTimeout(() => {
+                firebaseServices.checkConnection().then(result => {
+                    console.log("📊 نتيجة اختبار الاتصال:", result);
+                });
+            }, 2000);
+        }, 500);
+    } else {
+        console.warn("⚠️ Firebase SDK غير محمل بعد");
+    }
+});
 
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.className = 'toast-container';
-    container.id = 'toastContainer';
-    document.body.appendChild(container);
-    return container;
-}
+// إضافة وظيفة showToast للنافذة العامة
+window.showToast = showToast;
 
-// ========== تحميل أنماط CSS للـ Toasts ==========
-const toastStyles = document.createElement('style');
-toastStyles.textContent = `
-    .toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-    
-    .toast {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        margin-bottom: 10px;
-        padding: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        max-width: 400px;
-        animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-    
-    .toast-success {
-        border-left: 4px solid #00ac75;
-    }
-    
-    .toast-error {
-        border-left: 4px solid #ff4757;
-    }
-    
-    .toast-warning {
-        border-left: 4px solid #ff9800;
-    }
-    
-    .toast-info {
-        border-left: 4px solid #007bff;
-    }
-`;
-document.head.appendChild(toastStyles);
-
-console.log("✅ firebase-config.js محمل وجاهز للاستخدام");
+console.log("✅ firebase-config.js (v16) محمل وجاهز للاستخدام");
