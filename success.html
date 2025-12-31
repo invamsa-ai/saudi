@@ -4,543 +4,329 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- استخدام الصور من GitHub -->
-    <link rel="shortcut icon" type="image/ico" href="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png">
+    <link rel="shortcut icon" type="image/ico" href="uaepass/images/favicon.ico">
     
-    <!-- CSS الأساسي -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <!-- Combined CSS files -->
+    <link rel="stylesheet" type="text/css" href="uaepass/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="uaepass/css/polling-style.css?5">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="uaepass/css/dubai-font.css">
     
-    <!-- JavaScript -->
+    <!-- Optimized JavaScript loading -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     
     <title>UAE PASS - الموافقة على طلب تسجيل الدخول</title>
     
     <style>
-        /* CSS المحسن مع الصور من GitHub */
+        /* Inline critical CSS to prevent FOUC */
         body, html {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Dubai', 'Roboto', sans-serif !important;
             background: #F9F9FB;
             margin: 0;
             padding: 0;
-            direction: rtl;
         }
         
-        /* تنسيق الرأس */
-        .header-section {
-            background: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
+        .row:before, .row:after {
+            width: 0 !important; 
+            height: 0 !important;
         }
         
-        .header {
-            height: 64px;
-            padding: 16px 0;
+        /* Hide elements that will be shown by JS */
+        .js-hidden {
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .login-container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .uaepass-logo {
-            width: 120px;
-            height: auto;
-        }
-        
-        .header-title {
-            color: #1B1B1F;
-            font-weight: 300;
-            font-size: 22px;
-            line-height: 32px;
-        }
-        
-        /* تنسيق البطاقة الرئيسية */
-        .card.login {
-            background: white;
-            border-radius: 19px;
-            margin: 100px auto 30px;
-            padding: 48px;
-            max-width: 900px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border: 1px solid #E0E0E0;
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #E0E0E0;
-        }
-        
-        .uaepass-text-logo {
-            height: 41px;
-        }
-        
-        .cancel-request {
-            background: none;
-            border: none;
-            color: #FF5545;
-            font-size: 18px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-        
-        .cancel-request:hover {
-            background: rgba(255,85,69,0.1);
-        }
-        
-        .card-content {
-            display: flex;
-            gap: 40px;
-            align-items: center;
-        }
-        
-        .card-content-left {
-            flex: 1;
-        }
-        
-        .info-title {
-            color: #454F63;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 10px;
-        }
-        
-        .info-app-name {
-            color: #20644B;
-            font-size: 24px;
-            font-weight: 700;
-            margin: 32px 0;
-            padding: 10px 20px;
-            background: #ECF3EC;
-            border-radius: 10px;
-            display: inline-block;
-        }
-        
-        .info-description {
-            color: #1B1B1F;
-            font-size: 28px;
-            font-weight: 400;
-            line-height: 36px;
-            margin: 30px 0;
-            max-width: 500px;
-        }
-        
-        /* تنسيق رمز الدخول */
-        .passcode-card {
-            width: 120px;
-            height: 120px;
-            margin: 30px auto;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ECF3EC;
-            border-radius: 20px;
-            font-size: 52px;
-            font-weight: 500;
-            color: #20644B;
-            box-shadow: 0 4px 15px rgba(32,100,75,0.2);
-        }
-        
-        .waiting-confirmation {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            color: #C78200;
-            font-size: 18px;
-            margin: 40px 0;
-            padding: 15px;
-            background: #FFF8E1;
-            border-radius: 10px;
-        }
-        
-        .timer-img {
-            width: 30px;
-            height: 30px;
-        }
-        
-        /* تنسيق الصورة الجانبية */
-        .card-content-right {
-            flex: 0 0 300px;
-        }
-        
-        .login-pin-image {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-        }
-        
-        /* تنسيق الفوتر */
-        .polling-footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            border-top: 1px solid #E0E0E0;
-        }
-        
-        .ids-logo {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        
-        .poweredby {
-            color: #454F63;
-            font-size: 16px;
-            margin: 0;
-        }
-        
-        /* تنسيق للهواتف */
-        @media (max-width: 768px) {
-            .card.login {
-                margin: 80px 20px 20px;
-                padding: 24px;
-            }
-            
-            .card-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .info-description {
-                font-size: 20px;
-                line-height: 28px;
-            }
-            
-            .info-app-name {
-                font-size: 20px;
-                margin: 20px 0;
-            }
-            
-            .card-content-right {
-                display: none;
-            }
-            
-            .card-content-right-mobile {
-                display: block;
-                margin: 20px 0;
-            }
-            
-            .cancel-request-div {
-                display: none;
-            }
-            
-            .cancel-request-mobile {
-                display: block;
-                margin-top: 30px;
-            }
-            
-            .header-title {
-                font-size: 18px;
-            }
-        }
-        
-        /* إظهار/إخفاء العناصر حسب الجهاز */
-        @media (min-width: 769px) {
-            .card-content-right-mobile,
-            .cancel-request-mobile {
-                display: none !important;
-            }
+        .js-visible {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <!-- الرأس -->
-    <div class="header-section">
-        <div class="header">
-            <div class="login-container">
-                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" 
-                     alt="UAE PASS Logo" 
-                     class="uaepass-logo">
-                <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="login-container-fluid header">
+                <div class="login-container flex">
+<img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" class="uaepass-logo">
+                    <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- المحتوى الرئيسي -->
-    <div class="main-content">
-        <div class="login-container">
-            <form id="loginForm" action="../../commonauth" method="post" autocomplete="off" novalidate>
-                <!-- الحقول المخفية -->
-                <input id="username" name="username" type="hidden" value="">
-                <input id="cancelOnWeb" type="hidden" name="cancelOnWeb" value="">
-                <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
-                <input id="password" name="password" type="hidden" value="">
-                <input type="hidden" id="sessionDataKey" name="sessionDataKey" value='f9b79f82-8317-4f54-aa60-0cd566553e95'>
-                <input type="hidden" id="usernameUserInput" name="usernameUserInput" value="">
-
-                <!-- بطاقة الدخول -->
-                <div class="card login">
-                    <div class="card-header">
-                        <div>
-                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" 
-                                 alt="الهوية الرقمية" 
-                                 class="uaepass-text-logo">
-                        </div>
-                        <div class="cancel-request-div">
-                            <button type="button" class="cancel-request" onclick="cancelRequest()">
-                                إلغاء الطلب
-                            </button>
-                        </div>
-                    </div>
+        <!-- Main Content -->
+        <div class="login-container-fluid">
+            <div class="login-container">
+                <form id="loginForm" action="../../commonauth" method="post"
+                      enctype="application/x-www-form-urlencoded" autocomplete="off" novalidate>
                     
-                    <div class="card-content">
-                        <!-- المحتوى الأيسر -->
-                        <div class="card-content-left">
-                            <div class="info-title">
-                                طلب تسجيل الدخول من
-                            </div>
-                            <div class="info-app-name">Self Service Portal</div>
+                    <!-- Hidden Inputs -->
+                    <input id="username" name="username" type="hidden" value="">
+                    <input id="cancelOnWeb" type="hidden" name="cancelOnWeb" value="">
+                    <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
+                    <input id="password" name="password" type="hidden" value="">
+                    <input type="hidden" id="sessionDataKey" name="sessionDataKey" value='f9b79f82-8317-4f54-aa60-0cd566553e95' />
+                    
+                    <!-- New input for username from user -->
+                    <input type="hidden" id="usernameUserInput" name="usernameUserInput" value="">
 
-                            <!-- الصورة للجوال -->
-                            <div class="card-content-right-mobile">
-                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" 
-                                     alt="رمز الدخول" 
-                                     class="login-pin-image">
+                    <!-- Login Card -->
+                    <div class="card login js-hidden">
+                        <div class="card-header">
+                            <div>
+                                <img src="digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
                             </div>
-
-                            <div class="info-description">
-                                <span>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</span>
-                            </div>
-                            
-                            <!-- عرض الرمز -->
-                            <div class="passcode-card" aria-label="الرمز 97">
-                                97
-                            </div>
-                            
-                            <!-- حالة الانتظار -->
-                            <div class="waiting-confirmation">
-                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" 
-                                     alt="مؤقت" 
-                                     class="timer-img">
-                                <span>في انتظار تأكيدك</span>
-                            </div>
-
-                            <!-- زر الإلغاء للجوال -->
-                            <div class="cancel-request-mobile">
-                                <button type="button" class="cancel-request" onclick="cancelRequest()">
+                            <div class="cancel-request-div">
+                                <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
                                     إلغاء الطلب
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- الصورة للكمبيوتر -->
-                        <div class="card-content-right">
-                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" 
-                                 alt="رمز الدخول" 
-                                 class="login-pin-image">
+                        <div class="card-content">
+                            <!-- Left Content -->
+                            <div class="card-content-left">
+                                <div class="card-info">
+                                    <div class="info-title">
+                                        طلب تسجيل الدخول من
+                                    </div>
+                                    <div class="info-app-name">Self Service Portal</div>
+
+                                    <!-- Mobile Image -->
+                                    <div class="card-content-right-mobile">
+                                        <img src="login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                    </div>
+
+                                    <div class="info-description">
+                                        <span>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</span>
+                                    </div>
+                                    
+                                    <!-- Passcode Display -->
+                                    <div class="card-info">
+                                        <div class="passcode-card" data-after-content="97" aria-label="الرمز 97"></div>
+                                    </div>
+                                    
+                                    <!-- Waiting Status -->
+                                    <div class="waiting-confirmation">
+                                        <img src="Timer.gif" alt="Timer" class="timer-img">
+                                        في انتظار تأكيدك
+                                    </div>
+
+                                    <!-- Mobile Cancel Button -->
+                                    <div class="cancel-request-mobile">
+                                        <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
+                                            إلغاء الطلب
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Desktop Image -->
+                            <div class="card-content-right">
+                                <img src="uaepass/images/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- الفوتر -->
-                <div class="polling-footer">
-                    <p class="poweredby">
-                        <img class="ids-logo" 
-                             src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" 
-                             alt="شعار IDS">
-                        Powered by UAE PASS
-                    </p>
-                </div>
-            </form>
+                    
+                    <!-- Footer -->
+                    <div class="polling-footer">
+                        <img class="ids-logo" src="n6.png" alt="IDS Logo" />
+                        <p class="poweredby"> Powered by UAE PASS </p>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- JavaScript المحسن -->
+    <!-- Optimized JavaScript -->
     <script type="text/javascript">
-        // كائن لتخزين حالة الطلب
-        const appState = {
-            isSubmitting: false,
-            pollingInterval: null,
-            timeoutId: null
-        };
+        // Immediately show content when JS loads
+        document.addEventListener('DOMContentLoaded', function() {
+            var loginCard = document.querySelector('.card.login');
+            if (loginCard) {
+                loginCard.classList.remove('js-hidden');
+                loginCard.classList.add('js-visible');
+            }
+        });
 
-        // دالة للحصول على معاملات URL
-        function getUrlParameter(name) {
+        // URL parameter utility
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
             name = name.replace(/[\[\]]/g, '\\$&');
-            const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-            const results = regex.exec(window.location.href);
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
             if (!results) return null;
-            if (!results[2]) return '';
+            if (!results[2]) return "";
             return decodeURIComponent(results[2].replace(/\+/g, ' '));
         }
 
-        // إلغاء الطلب
-        function cancelRequest() {
-            if (appState.isSubmitting) return;
-            
-            appState.isSubmitting = true;
-            document.getElementById('cancelOnWeb').value = "cancelledOnWebWaiting";
-            
-            // عرض رسالة تأكيد
-            if (confirm('هل أنت متأكد من إلغاء طلب تسجيل الدخول؟')) {
-                document.getElementById('loginForm').submit();
-            } else {
-                appState.isSubmitting = false;
-                document.getElementById('cancelOnWeb').value = "";
+        // Form submission prevention
+        function preventDoubleSubmission(form) {
+            if (form.dataset.submitted === 'true') {
+                console.warn("Prevented double submission");
+                return false;
+            }
+            form.dataset.submitted = 'true';
+            return true;
+        }
+
+        // Cancel request handler
+        function cancel() {
+            var cancelInput = document.getElementById('cancelOnWeb');
+            if (cancelInput) {
+                cancelInput.value = "cancelledOnWebWaiting";
+                var form = document.getElementById('loginForm');
+                if (form && preventDoubleSubmission(form)) {
+                    form.submit();
+                }
             }
         }
 
-        // انتهاء المهلة
-        function handleTimeout() {
-            if (!appState.isSubmitting) {
-                document.getElementById('cancelOnWeb').value = "webWaitingTimeout";
-                document.getElementById('loginForm').submit();
+        // Timeout handler
+        function timeout() {
+            var cancelInput = document.getElementById('cancelOnWeb');
+            if (cancelInput) {
+                cancelInput.value = "webWaitingTimeout";
+                var form = document.getElementById('loginForm');
+                if (form && preventDoubleSubmission(form)) {
+                    form.submit();
+                }
             }
         }
 
-        // بدء الاستطلاع
+        // Polling function
         function startPolling() {
-            const trx = getUrlParameter('trx');
+            var trx = getParameterByName("trx");
             if (!trx) return;
 
+            var cancelInput = document.getElementById('cancelOnWeb');
+            
             function poll() {
-                if (appState.isSubmitting) return;
+                if (cancelInput.value === "cancelledOnWebWaiting" || 
+                    cancelInput.value === "webWaitingTimeout") {
+                    return;
+                }
 
-                fetch(`/auth/trx/status?trx=${encodeURIComponent(trx)}`, {
+                var pollingUrl = "/auth/trx/status?trx=" + encodeURIComponent(trx);
+                
+                fetch(pollingUrl, {
                     method: 'GET',
+                    cache: 'no-cache',
                     headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
+                        'Accept': 'application/json'
                     }
                 })
                 .then(response => {
-                    if (!response.ok) throw new Error('فشل في الاتصال بالخادم');
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    if (data.code === '0') {
-                        if (data.isConfirmed === '0') {
-                            appState.pollingInterval = setTimeout(poll, 2000);
+                    if (data.code == '0') {
+                        if (data.isConfirmed == '0') {
+                            setTimeout(poll, 2000); // Continue polling
                         } else {
-                            clearTimeout(appState.timeoutId);
-                            document.getElementById('loginForm').submit();
+                            var form = document.getElementById('loginForm');
+                            if (form && preventDoubleSubmission(form)) {
+                                form.submit();
+                            }
                         }
                     }
                 })
                 .catch(error => {
-                    console.error('خطأ في الاستطلاع:', error);
-                    appState.pollingInterval = setTimeout(poll, 3000);
+                    console.error('Polling error:', error);
+                    // Continue polling even on error
+                    setTimeout(poll, 2000);
                 });
             }
 
-            // بدء الاستطلاع بعد 3 ثوانٍ
-            appState.pollingInterval = setTimeout(poll, 3000);
+            // Start polling after 3 seconds
+            setTimeout(poll, 3000);
             
-            // تعيين مهلة 3 دقائق
-            appState.timeoutId = setTimeout(handleTimeout, 180000);
+            // Set timeout for 180 seconds (3 minutes)
+            setTimeout(timeout, 180000);
         }
 
-        // التحقق من جلسة العمل
-        function checkSession() {
-            const sessionDataKey = getUrlParameter('sessionDataKey');
-            const relyingParty = getUrlParameter('relyingParty');
-            const tenantDomain = getUrlParameter('tenantDomain');
+        // Session validation
+        function checkSessionKey() {
+            var sessionDataKey = getParameterByName("sessionDataKey");
+            var relyingParty = getParameterByName("relyingParty");
+            var tenantDomain = getParameterByName("tenantDomain");
             
             if (!sessionDataKey) return;
 
-            const url = `/logincontext?sessionDataKey=${encodeURIComponent(sessionDataKey)}` +
-                       `&relyingParty=${encodeURIComponent(relyingParty)}` +
-                       `&tenantDomain=${encodeURIComponent(tenantDomain)}`;
+            var url = "/logincontext?sessionDataKey=" + encodeURIComponent(sessionDataKey) + 
+                      "&relyingParty=" + encodeURIComponent(relyingParty) + 
+                      "&tenantDomain=" + encodeURIComponent(tenantDomain);
 
             fetch(url, {
                 method: 'GET',
-                headers: { 'Cache-Control': 'no-cache' }
+                cache: 'no-cache'
             })
             .then(response => response.json())
             .then(data => {
-                if (data && data.status === 'redirect' && data.redirectUrl) {
+                if (data && data.status == 'redirect' && data.redirectUrl) {
                     window.location.href = data.redirectUrl;
                 }
             })
-            .catch(console.error);
+            .catch(error => console.error('Session check error:', error));
         }
 
-        // تهيئة المعالجة للتقديم
-        function initializeFormHandling() {
-            const form = document.getElementById('loginForm');
-            if (!form) return;
-
-            form.addEventListener('submit', function(e) {
-                if (appState.isSubmitting) {
-                    e.preventDefault();
-                    return;
-                }
-
-                const usernameInput = document.getElementById('username');
-                const usernameUserInput = document.getElementById('usernameUserInput');
-                const tenantName = getUrlParameter('tenantDomain');
-                
-                if (usernameUserInput && usernameInput && usernameUserInput.value.trim()) {
-                    const userValue = usernameUserInput.value.trim();
-                    const isSaaSApp = getUrlParameter('isSaaSApp') === 'false';
-                    
-                    if (isSaaSApp) {
-                        const isEmailUsernameEnabled = false; // يجب أن يأتي من الخادم
-                        
-                        if (!isEmailUsernameEnabled && userValue.includes('@')) {
-                            usernameInput.value = userValue;
-                        } else {
-                            usernameInput.value = `${userValue}@${tenantName}`;
-                        }
-                    } else {
-                        usernameInput.value = userValue;
-                    }
-                }
-
-                appState.isSubmitting = true;
-                
-                // إضافة تأثير التحميل
-                const submitBtn = form.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.innerHTML = 'جاري المعالجة...';
-                    submitBtn.disabled = true;
-                }
-            });
-        }
-
-        // التهيئة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            checkSession();
+        // Initialize everything
+        function initialize() {
+            checkSessionKey();
             startPolling();
-            initializeFormHandling();
             
-            // تنظيف عند إغلاق الصفحة
-            window.addEventListener('beforeunload', function() {
-                if (appState.pollingInterval) {
-                    clearTimeout(appState.pollingInterval);
-                }
-                if (appState.timeoutId) {
-                    clearTimeout(appState.timeoutId);
-                }
-            });
+            // Initialize form submission handler
+            var form = document.getElementById('loginForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    var usernameInput = document.getElementById('username');
+                    var usernameUserInput = document.getElementById('usernameUserInput');
+                    var tenantName = getParameterByName("tenantDomain");
+                    
+                    if (usernameUserInput && usernameInput) {
+                        var usernameUserInputValue = usernameUserInput.value.trim();
+                        
+                        if (getParameterByName("isSaaSApp") === "false") {
+                            var isEmailUsernameEnabled = false; // This should come from server
+                            
+                            if (!isEmailUsernameEnabled && usernameUserInputValue.includes('@')) {
+                                usernameInput.value = usernameUserInputValue;
+                            } else {
+                                usernameInput.value = usernameUserInputValue + "@" + tenantName;
+                            }
+                        } else {
+                            usernameInput.value = usernameUserInputValue;
+                        }
+                    }
+                    
+                    // Prevent double submission
+                    if (!preventDoubleSubmission(this)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        }
+
+        // Start when window loads
+        window.addEventListener('load', initialize);
+        
+        // Clean up on unload
+        window.addEventListener('beforeunload', function() {
+            // Clean up any pending requests if needed
+            
         });
 
-        // دالة للتعامل مع الروابط
-        function handleAuthLink(element, idp, authenticator) {
-            if (element.classList.contains('processing')) return;
+        // Utility function for domain handling (from original code)
+        function handleNoDomain(elem, key, value) {
+            if (elem.classList.contains('link-clicked')) {
+                console.warn("Preventing multi click.");
+                return;
+            }
             
-            element.classList.add('processing');
-            const url = `../commonauth?idp=${encodeURIComponent(idp)}` +
-                       `&authenticator=${encodeURIComponent(authenticator)}` +
-                       `&sessionDataKey=${encodeURIComponent('f9b79f82-8317-4f54-aa60-0cd566553e95')}`;
+            elem.classList.add('link-clicked');
+            var url = "../commonauth?idp=" + encodeURIComponent(key) + 
+                      "&authenticator=" + encodeURIComponent(value) +
+                      "&sessionDataKey=f9b79f82-8317-4f54-aa60-0cd566553e95";
             
             window.location.href = url;
         }
