@@ -1,35 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <meta charset="UTF-8">
+    <title>اختبار اتصال Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        .status {
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
-    <h1>اختبار اتصال Firebase</h1>
-    <div id="status">جاري الاختبار...</div>
+    <h1>🔥 اختبار اتصال Firebase</h1>
+    <div id="status" class="status warning">جاري التحقق من الاتصال...</div>
+    <button onclick="runTest()" style="padding: 10px 20px; font-size: 16px;">تشغيل الاختبار مرة أخرى</button>
+    
+    <div id="details" class="details" style="display: none;">
+        <!-- التفاصيل ستظهر هنا -->
+    </div>
+    
+    <!-- تحميل Firebase SDKs بالترتيب الصحيح -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- تحميل ملف التهيئة -->
+    <script src="firebase-config.js"></script>
+    
     <script>
-        setTimeout(async () => {
-            const status = document.getElementById('status');
-            const result = await checkFirebaseConnection();
+        async function runTest() {
+            const statusDiv = document.getElementById('status');
+            const detailsDiv = document.getElementById('details');
             
-            if (result.connected) {
-                status.innerHTML = `✅ متصل بـ: ${result.projectId}`;
-                status.style.color = 'green';
+            statusDiv.className = 'status warning';
+            statusDiv.innerHTML = 'جاري التحقق من الاتصال...';
+            detailsDiv.style.display = 'none';
+            
+            try {
+                console.log('=== بدء اختبار Firebase ===');
                 
-                // اختبار الكتابة
-                await firebaseDb.collection('test').add({
-                    message: 'اختبار اتصال ناجح',
-                    timestamp: new Date()
-                });
+                // 1. التحقق من تحميل Firebase SDK
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK غير محمل. تحقق من اتصال الإنترنت.');
+                }
                 
-                console.log('✅ الاختبار ناجح!');
-            } else {
-                status.innerHTML = `❌ خطأ: ${result.error}`;
-                status.style.color = 'red';
+                console.log('✅ Firebase SDK محمل');
+                
+                // 2. التحقق من وجود الدالة
+                if (typeof checkFirebaseConnection !== 'function') {
+                    throw new Error('دالة checkFirebaseConnection غير موجودة. تأكد من تحميل firebase-config.js');
+                }
+                
+                console.log('✅ دالة checkFirebaseConnection موجودة');
+                
+                // 3. تشغيل الاختبار
+                const result = await checkFirebaseConnection();
+                
+                // 4. عرض النتيجة
+                if (result.connected) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `
+                        ✅ <strong>تم الاتصال بـ Firebase بنجاح!</strong><br>
+                        المشروع: ${result.projectId}<br>
+                        الخدمات:<br>
+                        • Firestore: ${result.services.firestore ? '✅' : '❌'}<br>
+                        • Realtime DB: ${result.services.realtime ? '✅' : '❌'}<br>
+                        • Auth: ${result.services.auth ? '✅' : '❌'}
+                    `;
+                    
+                    // عرض التفاصيل
+                    detailsDiv.style.display = 'block';
+                    detailsDiv.innerHTML = JSON.stringify(result, null, 2);
+                    
+                    // اختبار إضافي: محاولة قراءة البيانات
+                    if (window.firebaseDb) {
+                        try {
+                            const snapshot = await window.firebaseDb.collection('login_records').limit(5).get();
+                            const count = snapshot.size;
+                            detailsDiv.innerHTML += `\n\n📊 عدد السجلات في login_records: ${count}`;
+                        } catch (readError) {
+                            detailsDiv.innerHTML += `\n\n⚠️ لا يمكن قراءة login_records: ${readError.message}`;
+                        }
+                    }
+                    
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = `
+                        ❌ <strong>فشل الاتصال بـ Firebase</strong><br>
+                        الخطأ: ${result.error}<br>
+                        المشروع: ${result.projectId}<br>
+                        ${result.suggestion ? 'نصيحة: ' + result.suggestion : ''}
+                    `;
+                    
+                    detailsDiv.style.display = 'block';
+                    detailsDiv.innerHTML = JSON.stringify(result, null, 2);
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ غير متوقع:', error);
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `
+                    ❌ <strong>حدث خطأ غير متوقع</strong><br>
+                    ${error.message}<br>
+                    <small>افتح وحدة التحكم (F12) لمزيد من التفاصيل</small>
+                `;
+                
+                detailsDiv.style.display = 'block';
+                detailsDiv.innerHTML = error.stack || error.toString();
             }
-        }, 1000);
+        }
+        
+        // تشغيل الاختبار تلقائياً عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runTest, 1000);
+        });
+        
+        // دالة لاختبار بسيط من وحدة التحكم
+        window.quickTest = async function() {
+            console.log('🔍 اختبار سريع...');
+            if (window.firebaseDb) {
+                try {
+                    const test = await window.firebaseDb.collection('test').add({ test: true });
+                    console.log('✅ نجح الاختبار، Document ID:', test.id);
+                    return true;
+                } catch (error) {
+                    console.error('❌ فشل الاختبار:', error);
+                    return false;
+                }
+            } else {
+                console.error('❌ firebaseDb غير معرف');
+                return false;
+            }
+        };
     </script>
 </body>
 </html>
