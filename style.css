@@ -122,17 +122,16 @@ body {
 }
 
 .form-check {
-    text-align: right;
-    display: flex;
+display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: flex-start; /* يضمن البدء من اليمين لأن الاتجاه RTL */
+    gap: 10px; /* مسافة بين النص والمربع */
 }
 
 .form-check input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #00ac75;
+    accent-color: #007bff;
     cursor: pointer;
 }
 
