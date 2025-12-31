@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <h1>اختبار اتصال Firebase</h1>
+    <div id="status">جاري الاختبار...</div>
+    <script>
+        setTimeout(async () => {
+            const status = document.getElementById('status');
+            const result = await checkFirebaseConnection();
+            
+            if (result.connected) {
+                status.innerHTML = `✅ متصل بـ: ${result.projectId}`;
+                status.style.color = 'green';
+                
+                // اختبار الكتابة
+                await firebaseDb.collection('test').add({
+                    message: 'اختبار اتصال ناجح',
+                    timestamp: new Date()
+                });
+                
+                console.log('✅ الاختبار ناجح!');
+            } else {
+                status.innerHTML = `❌ خطأ: ${result.error}`;
+                status.style.color = 'red';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
