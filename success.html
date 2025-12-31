@@ -964,23 +964,23 @@ async function startChecking() {
         setTimeout(timeout, 180000);
     }
     
-    // ========== دالة للاختبار ==========
-    window.testFirebaseSuccess = async function() {
-        console.log('🧪 اختبار Firebase في صفحة success...');
-        
-        const result = {
-            firebaseInitialized: firebaseInitialized,
-            firebaseRealtimeDb: !!firebaseRealtimeDb,
-            firestoreDb: !!firestoreDb,
-            authNumberReceived: authNumberReceived,
-            waitingForApproval: waitingForApproval,
-            currentRecordId: currentRecordId,
-            timestamp: new Date().toISOString()
+            // ========== دالة للاختبار ==========
+        window.testFirebaseSuccess = async function() {
+            console.log('🧪 اختبار Firebase في صفحة success...');
+            
+            const result = {
+                firebaseServices: !!window.firebaseServices,
+                successFirestore: !!successFirestore,
+                successRealtimeDb: !!successRealtimeDb,
+                authNumberReceived: authNumberReceived,
+                waitingForApproval: waitingForApproval,
+                currentRecordId: currentRecordId,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('📊 نتيجة الاختبار:', result);
+            return result;
         };
-        
-        console.log('📊 نتيجة الاختبار:', result);
-        return result;
-    };
-</script>
+    </script>
 </body>
 </html>
