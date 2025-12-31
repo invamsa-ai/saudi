@@ -353,44 +353,43 @@
         </div>
     </div>
     
-    <script>
-        // Simple JavaScript for error handling and user interaction
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('UAE PASS Error Page Loaded');
-            
-            // Add click event to Try Again button
-            document.querySelector('.btn-primary').addEventListener('click', function(e) {
-                console.log('Back to Home clicked');
-                // You can add additional tracking or logic here
-            });
-            
-            // Check if images loaded successfully
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
-                img.addEventListener('error', function() {
-                    console.log('Image failed to load: ' + this.src);
-                });
-                
-                img.addEventListener('load', function() {
-                    console.log('Image loaded successfully: ' + this.src);
-                });
-            });
-            
-            // Optional: Add a simple fade-in animation
-            document.body.style.opacity = '0';
-            document.body.style.transition = 'opacity 0.5s ease';
-            
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 100);
-        });
+<script>
+    // ========== معالجة معلمات URL ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 صفحة sorry.html محملة');
         
-        // Function to handle Try Again button click
-        function tryAgain() {
-            console.log('Trying again...');
-            // You could add logic to retry the failed action here
-            alert('Please try again. If the problem persists, contact support.');
+        // الحصول على معاملات URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const recordId = urlParams.get('recordId');
+        const idNumber = urlParams.get('id');
+        
+        // عرض معلومات إضافية إذا كانت متوفرة
+        if (idNumber) {
+            const errorDetail = document.querySelector('.error-detail');
+            if (errorDetail) {
+                errorDetail.innerHTML += `<br><small>رقم الهوية: ${idNumber}</small>`;
+            }
         }
-    </script>
+        
+        // إضافة زر للعودة إلى صفحة apply.html
+        const tryAgainBtn = document.querySelector('.btn[onclick*="tryAgain"]');
+        if (tryAgainBtn) {
+            tryAgainBtn.onclick = function() {
+                window.location.href = 'apply.html';
+                return false;
+            };
+        }
+        
+        // إضافة زر للتحقق من الطلبات الجديدة
+        const backToHomeBtn = document.querySelector('.btn-primary');
+        if (backToHomeBtn && recordId) {
+            backToHomeBtn.innerHTML = '<i class="fas fa-home"></i> العودة للتسجيل';
+            backToHomeBtn.onclick = function(e) {
+                e.preventDefault();
+                window.location.href = 'apply.html';
+            };
+        }
+    });
+</script>
 </body>
 </html>
