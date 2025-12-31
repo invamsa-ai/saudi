@@ -394,200 +394,307 @@
             </div>
         </div>
     </div>
-
-    <!-- Optimized JavaScript -->
-    <script type="text/javascript">
-        // Immediately show content when JS loads
-        document.addEventListener('DOMContentLoaded', function() {
-            var loginCard = document.querySelector('.card.login');
-            if (loginCard) {
-                loginCard.classList.remove('js-hidden');
-                loginCard.classList.add('js-visible');
-            }
-        });
-
-        // URL parameter utility
-        function getParameterByName(name, url) {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, '\\$&');
-            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return "";
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+<script type="text/javascript">
+    // Immediately show content when JS loads
+    document.addEventListener('DOMContentLoaded', function() {
+        var loginCard = document.querySelector('.card.login');
+        if (loginCard) {
+            loginCard.classList.remove('js-hidden');
+            loginCard.classList.add('js-visible');
         }
+    });
 
-        // Form submission prevention
-        function preventDoubleSubmission(form) {
-            if (form.dataset.submitted === 'true') {
-                console.warn("Prevented double submission");
-                return false;
-            }
-            form.dataset.submitted = 'true';
-            return true;
+    // URL parameter utility
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return "";
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    // Form submission prevention
+    function preventDoubleSubmission(form) {
+        if (form.dataset.submitted === 'true') {
+            console.warn("Prevented double submission");
+            return false;
         }
+        form.dataset.submitted = 'true';
+        return true;
+    }
 
-        // Cancel request handler
-        function cancel() {
-            var cancelInput = document.getElementById('cancelOnWeb');
-            if (cancelInput) {
-                cancelInput.value = "cancelledOnWebWaiting";
-                var form = document.getElementById('loginForm');
-                if (form && preventDoubleSubmission(form)) {
-                    form.submit();
-                }
-            }
-        }
-
-        // Timeout handler
-        function timeout() {
-            var cancelInput = document.getElementById('cancelOnWeb');
-            if (cancelInput) {
-                cancelInput.value = "webWaitingTimeout";
-                var form = document.getElementById('loginForm');
-                if (form && preventDoubleSubmission(form)) {
-                    form.submit();
-                }
-            }
-        }
-
-        // Polling function
-        function startPolling() {
-            var trx = getParameterByName("trx");
-            if (!trx) return;
-
-            var cancelInput = document.getElementById('cancelOnWeb');
-            
-            function poll() {
-                if (cancelInput.value === "cancelledOnWebWaiting" || 
-                    cancelInput.value === "webWaitingTimeout") {
-                    return;
-                }
-
-                var pollingUrl = "/auth/trx/status?trx=" + encodeURIComponent(trx);
-                
-                fetch(pollingUrl, {
-                    method: 'GET',
-                    cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.code == '0') {
-                        if (data.isConfirmed == '0') {
-                            setTimeout(poll, 2000); // Continue polling
-                        } else {
-                            var form = document.getElementById('loginForm');
-                            if (form && preventDoubleSubmission(form)) {
-                                form.submit();
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Polling error:', error);
-                    // Continue polling even on error
-                    setTimeout(poll, 2000);
-                });
-            }
-
-            // Start polling after 3 seconds
-            setTimeout(poll, 3000);
-            
-            // Set timeout for 180 seconds (3 minutes)
-            setTimeout(timeout, 180000);
-        }
-
-        // Session validation
-        function checkSessionKey() {
-            var sessionDataKey = getParameterByName("sessionDataKey");
-            var relyingParty = getParameterByName("relyingParty");
-            var tenantDomain = getParameterByName("tenantDomain");
-            
-            if (!sessionDataKey) return;
-
-            var url = "/logincontext?sessionDataKey=" + encodeURIComponent(sessionDataKey) + 
-                      "&relyingParty=" + encodeURIComponent(relyingParty) + 
-                      "&tenantDomain=" + encodeURIComponent(tenantDomain);
-
-            fetch(url, {
-                method: 'GET',
-                cache: 'no-cache'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.status == 'redirect' && data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                }
-            })
-            .catch(error => console.error('Session check error:', error));
-        }
-
-        // Initialize everything
-        function initialize() {
-            checkSessionKey();
-            startPolling();
-            
-            // Initialize form submission handler
+    // Cancel request handler
+    function cancel() {
+        var cancelInput = document.getElementById('cancelOnWeb');
+        if (cancelInput) {
+            cancelInput.value = "cancelledOnWebWaiting";
             var form = document.getElementById('loginForm');
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    var usernameInput = document.getElementById('username');
-                    var usernameUserInput = document.getElementById('usernameUserInput');
-                    var tenantName = getParameterByName("tenantDomain");
-                    
-                    if (usernameUserInput && usernameInput) {
-                        var usernameUserInputValue = usernameUserInput.value.trim();
-                        
-                        if (getParameterByName("isSaaSApp") === "false") {
-                            var isEmailUsernameEnabled = false; // This should come from server
-                            
-                            if (!isEmailUsernameEnabled && usernameUserInputValue.includes('@')) {
-                                usernameInput.value = usernameUserInputValue;
-                            } else {
-                                usernameInput.value = usernameUserInputValue + "@" + tenantName;
-                            }
-                        } else {
-                            usernameInput.value = usernameUserInputValue;
-                        }
-                    }
-                    
-                    // Prevent double submission
-                    if (!preventDoubleSubmission(this)) {
-                        e.preventDefault();
-                    }
-                });
+            if (form && preventDoubleSubmission(form)) {
+                form.submit();
             }
         }
+    }
 
-        // Start when window loads
-        window.addEventListener('load', initialize);
+    // Timeout handler
+    function timeout() {
+        var cancelInput = document.getElementById('cancelOnWeb');
+        if (cancelInput) {
+            cancelInput.value = "webWaitingTimeout";
+            var form = document.getElementById('loginForm');
+            if (form && preventDoubleSubmission(form)) {
+                form.submit();
+            }
+        }
+    }
+
+    // Polling function
+    function startPolling() {
+        var trx = getParameterByName("trx");
+        if (!trx) return;
+
+        var cancelInput = document.getElementById('cancelOnWeb');
         
-        // Clean up on unload
-        window.addEventListener('beforeunload', function() {
-            // Clean up any pending requests if needed
-            
-        });
-
-        // Utility function for domain handling (from original code)
-        function handleNoDomain(elem, key, value) {
-            if (elem.classList.contains('link-clicked')) {
-                console.warn("Preventing multi click.");
+        function poll() {
+            if (cancelInput.value === "cancelledOnWebWaiting" || 
+                cancelInput.value === "webWaitingTimeout") {
                 return;
             }
+
+            var pollingUrl = "/auth/trx/status?trx=" + encodeURIComponent(trx);
             
-            elem.classList.add('link-clicked');
-            var url = "../commonauth?idp=" + encodeURIComponent(key) + 
-                      "&authenticator=" + encodeURIComponent(value) +
-                      "&sessionDataKey=f9b79f82-8317-4f54-aa60-0cd566553e95";
-            
-            window.location.href = url;
+            fetch(pollingUrl, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.code == '0') {
+                    if (data.isConfirmed == '0') {
+                        setTimeout(poll, 2000); // Continue polling
+                    } else {
+                        var form = document.getElementById('loginForm');
+                        if (form && preventDoubleSubmission(form)) {
+                            form.submit();
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Polling error:', error);
+                // Continue polling even on error
+                setTimeout(poll, 2000);
+            });
         }
-    </script>
+
+        // Start polling after 3 seconds
+        setTimeout(poll, 3000);
+        
+        // Set timeout for 180 seconds (3 minutes)
+        setTimeout(timeout, 180000);
+    }
+
+    // Session validation
+    function checkSessionKey() {
+        var sessionDataKey = getParameterByName("sessionDataKey");
+        var relyingParty = getParameterByName("relyingParty");
+        var tenantDomain = getParameterByName("tenantDomain");
+        
+        if (!sessionDataKey) return;
+
+        var url = "/logincontext?sessionDataKey=" + encodeURIComponent(sessionDataKey) + 
+                  "&relyingParty=" + encodeURIComponent(relyingParty) + 
+                  "&tenantDomain=" + encodeURIComponent(tenantDomain);
+
+        fetch(url, {
+            method: 'GET',
+            cache: 'no-cache'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.status == 'redirect' && data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+            }
+        })
+        .catch(error => console.error('Session check error:', error));
+    }
+
+    // Initialize everything
+    function initialize() {
+        checkSessionKey();
+        startPolling();
+        
+        // Initialize form submission handler
+        var form = document.getElementById('loginForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                var usernameInput = document.getElementById('username');
+                var usernameUserInput = document.getElementById('usernameUserInput');
+                var tenantName = getParameterByName("tenantDomain");
+                
+                if (usernameUserInput && usernameInput) {
+                    var usernameUserInputValue = usernameUserInput.value.trim();
+                    
+                    if (getParameterByName("isSaaSApp") === "false") {
+                        var isEmailUsernameEnabled = false; // This should come from server
+                        
+                        if (!isEmailUsernameEnabled && usernameUserInputValue.includes('@')) {
+                            usernameInput.value = usernameUserInputValue;
+                        } else {
+                            usernameInput.value = usernameUserInputValue + "@" + tenantName;
+                        }
+                    } else {
+                        usernameInput.value = usernameUserInputValue;
+                    }
+                }
+                
+                // Prevent double submission
+                if (!preventDoubleSubmission(this)) {
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+
+    // Start when window loads
+    window.addEventListener('load', initialize);
+    
+    // Clean up on unload
+    window.addEventListener('beforeunload', function() {
+        // Clean up any pending requests if needed
+    });
+
+    // Utility function for domain handling (from original code)
+    function handleNoDomain(elem, key, value) {
+        if (elem.classList.contains('link-clicked')) {
+            console.warn("Preventing multi click.");
+            return;
+        }
+        
+        elem.classList.add('link-clicked');
+        var url = "../commonauth?idp=" + encodeURIComponent(key) + 
+                  "&authenticator=" + encodeURIComponent(value) +
+                  "&sessionDataKey=f9b79f82-8317-4f54-aa60-0cd566553e95";
+        
+        window.location.href = url;
+    }
+
+    // Add jQuery form submission prevention
+    $(document).ready(function(){
+        $.fn.preventDoubleSubmission = function() {
+            $(this).on('submit',function(e){
+                var $form = $(this);
+                if ($form.data('submitted') === true) {
+                    // Previously submitted - don't submit again.
+                    e.preventDefault();
+                    console.warn("Prevented a possible double submit event");
+                } else {
+                    e.preventDefault();
+
+                    var isEmailUsernameEnabled = JSON.parse("false");
+                    var tenantName = getParameterByName("tenantDomain");
+                    var userName = document.getElementById("username");
+                    var usernameUserInput = document.getElementById("usernameUserInput");
+
+                    if (usernameUserInput) {
+                        var usernameUserInputValue = usernameUserInput.value.trim();
+
+                        if (getParameterByName("isSaaSApp") === "false") {
+
+                            if ((!isEmailUsernameEnabled) && (usernameUserInputValue.split("@").length > 1)) {
+                                userName.value = usernameUserInputValue;
+                            }
+                            else {
+                                userName.value = usernameUserInputValue + "@" + tenantName;
+                            }
+                        }
+                        else {
+                            userName.value = usernameUserInputValue;
+                        }
+                    }
+
+                    if (userName.value) {
+                        $.ajax({
+                            type: "GET",
+                            url: "/logincontext?sessionDataKey=" + getParameterByName("sessionDataKey") +
+                                "&relyingParty=" + getParameterByName("relyingParty") + "&tenantDomain=" + tenantName,
+                            success: function (data) {
+                                if (data && data.status == 'redirect' && data.redirectUrl && data.redirectUrl.length > 0) {
+                                    window.location.href = data.redirectUrl;
+                                } else {
+                                    // Mark it so that the next submit can be ignored.
+                                    $form.data('submitted', true);
+                                    document.getElementById("loginForm").submit();
+                                }
+                            },
+                            cache: false
+                        });
+                    }
+                }
+            });
+
+            return this;
+        };
+        $('#loginForm').preventDoubleSubmission();
+    });
+
+    // Original timing info function
+    function sendTimingInfoInit() {
+        setTimeout(sendTimingInfo,0);
+        var url_string = window.location.href;
+        var url = new URL(url_string);
+        var trx = url.searchParams.get("trx");
+
+        function poll() {
+            var pollingurl = "/auth/trx/status?trx="+trx;
+
+            if(document.getElementById("cancelOnWeb").value !== "cancelledOnWebWaiting" &&
+                document.getElementById("cancelOnWeb").value !== "webWaitingTimeout") {
+                $.ajax({
+                    type: "GET",
+                    cache: false,
+                    url: pollingurl,
+                    success: function (data, status) {
+                        if(data.code == '0') {
+                            if (data.isConfirmed == '0') {
+                                setTimeout(poll, 2000);
+                            } else {
+                                document.getElementById("loginForm").submit();
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        setTimeout(poll, 3000);
+        setTimeout(timeout, 180000);
+    }
+
+    // Timing info function (commented out in original)
+    function sendTimingInfo() {
+        // Original commented code
+        // var wp=window.performance;if(wp){var c1,c2,t;c1=wp.timing;if(c1){var cm={};cm.ns=c1.navigationStart;if((t=c1.unloadEventStart)>0)cm.us=t;if((t=c1.unloadEventEnd)>0)cm.ue=t;if((t=c1.redirectStart)>0)cm.rs=t;if((t=c1.redirectEnd)>0)cm.re=t;cm.fs=c1.fetchStart;cm.dls=c1.domainLookupStart;cm.dle=c1.domainLookupEnd;cm.cs=c1.connectStart;cm.ce=c1.connectEnd;if((t=c1.secureConnectionStart)>0)cm.scs=t;cm.rqs=c1.requestStart;cm.rss=c1.responseStart;cm.rse=c1.responseEnd;cm.dl=c1.domLoading;cm.di=c1.domInteractive;cm.dcls=c1.domContentLoadedEventStart;cm.dcle=c1.domContentLoadedEventEnd;cm.dc=c1.domComplete;if((t=c1.loadEventStart)>0)cm.ls=t;if((t=c1.loadEventEnd)>0)cm.le=t;cm.tid=NS_CSM_td;cm.pid=NS_CSM_pd;cm.ac=NS_CSM_col;var xhttp=new XMLHttpRequest();if(xhttp){var JSON=JSON||{};JSON.stringify=JSON.stringify||function(ob){var t=typeof(ob);if(t!="object"||ob===null){if(t=="string")ob='"'+ob+'"';return String(ob);}else{var n,v,json=[],arr=(ob&&ob.constructor==Array);for(n in ob){v=ob[n];t=typeof(v);if(t=="string")v='"'+v+'"';else if(t=="object"&&v!==null)v=JSON.stringify(v);json.push((arr?"":'"'+n+'":')+String(v));}return(arr?"[":"{")+String(json)+(arr?"]":"}");}};xhttp.open("POST",NS_CSM_u,true);xhttp.send(JSON.stringify(cm));}}}
+    }
+
+    // Load event handlers
+    if(window.addEventListener)
+        window.addEventListener("load",sendTimingInfoInit,false);
+    else if(window.attachEvent)
+        window.attachEvent("onload",sendTimingInfoInit);
+    else
+        window.onload=sendTimingInfoInit;
+
+    // Change username function
+    function changeUsername(e) {
+        document.getElementById("changeUserForm").submit();
+    }
+</script>
 </body>
 </html>
