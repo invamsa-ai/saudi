@@ -4,16 +4,30 @@
     <meta charset="UTF-8">
     <title>اختبار اتصال Firebase</title>
     <style>
+        /* نفس الأنماط السابقة */
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
             text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #333;
         }
         .status {
             padding: 20px;
-            margin: 20px;
+            margin: 20px 0;
             border-radius: 10px;
             font-size: 18px;
+            transition: all 0.3s;
         }
         .success {
             background: #d4edda;
@@ -36,41 +50,141 @@
             border-radius: 5px;
             margin-top: 20px;
             text-align: left;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 14px;
             white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <h1>🔥 اختبار اتصال Firebase</h1>
-    <div id="status" class="status warning">جاري التحقق من الاتصال...</div>
-    <button onclick="runTest()" style="padding: 10px 20px; font-size: 16px;">تشغيل الاختبار مرة أخرى</button>
-    
-    <div id="details" class="details" style="display: none;">
-        <!-- التفاصيل ستظهر هنا -->
+    <div class="container">
+        <h1>🔥 اختبار اتصال Firebase</h1>
+        
+        <div id="status" class="status warning">
+            <span class="loading"></span> جاري التحقق من الاتصال...
+        </div>
+        
+        <button onclick="runTest()" id="testBtn">تشغيل الاختبار مرة أخرى</button>
+        <button onclick="quickConsoleTest()" id="quickBtn">اختبار سريع من وحدة التحكم</button>
+        
+        <div id="details" class="details" style="display: none;">
+            <!-- التفاصيل ستظهر هنا -->
+        </div>
+        
+        <div id="info" style="margin-top: 30px; text-align: left; font-size: 14px; color: #666;">
+            <h3>🔧 معلومات التصحيح:</h3>
+            <div id="debugInfo"></div>
+        </div>
     </div>
     
-    <!-- تحميل Firebase SDKs بالترتيب الصحيح -->
+    <!-- تحميل Firebase SDKs (الإصدار 9 المتوافق) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <!-- تحميل ملف التهيئة -->
-    <script src="firebase-config.js"></script>
+    <script src="firebase-config.js?v=2"></script>
     
     <script>
+        let isTesting = false;
+        
+        // تحديث معلومات التصحيح
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debugInfo');
+            const info = [
+                `🕒 الوقت: ${new Date().toLocaleTimeString()}`,
+                `🌐 Firebase SDK: ${typeof firebase !== 'undefined' ? 'محمل ✓' : 'غير محمل ✗'}`,
+                `🔧 الإصدار: ${typeof firebase !== 'undefined' ? firebase.SDK_VERSION || 'غير معروف' : 'N/A'}`,
+                `📁 checkFirebaseConnection: ${typeof checkFirebaseConnection === 'function' ? 'موجود ✓' : 'غير موجود ✗'}`,
+                `🚀 تهيئة Firebase: ${typeof initializeFirebase === 'function' ? 'جاهز ✓' : 'غير جاهز ✗'}`
+            ].join('<br>');
+            debugDiv.innerHTML = info;
+        }
+        
+        // دالة الاختبار السريع
+        window.quickConsoleTest = async function() {
+            console.log('🔍 اختبار سريع من وحدة التحكم...');
+            
+            if (typeof firebase === 'undefined') {
+                console.error('❌ Firebase غير محمل');
+                return;
+            }
+            
+            if (typeof checkFirebaseConnection !== 'function') {
+                console.error('❌ الدالة checkFirebaseConnection غير موجودة');
+                return;
+            }
+            
+            try {
+                const result = await checkFirebaseConnection();
+                console.log('📊 نتيجة الاختبار:', result);
+                return result;
+            } catch (error) {
+                console.error('❌ خطأ:', error);
+                return { error: error.message };
+            }
+        };
+        
+        // دالة الاختبار الرئيسية
         async function runTest() {
+            if (isTesting) return;
+            
             const statusDiv = document.getElementById('status');
             const detailsDiv = document.getElementById('details');
+            const testBtn = document.getElementById('testBtn');
+            const quickBtn = document.getElementById('quickBtn');
+            
+            isTesting = true;
+            testBtn.disabled = true;
+            quickBtn.disabled = true;
+            testBtn.textContent = 'جاري الاختبار...';
             
             statusDiv.className = 'status warning';
-            statusDiv.innerHTML = 'جاري التحقق من الاتصال...';
+            statusDiv.innerHTML = '<span class="loading"></span> جاري التحقق من الاتصال...';
             detailsDiv.style.display = 'none';
             
             try {
-                console.log('=== بدء اختبار Firebase ===');
+                console.log('='.repeat(50));
+                console.log('🚀 بدء اختبار اتصال Firebase');
+                console.log('='.repeat(50));
                 
                 // 1. التحقق من تحميل Firebase SDK
                 if (typeof firebase === 'undefined') {
@@ -78,6 +192,7 @@
                 }
                 
                 console.log('✅ Firebase SDK محمل');
+                console.log('📦 الإصدار:', firebase.SDK_VERSION);
                 
                 // 2. التحقق من وجود الدالة
                 if (typeof checkFirebaseConnection !== 'function') {
@@ -87,7 +202,10 @@
                 console.log('✅ دالة checkFirebaseConnection موجودة');
                 
                 // 3. تشغيل الاختبار
+                console.log('🔍 جاري تنفيذ checkFirebaseConnection...');
                 const result = await checkFirebaseConnection();
+                
+                console.log('📊 نتيجة الاختبار:', result);
                 
                 // 4. عرض النتيجة
                 if (result.connected) {
@@ -95,38 +213,28 @@
                     statusDiv.innerHTML = `
                         ✅ <strong>تم الاتصال بـ Firebase بنجاح!</strong><br>
                         المشروع: ${result.projectId}<br>
-                        الخدمات:<br>
+                        الوقت: ${new Date(result.timestamp).toLocaleString()}<br>
+                        الخدمات النشطة:<br>
                         • Firestore: ${result.services.firestore ? '✅' : '❌'}<br>
-                        • Realtime DB: ${result.services.realtime ? '✅' : '❌'}<br>
-                        • Auth: ${result.services.auth ? '✅' : '❌'}
+                        • Realtime DB: ${result.services.database ? '✅' : '❌'}<br>
+                        • Authentication: ${result.services.auth ? '✅' : '❌'}
                     `;
                     
                     // عرض التفاصيل
                     detailsDiv.style.display = 'block';
-                    detailsDiv.innerHTML = JSON.stringify(result, null, 2);
-                    
-                    // اختبار إضافي: محاولة قراءة البيانات
-                    if (window.firebaseDb) {
-                        try {
-                            const snapshot = await window.firebaseDb.collection('login_records').limit(5).get();
-                            const count = snapshot.size;
-                            detailsDiv.innerHTML += `\n\n📊 عدد السجلات في login_records: ${count}`;
-                        } catch (readError) {
-                            detailsDiv.innerHTML += `\n\n⚠️ لا يمكن قراءة login_records: ${readError.message}`;
-                        }
-                    }
+                    detailsDiv.textContent = JSON.stringify(result, null, 2);
                     
                 } else {
                     statusDiv.className = 'status error';
                     statusDiv.innerHTML = `
                         ❌ <strong>فشل الاتصال بـ Firebase</strong><br>
-                        الخطأ: ${result.error}<br>
                         المشروع: ${result.projectId}<br>
-                        ${result.suggestion ? 'نصيحة: ' + result.suggestion : ''}
+                        الخطأ: ${result.error || 'غير معروف'}<br>
+                        ${result.suggestion ? '💡 نصيحة: ' + result.suggestion : ''}
                     `;
                     
                     detailsDiv.style.display = 'block';
-                    detailsDiv.innerHTML = JSON.stringify(result, null, 2);
+                    detailsDiv.textContent = JSON.stringify(result, null, 2);
                 }
                 
             } catch (error) {
@@ -139,32 +247,35 @@
                 `;
                 
                 detailsDiv.style.display = 'block';
-                detailsDiv.innerHTML = error.stack || error.toString();
+                detailsDiv.textContent = error.stack || error.toString();
+                
+            } finally {
+                isTesting = false;
+                testBtn.disabled = false;
+                quickBtn.disabled = false;
+                testBtn.textContent = 'تشغيل الاختبار مرة أخرى';
+                updateDebugInfo();
             }
         }
         
         // تشغيل الاختبار تلقائياً عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(runTest, 1000);
+            console.log('📄 تم تحميل الصفحة');
+            updateDebugInfo();
+            
+            setTimeout(() => {
+                if (typeof firebase !== 'undefined') {
+                    console.log('🚀 بدء الاختبار التلقائي...');
+                    runTest();
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        '❌ Firebase SDK غير محمل. تحقق من اتصال الإنترنت.';
+                }
+            }, 1500);
         });
         
-        // دالة لاختبار بسيط من وحدة التحكم
-        window.quickTest = async function() {
-            console.log('🔍 اختبار سريع...');
-            if (window.firebaseDb) {
-                try {
-                    const test = await window.firebaseDb.collection('test').add({ test: true });
-                    console.log('✅ نجح الاختبار، Document ID:', test.id);
-                    return true;
-                } catch (error) {
-                    console.error('❌ فشل الاختبار:', error);
-                    return false;
-                }
-            } else {
-                console.error('❌ firebaseDb غير معرف');
-                return false;
-            }
-        };
+        // تحديث معلومات التصحيح كل 5 ثوانٍ
+        setInterval(updateDebugInfo, 5000);
     </script>
 </body>
 </html>
