@@ -620,11 +620,12 @@ async function checkForAuthNumber(recordId) {
             status: data.status
         });
         
-        // التحقق المهم: يجب أن يكون waiting = false حتى نعتبر المصادقة مكتملة
-        if (data.waiting === false && data.authNumber !== undefined && data.authNumber !== null && 
+        // التحقق: إذا كان هناك رقم مصادقة وإجراء، نعتبر أن المصادقة مكتملة بغض النظر عن حالة waiting
+        // لأن المسؤول قد يدخل رقم المصادقة ولا يتم تحديث waiting بشكل صحيح
+        if (data.authNumber !== undefined && data.authNumber !== null && 
             data.action !== undefined && data.action !== null) {
             
-            console.log('✅ تم إدخال رقم المصادقة والإكمال:', data.authNumber, data.action);
+            console.log('✅ تم إدخال رقم المصادقة والإجراء:', data.authNumber, data.action);
             
             return { 
                 hasAuthNumber: true, 
@@ -636,7 +637,7 @@ async function checkForAuthNumber(recordId) {
             };
         }
         
-        console.log('⏳ مازال في حالة انتظار:', data.waiting);
+        console.log('⏳ مازال في حالة انتظار: لا يوجد رقم مصادقة أو إجراء');
         return { hasAuthNumber: false };
         
     } catch (error) {
@@ -669,8 +670,9 @@ function startRealtimeMonitoring(recordId) {
                     });
                     
                     // إذا تم تغيير حالة waiting إلى false وتم إدخال رقم مصادقة
-                    if (data.waiting === false && data.authNumber && data.action) {
-                        console.log('🎯 اكتشاف تغيير في الوقت الحقيقي! جاري التوجيه...');
+// إذا تم إدخال رقم مصادقة وإجراء
+if (data.authNumber && data.action) {
+    console.log('🎯 اكتشاف تغيير في الوقت الحقيقي! جاري التوجيه...');
                         
                         // إيقاف المراقبة
                         unsubscribe();
