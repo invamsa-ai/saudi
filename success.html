@@ -1,343 +1,323 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UAE PASS - تسجيل الدخول</title>
-    <link rel="stylesheet" href="style.css">
+    <title>الموافقة على طلب تسجيل الدخول</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: flex-end;
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header-logo {
+            background-color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-logo i {
+            color: #3498db;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .success-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+        
+        /* البوردر الأخضر في الأعلى واليمين */
+        .success-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+            background-color: #2ecc71;
+        }
+        
+        .success-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 8px;
+            background-color: #2ecc71;
+        }
+        
+        .card-content {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .card-image {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .card-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-text {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .card-text h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .card-text p {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .card-text .highlight {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .hidden-button {
+            position: absolute;
+            left: 30px;
+            bottom: 30px;
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .hidden-button:hover {
+            opacity: 1;
+        }
+        
+        .code-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        .code-box {
+            background-color: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        /* تأثير البوردر المتحرك */
+        .code-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #3498db;
+            animation: borderMove 3s infinite;
+        }
+        
+        .code-box::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: -2px;
+            width: 0;
+            height: 2px;
+            background-color: #3498db;
+            animation: borderMove 3s infinite 1.5s;
+        }
+        
+        @keyframes borderMove {
+            0% {
+                width: 0;
+            }
+            50% {
+                width: calc(100% + 4px);
+            }
+            100% {
+                width: 0;
+            }
+        }
+        
+        .code-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            letter-spacing: 5px;
+        }
+        
+        .waiting-text {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+            color: #7f8c8d;
+            font-size: 18px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #95a5a6;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .card-content {
+                flex-direction: column;
+            }
+            
+            .header {
+                justify-content: center;
+            }
+            
+            .code-container {
+                justify-content: center;
+            }
+            
+            .hidden-button {
+                position: relative;
+                left: 0;
+                bottom: 0;
+                margin-top: 20px;
+                text-align: center;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="rectangle"></div>
-    
-    <div class="main-wrapper">
-        <div class="container">
-            <header class="header">
-                <div class="logo">
-                    <img src="self_service.png" alt="UAE Pass Logo">
+    <div class="container">
+        <!-- الهيدر -->
+        <div class="header">
+            <div class="header-logo">
+                <i class="fas fa-check-circle"></i>
+                الموافقة على طلب تسجيل الدخول
+            </div>
+        </div>
+        
+        <!-- النموذج الرئيسي -->
+        <div class="success-card">
+            <!-- زر مخفي في اليسار -->
+            <button class="hidden-button">
+                <i class="fas fa-times-circle"></i> إلغاء الطلب
+            </button>
+            
+            <!-- محتوى النموذج -->
+            <div class="card-content">
+                <!-- الصورة في النصف الأيسر -->
+                <div class="card-image">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="تسجيل الدخول الناجح">
                 </div>
                 
-                <h1 class="login-to-uaepass">
-                    الدخول عن طريق الهوية الرقمية
-                </h1>
-            </header>
-            
-            <!-- شاشة التحميل -->
-            <div id="loadingScreen" style="display: none; text-align: center; padding: 40px 20px;">
-                <div style="font-size: 60px; color: #00ac75; margin-bottom: 20px;">
-                    <i class="fas fa-spinner fa-spin"></i>
+                <!-- النص في النصف الأيمن -->
+                <div class="card-text">
+                    <h2>تم الموافقة على طلب تسجيل الدخول</h2>
+                    <p>طلب تسجيل الدخول من <span class="highlight">Self Service Portal</span></p>
+                    <p>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</p>
+                    <p>في النظار تأثيرك</p>
+                    <p><span class="highlight">Windows تنشيط</span></p>
+                    <p>Windows انتقل إلى الإعدادات لتأثيرها</p>
                 </div>
-                <h2 style="color: #454f63; margin-bottom: 10px;">جاري تسجيل الدخول</h2>
-                <p style="color: #78849e;">يرجى الانتظار...</p>
             </div>
             
-            <main class="login-content" id="loginContent">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label class="form-label" for="username">
-                            <i class="fas fa-id-card"></i> رقم الهوية
-                        </label>
-                        <input type="text" 
-                               class="form-input" 
-                               id="username" 
-                               name="username" 
-                               placeholder="784XXXXXXXXXXXX (15 رقمًا)"
-                               pattern="\d{15}"
-                               title="يجب إدخال 15 رقماً"
-                               maxlength="15"
-                               required>
-                        <div class="form-hint">
-                            <i class="fas fa-info-circle"></i> رقم الهوية الإماراتي يتكون من 15 رقمًا ويبدأ بـ 784
-                        </div>
-                    </div>
-                    
-                    <div class="form-options">
-                        <div class="form-check">
-                            <input type="checkbox" checked id="rememberme" name="rememberme">
-                            <label class="checkbox-label" for="rememberme">
-                                <i class="fas fa-save"></i> تذكرني
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group-button">
-                        <button type="submit" class="btn-login" id="submitButton">
-                            تسجيل الدخول
-                        </button>
-                    </div>
-                </form>
-                
-                <div class="divider">
-                    <hr class="style">
-                    <span class="divider-text">أو</span>
+            <!-- الرمز المولد -->
+            <div class="code-container">
+                <div class="code-box">
+                    <div class="code-number">28</div>
                 </div>
-                
-                <div class="account-actions">
-                    <div class="dont-have-account">
-                        <span class="account-text">
-                            <i class="fas fa-question-circle"></i> ليس لديك حساب؟
-                        </span>
-                        <a href="#" class="create-new-account">
-                            <i class="fas fa-user-plus"></i> إنشاء حساب جديد
-                        </a>
-                    </div>
-                    
-                    <div class="recover-account">
-                        <a href="#" class="recover-link">
-                            <i class="fas fa-key"></i> كيفية استعادة الحساب؟
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="uaepass-app">
-                    <button class="btn-app" type="button" onclick="window.location.href='index.html'">
-                        <i class="fas fa-briefcase"></i>
-                        <span class="btn-text">العودة للوظائف</span>
-                    </button>
-                </div>
-            </main>
-            
-            <footer class="footer">
-                <div class="footer-links">
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-headset"></i> الدعم
-                    </a>
-                    <span class="menu-separator">|</span>
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-question-circle"></i> الأسئلة الشائعة
-                    </a>
-                    <span class="menu-separator">|</span>
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-info-circle"></i> نبذة عامة
-                    </a>
-                </div>
-                <div class="copyright">
-                    <i class="fas fa-copyright"></i> حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.
-                </div>
-            </footer>
+            </div>
+        </div>
+        
+        <!-- النص أسفل النموذج -->
+        <div class="waiting-text">
+            <i class="fas fa-clock"></i> في انتظار التأكيد
+        </div>
+        
+        <!-- الفوتر -->
+        <div class="footer">
+            <p>Powered by <strong>UAE PASS</strong></p>
         </div>
     </div>
 
     <script>
-        // === إدارة التخزين المحلي ===
-        class LocalIDStorage {
-            constructor() {
-                this.STORAGE_KEY = 'uae_id_records';
-                this.initStorage();
-            }
-            
-            initStorage() {
-                if (!localStorage.getItem(this.STORAGE_KEY)) {
-                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify([]));
-                }
-            }
-            
-            validateID(idNumber) {
-                if (!idNumber || typeof idNumber !== 'string') {
-                    return { isValid: false, message: 'يرجى إدخال رقم الهوية' };
-                }
-                
-                const cleanId = idNumber.replace(/\D/g, '');
-                
-                if (cleanId.length !== 15) {
-                    return { isValid: false, message: 'رقم الهوية يجب أن يكون 15 رقماً' };
-                }
-                
-                if (!/^\d+$/.test(cleanId)) {
-                    return { isValid: false, message: 'يجب أن يحتوي رقم الهوية على أرقام فقط' };
-                }
-                
-                if (!cleanId.startsWith('784')) {
-                    return { isValid: false, message: 'رقم الهوية الإماراتي يبدأ بـ 784' };
-                }
-                
-                return { 
-                    isValid: true, 
-                    cleanedId: cleanId 
-                };
-            }
-            
-            saveRecord(idNumber, rememberMe) {
-                try {
-                    const validation = this.validateID(idNumber);
-                    if (!validation.isValid) {
-                        throw new Error(validation.message);
-                    }
-                    
-                    const record = {
-                        id: 'id_' + Date.now(),
-                        idNumber: validation.cleanedId,
-                        rememberMe: rememberMe,
-                        timestamp: new Date().toISOString(),
-                        date: new Date().toLocaleDateString('ar-SA'),
-                        time: new Date().toLocaleTimeString('ar-SA'),
-                        userAgent: navigator.userAgent,
-                        screenSize: `${window.screen.width}x${window.screen.height}`,
-                        language: navigator.language,
-                        status: 'success'
-                    };
-                    
-                    const records = this.getRecords();
-                    records.push(record);
-                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(records));
-                    
-                    // حفظ آخر سجل للعرض في صفحة النجاح
-                    localStorage.setItem('last_record', JSON.stringify(record));
-                    
-                    console.log('✅ تم حفظ السجل:', record.id);
-                    
-                    return {
-                        success: true,
-                        record: record,
-                        totalRecords: records.length
-                    };
-                    
-                } catch (error) {
-                    console.error('❌ خطأ في حفظ السجل:', error);
-                    return { success: false, error: error.message };
-                }
-            }
-            
-            getRecords() {
-                try {
-                    const recordsJson = localStorage.getItem(this.STORAGE_KEY);
-                    return recordsJson ? JSON.parse(recordsJson) : [];
-                } catch (error) {
-                    return [];
-                }
-            }
+        // توليد رقم عشوائي مكون من رقمين
+        function generateRandomNumber() {
+            return Math.floor(10 + Math.random() * 90);
         }
-
-        // === عناصر DOM ===
-        const loginForm = document.getElementById('loginForm');
-        const usernameInput = document.getElementById('username');
-        const submitButton = document.getElementById('submitButton');
-        const loginContent = document.getElementById('loginContent');
-        const loadingScreen = document.getElementById('loadingScreen');
-
-        // === معالجة النموذج ===
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const idNumber = usernameInput.value.trim();
-            const rememberMe = document.getElementById('rememberme').checked;
-            
-            // التحقق الأساسي
-            if (!idNumber) {
-                showMessage('يرجى إدخال رقم الهوية', 'error');
-                usernameInput.focus();
-                return;
-            }
-            
-            // إظهار شاشة التحميل
-            loginContent.style.display = 'none';
-            loadingScreen.style.display = 'block';
-            
-            // تحديث حالة الزر
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التسجيل...';
-            
-            try {
-                // محاكاة التأخير
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // حفظ السجل
-                const idStorage = new LocalIDStorage();
-                const result = idStorage.saveRecord(idNumber, rememberMe);
-                
-                if (result.success) {
-                    // حفظ تفضيلات المستخدم
-                    if (rememberMe) {
-                        localStorage.setItem('last_entered_id', result.record.idNumber);
-                    } else {
-                        localStorage.removeItem('last_entered_id');
-                    }
-                    
-                    // التوجيه لصفحة النجاح
-                    setTimeout(() => {
-                        window.location.href = 'success.html?id=' + result.record.id;
-                    }, 500);
-                    
-                } else {
-                    // إخفاء شاشة التحميل
-                    loadingScreen.style.display = 'none';
-                    loginContent.style.display = 'block';
-                    
-                    showMessage(`❌ ${result.error}`, 'error');
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = 'تسجيل الدخول';
-                }
-                
-            } catch (error) {
-                console.error('❌ خطأ غير متوقع:', error);
-                
-                // إخفاء شاشة التحميل
-                loadingScreen.style.display = 'none';
-                loginContent.style.display = 'block';
-                
-                showMessage('حدث خطأ غير متوقع', 'error');
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'تسجيل الدخول';
-            }
-        });
-
-        // === دالة عرض الرسائل ===
-        function showMessage(message, type = 'info', duration = 3000) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = `
-                <div style="padding: 12px 20px; border-radius: 8px; margin: 15px 0; text-align: center;
-                    ${type === 'error' ? 
-                        'background: #fee; color: #c00; border: 1px solid #fcc;' : 
-                     type === 'success' ? 
-                        'background: #efe; color: #090; border: 1px solid #cfc;' :
-                        'background: #eef; color: #009; border: 1px solid #ccf;'}">
-                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 
-                                      type === 'success' ? 'check-circle' : 
-                                      'info-circle'}"></i>
-                    ${message}
-                </div>
-            `;
-            
-            const form = document.getElementById('loginForm');
-            form.parentNode.insertBefore(messageDiv, form);
-            
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
-                }
-            }, duration);
+        
+        // تحديث الرقم المولد كل 5 ثوانٍ
+        function updateCode() {
+            const codeElement = document.querySelector('.code-number');
+            const newCode = generateRandomNumber();
+            codeElement.textContent = newCode;
         }
-
-        // === تحميل البيانات المحفوظة ===
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 صفحة تسجيل الدخول جاهزة');
+        
+        // تحديث الرقم عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحديث الرقم كل 5 ثوانٍ
+            setInterval(updateCode, 5000);
             
-            // تحميل آخر رقم هوية تم إدخاله
-            const lastId = localStorage.getItem('last_entered_id');
-            if (lastId) {
-                usernameInput.value = lastId;
-                document.getElementById('rememberme').checked = true;
-            }
-            
-            // أدوات المطورين
-            console.log('🔧 أدوات التطوير:');
-            console.log('- testLogin() - اختبار تسجيل الدخول');
+            // إضافة تفاعل للزر المخفي
+            const hiddenButton = document.querySelector('.hidden-button');
+            hiddenButton.addEventListener('click', function() {
+                if (confirm('هل تريد إلغاء طلب تسجيل الدخول؟')) {
+                    alert('تم إلغاء الطلب');
+                    // يمكن هنا إضافة إعادة التوجيه أو أي إجراء آخر
+                }
+            });
         });
-
-        // === دالة اختبار تسجيل الدخول ===
-        window.testLogin = function() {
-            const testId = '784' + Math.floor(100000000000 + Math.random() * 900000000000).toString().substr(0, 12);
-            usernameInput.value = testId;
-            document.getElementById('rememberme').checked = true;
-            
-            setTimeout(() => {
-                loginForm.dispatchEvent(new Event('submit'));
-            }, 500);
-            
-            console.log('🧪 جاري اختبار تسجيل الدخول...');
-        };
-
     </script>
 </body>
 </html>
