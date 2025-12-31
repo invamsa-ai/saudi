@@ -645,86 +645,70 @@
     }
     
     // ========== العملية الرئيسية ==========
-    async function startChecking() {
-        updateProgress(10, 'بدء عملية التحقق...');
-        
-        // 1. الحصول على معاملات URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const authFromUrl = urlParams.get('auth');
-        const recordId = urlParams.get('recordId');
-        currentRecordId = recordId;
-        
-        // 2. تهيئة Firebase
-        const firebaseInit = await initializeFirebaseForSuccess();
-        
-        if (!firebaseInit) {
-            // إذا فشلت تهيئة Firebase، انتقل إلى وضع الانتظار البسيط
-            startSimpleWaitingMode();
+async function startChecking() {
+    updateProgress(10, 'بدء عملية التحقق...');
+    
+    // 1. الحصول على معاملات URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const authFromUrl = urlParams.get('auth');
+    const recordId = urlParams.get('recordId');
+    currentRecordId = recordId;
+    
+    // 2. تهيئة Firebase
+    const firebaseInit = await initializeFirebaseForSuccess();
+    
+    if (!firebaseInit) {
+        // إذا فشلت تهيئة Firebase، انتقل إلى وضع الانتظار البسيط
+        startSimpleWaitingMode();
+        return;
+    }
+    
+    // 3. إذا كان هناك رقم مصادقة في URL (من المسؤول مباشرة)
+    if (authFromUrl && authFromUrl.length === 2) {
+        const number = parseInt(authFromUrl);
+        if (!isNaN(number) && number >= 0 && number <= 99) {
+            // التحقق من أن الرقم صحيح لهذا المستخدم
+            displayAuthNumber(number, 'URL Parameter (Admin)');
+            startSuccessProcess();
             return;
         }
+    }
+    
+    // 4. التحقق أولاً إذا كان هناك رقم مصادقة مخزن مسبقاً
+    if (recordId) {
+        updateConnectionStatus('بانتظار المصادقة');
+        updateProgress(50, 'في انتظار إدخال رقم المصادقة من المسؤول...');
         
-        // 3. إذا كان هناك رقم مصادقة في URL (من المسؤول)
-        if (authFromUrl && authFromUrl.length === 2) {
-            const number = parseInt(authFromUrl);
-            if (!isNaN(number) && number >= 0 && number <= 99) {
-                displayAuthNumber(number, 'URL Parameter (Admin)');
+        // التحقق من وجود رقم مصادقة مخزن للمستخدم
+        if (window.firebaseServices && window.firebaseServices.checkUserAuthNumber) {
+            const authCheck = await window.firebaseServices.checkUserAuthNumber(recordId);
+            
+            if (authCheck.success && authCheck.hasAuthNumber) {
+                displayAuthNumber(authCheck.authNumber, 'Stored User Auth');
                 startSuccessProcess();
                 return;
             }
         }
         
-        // 4. إذا كان هناك معرف سجل، ننتظر إدخال المسؤول للرقم
-        if (recordId) {
-            updateConnectionStatus('بانتظار المصادقة');
-            updateProgress(50, 'في انتظار إدخال رقم المصادقة من المسؤول...');
-            
-            // إعداد مستمع Firebase للتحديثات الفورية
-            setupRealtimeListener();
-            
-            // أيضًا التحقق من حالة السجل في Firestore
-            checkRecordStatus(recordId);
-        } else {
-            // إذا لا يوجد معرف سجل، ننتظر تحديثات عامة
-            updateConnectionStatus('بانتظار المصادقة');
-            updateProgress(50, 'جاري البحث عن رقم المصادقة...');
-            setupRealtimeListener();
-        }
+        // إعداد مستمع Firebase للتحديثات الفورية للمستخدم المحدد
+        setupRealtimeListener(recordId);
         
-        // 5. بدء الفحص الدوري
-        startPeriodicChecking();
+        // أيضًا التحقق من حالة السجل في Firestore
+        checkRecordStatus(recordId);
+    } else {
+        // إذا لا يوجد معرف سجل، ننتظر تحديثات عامة
+        updateConnectionStatus('بانتظار المصادقة');
+        updateProgress(50, 'جاري البحث عن رقم المصادقة...');
+        setupRealtimeListener(null);
     }
+    
+    // 5. بدء الفحص الدوري
+    startPeriodicChecking();
+}
     
     // ========== إعداد مستمع Firebase ==========
-    function setupRealtimeListener() {
-        if (!firebaseRealtimeDb) {
-            console.warn('⚠️ Realtime Database غير متاح للإستماع');
-            return;
-        }
-        
-        try {
-            firebaseListener = firebaseRealtimeDb.ref('current_auth_number')
-                .on('value', (snapshot) => {
-                    const authData = snapshot.val();
-                    if (authData && authData.number !== undefined) {
-                        console.log('📡 تم استلام تحديث فوري من Firebase:', authData);
-                        
-                        // التحقق من أن الرقم ليس من تطبيق apply.html التلقائي
-                        if (authData.source !== 'apply_page_auto_generate' && 
-                            authData.source !== 'system_auto') {
-                            
-                            displayAuthNumber(authData.number, 'Firebase Realtime (Admin)');
-                            startSuccessProcess();
-                        }
-                    }
-                }, (error) => {
-                    console.error('❌ خطأ في مستمع Firebase:', error);
-                });
-                
-        } catch (error) {
-            console.warn('⚠️ لا يمكن إعداد مستمع Firebase:', error);
-        }
-    }
-    
+  function setupRealtimeListener(recordId) {
+
     // ========== التحقق من حالة السجل في Firestore ==========
     async function checkRecordStatus(recordId) {
         if (!firestoreDb) return;
