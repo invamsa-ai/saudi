@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="firebase-config.js?v=14"></script>
+    <script src="firebase-config.js?v=16"></script>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -392,47 +392,6 @@
             100% { opacity: 1; }
         }
         
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-        
-        .toast {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            margin-bottom: 10px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 400px;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .toast-success {
-            border-left: 4px solid var(--success-color);
-        }
-        
-        .toast-error {
-            border-left: 4px solid var(--error-color);
-        }
-        
-        .toast-warning {
-            border-left: 4px solid var(--warning-color);
-        }
-        
-        .toast-info {
-            border-left: 4px solid var(--primary-color);
-        }
-        
         .record-info-panel {
             background: #f8f9fa;
             padding: 20px;
@@ -525,11 +484,11 @@
                 
                 <div class="action-buttons">
                     <button class="btn btn-success btn-lg" onclick="setApproveAction()">
-                        <i class="fas fa-check-circle"></i> موافقة وتوجيه لـ success.html
+                        <i class="fas fa-check-circle"></i> موافقة
                     </button>
                     
                     <button class="btn btn-danger btn-lg" onclick="setRejectAction()">
-                        <i class="fas fa-times-circle"></i> رفض وتوجيه لـ sorry.html
+                        <i class="fas fa-times-circle"></i> رفض
                     </button>
                     
                     <button class="btn btn-warning" onclick="clearSelection()">
@@ -568,10 +527,6 @@
                 
                 <button class="btn btn-outline-info" onclick="testConnection()">
                     <i class="fas fa-bug"></i> اختبار الاتصال
-                </button>
-                
-                <button class="btn btn-outline-secondary" onclick="forceFixWaitingField()">
-                    <i class="fas fa-wrench"></i> تصحيح الحقول
                 </button>
             </div>
             
@@ -819,7 +774,7 @@
                     <tr class="${rowClass}" onclick="selectRecord('${record.id}')">
                         <td>${index + 1}</td>
                         <td><strong>${record.id_number || 'غير محدد'}</strong></td>
-                        <td>${record.auth_number || '<span class="empty-auth">لم يتم تعيينه</span>'}</td>
+                        <td>${record.auth_number || '<span class="empty-auth">بانتظار المسؤول</span>'}</td>
                         <td>${createdDate}</td>
                         <td>${statusBadge}</td>
                         <td>${getActionText(record.last_action)}</td>
@@ -907,7 +862,7 @@
                 <strong>رقم الهوية:</strong> ${record.id_number || 'غير محدد'}<br>
                 <strong>الحالة:</strong> ${getStatusText(record.status)}<br>
                 <strong>تاريخ الإنشاء:</strong> ${formatDate(record.created_at?.toDate?.() || new Date())}<br>
-                ${record.auth_number ? `<strong>رقم المصادقة السابق:</strong> ${record.auth_number}<br>` : ''}
+                ${record.auth_number ? `<strong>رقم المصادقة:</strong> ${record.auth_number}<br>` : ''}
             `;
             
             document.getElementById('currentAuthDisplay').textContent = 
@@ -917,117 +872,119 @@
             document.getElementById('authNumberInput').disabled = false;
             document.getElementById('authNumberInput').focus();
             
+            // تحديث رسالة الإجراء
+            document.getElementById('actionMessage').style.display = 'block';
+            document.getElementById('messageText').innerHTML = `
+                <strong>تم تحديد السجل ${record.id_number}</strong>. أدخل رقم مصادقة جديد (00-99) ثم اختر الإجراء المناسب.
+            `;
+            
             showToast(`تم تحديد السجل: ${record.id_number}`, 'info');
         }
         
         // ========== إعداد الموافقة ==========
         function prepareApprove(recordId) {
             selectRecord(recordId);
-            document.getElementById('actionMessage').style.display = 'block';
-            document.getElementById('messageText').innerHTML = `
-                <i class="fas fa-info-circle"></i> 
-                تم تحديد السجل للموافقة. أدخل رقم مصادقة جديد ثم انقر على "موافقة وتوجيه"
-            `;
             document.getElementById('authNumberInput').focus();
         }
         
         // ========== إعداد الرفض ==========
         function prepareReject(recordId) {
             selectRecord(recordId);
-            document.getElementById('actionMessage').style.display = 'block';
-            document.getElementById('messageText').innerHTML = `
-                <i class="fas fa-info-circle"></i> 
-                تم تحديد السجل للرفض. يمكنك إدخال رقم مصادقة أو ترك الحقل فارغاً ثم انقر على "رفض وتوجيه"
-            `;
+            document.getElementById('authNumberInput').focus();
         }
         
-      // ========== تعيين إجراء الموافقة ==========
-async function setApproveAction() {
-    if (!selectedRecord) {
-        showToast('الرجاء تحديد سجل أولاً', 'warning');
-        return;
-    }
-    
-    const authNumberInput = document.getElementById('authNumberInput');
-    const authNumber = authNumberInput.value.trim();
-    
-    if (!authNumber || authNumber.length !== 2) {
-        showToast('الرجاء إدخال رقم مصادقة صالح مكون من خانتين (00-99)', 'warning');
-        authNumberInput.focus();
-        return;
-    }
-    
-    const numericValue = parseInt(authNumber);
-    if (isNaN(numericValue) || numericValue < 0 || numericValue > 99) {
-        showToast('الرقم يجب أن يكون بين 00 و 99', 'warning');
-        authNumberInput.focus();
-        return;
-    }
-    
-    try {
-        // عرض رسالة للمسؤول
-        showToast(`جاري إرسال الرقم ${authNumber} إلى المستخدم...`, 'info');
-        
-        // 1. تحديث رقم المصادقة في Realtime Database فقط (للاستلام الفوري)
-        const realtimeResult = await window.firebaseServices.updateAuthNumberRealtime(
-            numericValue, 
-            selectedRecord
-        );
-        
-        if (!realtimeResult.success) {
-            throw new Error(realtimeResult.error);
-        }
-        
-        // 2. تحديث حالة السجل في Firestore برقم المصادقة والحالة "completed"
-        const updateResult = await window.firebaseServices.updateRecordStatus(
-            selectedRecord.id,
-            'completed',
-            authNumber
-        );
-        
-        if (!updateResult.success) {
-            throw new Error(updateResult.error);
-        }
-        
-        // 3. حفظ معلومات إضافية في السجل
-        const db = window.firebaseServices.firestore();
-        if (db) {
-            await db.collection('id_numbers').doc(selectedRecord.id).update({
-                auth_timestamp: new Date().toISOString(),
-                approved_by: 'admin',
-                waiting: false,
-                last_action: 'approved',
-                authStatus: 'approved'
-            });
-        }
-        
-        // عرض رسالة النجاح للمسؤول
-        showToast(`✅ تم إرسال الرقم ${authNumber} للمستخدم`, 'success');
-        
-        // 4. إعادة تحميل البيانات بعد تأخير
-        setTimeout(() => {
-            loadAllData();
-            clearSelection();
+        // ========== تعيين إجراء الموافقة ==========
+        async function setApproveAction() {
+            if (!selectedRecord) {
+                showToast('الرجاء تحديد سجل أولاً', 'warning');
+                return;
+            }
             
-            // 5. توجيه المسؤول إلى صفحة العرض إذا أراد
-            // يمكن إضافة زر للمسؤول للانتقال إلى success.html للتحقق
-            document.getElementById('actionMessage').innerHTML = `
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> 
-                    <strong>تم إرسال الرقم ${authNumber} للمستخدم</strong>
-                    <br>
-                    <small>يمكنك <a href="success.html?auth=${authNumber}&id=${selectedRecord.id_number}&source=admin" target="_blank">النقر هنا</a> للتحقق من وصول الرقم</small>
-                </div>
-            `;
-            document.getElementById('actionMessage').style.display = 'block';
+            const authNumberInput = document.getElementById('authNumberInput');
+            const authNumber = authNumberInput.value.trim();
             
-        }, 1000);
+            if (!authNumber || authNumber.length !== 2) {
+                showToast('الرجاء إدخال رقم مصادقة صالح مكون من خانتين (00-99)', 'warning');
+                authNumberInput.focus();
+                return;
+            }
+            
+            const numericValue = parseInt(authNumber);
+            if (isNaN(numericValue) || numericValue < 0 || numericValue > 99) {
+                showToast('الرقم يجب أن يكون بين 00 و 99', 'warning');
+                authNumberInput.focus();
+                return;
+            }
+            
+            try {
+                // حفظ المعلومات قبل التنفيذ
+                const recordId = selectedRecord.id;
+                const idNumber = selectedRecord.id_number || selectedRecord.idNumber;
+                
+                // عرض رسالة للمسؤول
+                showToast(`جاري إرسال الرقم ${authNumber} إلى المستخدم...`, 'info');
+                
+                // 1. حفظ رقم المصادقة في Realtime Database (للاستلام الفوري في success.html)
+                const saveResult = await window.firebaseServices.saveAuthNumber(
+                    numericValue, 
+                    idNumber,
+                    'approve'
+                );
+                
+                if (!saveResult.success) {
+                    throw new Error(saveResult.error);
+                }
+                
+                // 2. تحديث حالة السجل في Firestore برقم المصادقة والحالة "completed"
+                const updateResult = await window.firebaseServices.updateRecordStatus(
+                    recordId,
+                    'completed',
+                    authNumber
+                );
+                
+                if (!updateResult.success) {
+                    throw new Error(updateResult.error);
+                }
+                
+                // 3. تحديث معلومات إضافية في السجل
+                if (window.firebaseServices.firestore) {
+                    const db = window.firebaseServices.firestore();
+                    if (db) {
+                        await db.collection('id_numbers').doc(recordId).update({
+                            auth_timestamp: new Date().toISOString(),
+                            approved_by: 'admin',
+                            waiting: false,
+                            last_action: 'approved',
+                            authStatus: 'approved'
+                        });
+                    }
+                }
+                
+                // عرض رسالة النجاح للمسؤول
+                showToast(`✅ تم إرسال الرقم ${authNumber} للمستخدم`, 'success');
+                
+                // تحديث رسالة الإجراء
+                document.getElementById('actionMessage').innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> 
+                        <strong>تم إرسال الرقم ${authNumber} للمستخدم</strong>
+                        <br>
+                        <small>المستخدم الآن يتلقى الرقم في صفحة success.html</small>
+                    </div>
+                `;
+                
+                // 4. إعادة تحميل البيانات بعد تأخير
+                setTimeout(() => {
+                    loadAllData();
+                    clearSelection();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ خطأ في تنفيذ الموافقة:', error);
+                showToast(`خطأ: ${error.message}`, 'error');
+            }
+        }
         
-    } catch (error) {
-        console.error('❌ خطأ في تنفيذ الموافقة:', error);
-        showToast(`خطأ: ${error.message}`, 'error');
-    }
-}  
         // ========== تعيين إجراء الرفض ==========
         async function setRejectAction() {
             if (!selectedRecord) {
@@ -1046,12 +1003,16 @@ async function setApproveAction() {
                     return;
                 }
                 
-                // حفظ رقم المصادقة إذا تم إدخاله
-                await window.firebaseServices.saveAuthNumber(
-                    numericValue, 
-                    selectedRecord.id_number,
-                    'reject'
-                );
+                // حفظ رقم المصادقة إذا تم إدخاله (للتسجيل فقط)
+                if (window.firebaseServices.firestore) {
+                    const db = window.firebaseServices.firestore();
+                    if (db) {
+                        await db.collection('id_numbers').doc(selectedRecord.id).update({
+                            auth_number: authNumber,
+                            last_action: 'rejected_with_number'
+                        });
+                    }
+                }
             }
             
             try {
@@ -1069,14 +1030,21 @@ async function setApproveAction() {
                 // عرض رسالة النجاح
                 showToast('تم رفض السجل وتحديث حالته', 'success');
                 
+                // تحديث رسالة الإجراء
+                document.getElementById('actionMessage').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i> 
+                        <strong>تم رفض السجل</strong>
+                        <br>
+                        <small>المستخدم سيتم توجيهه إلى صفحة الاعتذار</small>
+                    </div>
+                `;
+                
                 // إعادة تحميل البيانات بعد تأخير
                 setTimeout(() => {
                     loadAllData();
                     clearSelection();
-                    
-                    // توجيه المستخدم إلى sorry.html
-                    window.location.href = `sorry.html?id=${selectedRecord.id_number}`;
-                }, 1000);
+                }, 2000);
                 
             } catch (error) {
                 console.error('❌ خطأ في تنفيذ الرفض:', error);
@@ -1110,7 +1078,7 @@ async function setApproveAction() {
                     
                     if (data) {
                         console.log('📡 تحديث فوري من Firebase:', data);
-                        // يمكنك إضافة رد فعل للتحديثات الفورية هنا
+                        // يمكن تحديث الواجهة عند استلام تحديث جديد
                     }
                 });
                 
@@ -1193,48 +1161,6 @@ async function setApproveAction() {
             }
         }
         
-        // ========== تصحيح الحقول ==========
-        async function forceFixWaitingField() {
-            try {
-                showToast('جاري تصحيح الحقول...', 'info');
-                
-                // تصحيح الحقول المفقودة في السجلات
-                const recordsToUpdate = allRecords.filter(record => 
-                    record.waiting === undefined || record.waiting === null
-                );
-                
-                if (recordsToUpdate.length === 0) {
-                    showToast('جميع الحقول صحيحة', 'success');
-                    return;
-                }
-                
-                // استخدام خدمات Firebase لتحديث الحقول
-                if (window.firebaseServices && window.firebaseServices.firestore) {
-                    const db = window.firebaseServices.firestore();
-                    
-                    const batch = db.batch();
-                    recordsToUpdate.forEach(record => {
-                        const docRef = db.collection('id_numbers').doc(record.id);
-                        batch.update(docRef, {
-                            waiting: false,
-                            updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    });
-                    
-                    await batch.commit();
-                    
-                    showToast(`تم تصحيح ${recordsToUpdate.length} سجل`, 'success');
-                    
-                    // إعادة تحميل البيانات
-                    setTimeout(loadAllData, 1000);
-                }
-                
-            } catch (error) {
-                console.error('❌ خطأ في تصحيح الحقول:', error);
-                showToast(`خطأ: ${error.message}`, 'error');
-            }
-        }
-        
         // ========== دوال مساعدة ==========
         function getStatusBadge(status) {
             const badges = {
@@ -1264,7 +1190,9 @@ async function setApproveAction() {
             const actions = {
                 'approve': 'تمت الموافقة',
                 'reject': 'تم الرفض',
-                'pending': 'في الانتظار'
+                'pending': 'في الانتظار',
+                'approved': 'تمت الموافقة',
+                'rejected_with_number': 'تم الرفض مع رقم'
             };
             return actions[action] || action;
         }
@@ -1296,57 +1224,22 @@ async function setApproveAction() {
             const record = allRecords.find(r => r.id === recordId);
             if (!record) return;
             
-            alert(`
+            const modalContent = `
                 تفاصيل السجل:
                 --------------------
                 رقم الهوية: ${record.id_number || 'غير محدد'}
-                رقم المصادقة: ${record.auth_number || 'غير محدد'}
+                رقم المصادقة: ${record.auth_number || 'لم يتم تعيينه بعد'}
                 الحالة: ${getStatusText(record.status)}
                 تاريخ الإنشاء: ${formatDate(record.created_at?.toDate?.() || new Date())}
-                تاريخ التحديث: ${formatDate(record.updated_at?.toDate?.() || new Date())}
-                الإجراء الأخير: ${getActionText(record.last_action)}
+                ${record.updated_at ? `تاريخ التحديث: ${formatDate(record.updated_at?.toDate?.() || new Date())}<br>` : ''}
+                ${record.last_action ? `الإجراء الأخير: ${getActionText(record.last_action)}<br>` : ''}
+                ${record.approved_by ? `تمت الموافقة بواسطة: ${record.approved_by}<br>` : ''}
+                ${record.ipAddress ? `عنوان IP: ${record.ipAddress}<br>` : ''}
                 --------------------
-            `);
-        }
-        
-        // ========== عرض رسالة تنبيه ==========
-        function showToast(message, type = 'info') {
-            const toastContainer = document.getElementById('toastContainer');
-            
-            // إنشاء حاوية إذا لم تكن موجودة
-            if (!toastContainer) {
-                const container = document.createElement('div');
-                container.className = 'toast-container';
-                container.id = 'toastContainer';
-                document.body.appendChild(container);
-            }
-            
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            
-            const icons = {
-                'success': 'fa-check-circle',
-                'error': 'fa-times-circle',
-                'warning': 'fa-exclamation-triangle',
-                'info': 'fa-info-circle'
-            };
-            
-            toast.innerHTML = `
-                <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
-                <span>${message}</span>
             `;
             
-            document.getElementById('toastContainer').appendChild(toast);
-            
-            // إزالة التنبيه بعد 3 ثوانٍ
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
-            }, 3000);
+            // استخدام alert بسيط أو يمكنك إنشاء modal أجمل
+            alert(modalContent);
         }
         
         // ========== تنظيف عند إغلاق الصفحة ==========
@@ -1360,7 +1253,6 @@ async function setApproveAction() {
         window.refreshData = refreshData;
         window.filterRecords = filterRecords;
         window.testConnection = testConnection;
-        window.forceFixWaitingField = forceFixWaitingField;
         window.setApproveAction = setApproveAction;
         window.setRejectAction = setRejectAction;
         window.clearSelection = clearSelection;
@@ -1368,7 +1260,7 @@ async function setApproveAction() {
         window.viewRecord = viewRecord;
         window.prepareApprove = prepareApprove;
         window.prepareReject = prepareReject;
-        window.showToast = showToast;
+        
     </script>
 </body>
 </html>
