@@ -90,7 +90,50 @@ const firebaseServices = {
             console.error("❌ خطأ في تهيئة خدمات Firebase:", error);
         }
     },
-    
+    // دالة لتحديث رقم المصادقة في Realtime Database فقط
+updateAuthNumberRealtime: async function(authNumber, recordData = {}) {
+    try {
+        if (!this.realtimeDb) {
+            this.realtimeDb();
+            if (!this.realtimeDb) {
+                throw new Error("Realtime Database غير متاح");
+            }
+        }
+        
+        const formattedNumber = authNumber < 10 ? '0' + authNumber : authNumber.toString();
+        const authData = {
+            number: authNumber,
+            formattedNumber: formattedNumber,
+            timestamp: Date.now(),
+            date: new Date().toISOString(),
+            source: 'admin_manual',
+            idNumber: recordData.id_number || recordData.idNumber,
+            recordId: recordData.id,
+            status: 'approved',
+            action: 'manual_approval',
+            requiresUserAction: true,
+            // لا نرسل authNumber هنا لأنه سيكون في Firestore فقط
+            // authNumber: formattedNumber // تعليق هذا السطر
+        };
+        
+        // حفظ في Realtime Database فقط
+        await this.realtimeDb.ref('current_auth_number').set(authData);
+        
+        console.log(`✅ تم حفظ رقم المصادقة ${formattedNumber} في Realtime Database`);
+        return {
+            success: true,
+            number: formattedNumber,
+            data: authData
+        };
+        
+    } catch (error) {
+        console.error("❌ خطأ في حفظ رقم المصادقة:", error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+},
     // الحصول على Firestore
     firestore: function() {
         if (!firestoreDb && firebase.firestore) {
