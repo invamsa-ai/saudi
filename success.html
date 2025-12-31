@@ -1,289 +1,532 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الموافقة على طلب تسجيل الدخول</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+<meta http-equiv="X-UA-Compatible" content="IE=edge;" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" type="image/ico" href="uaepass/images/favicon.ico">
+<link rel="stylesheet" type="text/css" href="uaepass/css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="uaepass/css/loginStylesheet.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<title>UAE PASS</title>
+<style>
+    body, html {
+        font-family: Dubai !important;
+        background: #F9F9FB;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+    
+    .flex {
+        display: flex;
+    }
+    
+    .card {
+        margin: 48px 0px 10px 0px;
+    }
+    
+    .card-info {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-clip: border-box;
+        border-radius: 0.25rem;
+        margin: 48px 0px 10px 0px;
+        border: 0px !important;
+    }
+    
+    .login-container {
+        max-width: 1280px;
+        margin: auto;
+        flex: 0 0 100%;
+    }
+    
+    .login-container-fluid {
+        max-width: 100%;
+    }
+    
+    .header {
+        background: #fff;
+        height: 64px;
+        padding: 16px 0px;
+    }
+    
+    .header-title {
+        color: #1B1B1F;
+        font-style: normal;
+        font-weight: 300;
+        line-height: 32px;
+        font-size: 22px;
+        padding: 0px 16px;
+    }
+    
+    .card.login {
+        padding: 48px;
+        margin: 48px 0px 10px 0px;
+        border: 1.6px solid transparent;
+        border-radius: 19px;
+        background-image: linear-gradient(to right bottom, white, white), radial-gradient(circle at top left, #ACE4AC, #fff, #fff 100%);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+    }
+    
+    .card.login .card-header {
+        display: flex;
+        justify-content: space-between;
+        background: white;
+        border: 0;
+        padding: 0px;
+        align-items: center;
+    }
+    
+    .card.login .card-content {
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .card.login .card-content .card-content-left {
+        max-width: 70%;
+        padding-right: 40px;
+    }
+    
+    .login-pin-image {
+        max-width: 400px;
+        width: 100%;
+    }
+    
+    .info-title {
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .info-app-name {
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        padding: 32px 0px;
+        color: #0066CC;
+    }
+    
+    .info-description {
+        font-size: 28px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 36px;
+        max-width: 500px;
+        color: #333;
+        margin-bottom: 40px;
+    }
+    
+    @keyframes spin {
+        from { transform: translate(-50%, -50%) rotate(0); }
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .passcode-card {
+        color: #454F63;
+        width: 90px;
+        height: 90px;
+        margin: auto;
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        display: inline-block;
+    }
+    
+    .passcode-card::before {
+        content: '';
+        display: block;
+        background: conic-gradient(
+            #fff 0.0turn 0.125turn,
+            #fff 0.125turn 0.25turn,
+            #fff 0.25turn 0.375turn,
+            #fff 0.375turn 0.5turn,
+            #fff 0.5turn 0.625turn,
+            #fff 0.625turn 0.75turn,
+            #20644B 0.75turn 0.875turn,
+            #20644B 0.875turn 1.0turn
+        );
+        width: calc(100% * 1.41421356237);
+        padding-bottom: calc(100% * 1.41421356237);
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 100%;
+        animation: spin 5s linear infinite;
+    }
+    
+    .passcode-card::after {
+        content: attr(data-after-content);
+        position: absolute;
+        inset: 0.15rem;
+        background: #ECF3EC;
+        border-radius: 0.85rem;
+        font-size: 52px;
+        font-style: normal;
+        font-weight: 400;
+        text-align: center;
+        line-height: 100px;
+        color: #333;
+    }
+    
+    .uaepass-logo {
+        width: 32px;
+        object-fit: contain;
+        height: 32px;
+        padding: 6px;
+    }
+    
+    .uaepass-text-logo {
+        display: flex;
+        height: 41px;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .timer-img {
+        width: 25px;
+        height: 20px;
+        padding: 1.667px 5.149px 2.415px 4.706px;
+        justify-content: center;
+        align-items: center;
+        vertical-align: middle;
+    }
+    
+    .waiting-confirmation {
+        color: #C78200;
+        font-family: Roboto;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        padding-top: 52px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .cancel-request {
+        color: #FF5545;
+        border: 0;
+        background: transparent;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 24px;
+        cursor: pointer;
+        padding: 10px;
+    }
+    
+    .cancel-request:after {
+        display: inline-block;
+        content: "\00d7";
+        font-size: 28px;
+        padding: 10px 0px;
+        font-weight: 400;
+        vertical-align: middle;
+    }
+    
+    .cancel-request:hover {
+        opacity: 0.8;
+    }
+    
+    .polling-footer {
+        position: relative;
+        width: 100%;
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px 0;
+    }
+    
+    .ids-logo {
+        width: 13px;
+        height: 13px;
+        object-fit: contain;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+    
+    .poweredby {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.5;
+        text-align: center;
+        color: #454f63;
+        display: inline-block;
+    }
+    
+    /* Media Queries */
+    @media only screen and (min-width: 600px) {
+        .cancel-request-mobile, .card-content-right-mobile {
+            display: none;
+        }
+    }
+    
+    @media only screen and (max-width: 900px) {
+        .login-container {
+            max-width: 80%;
+        }
+    }
+    
+    @media only screen and (max-width: 600px) {
+        .info-title {
+            margin: 20px 0px 10px 0px;
+            text-align: center;
+        }
+        
+        .card-info {
+            margin: 10px 0px 10px 0px;
+        }
+        
+        .card.login {
+            padding: 30px 20px;
+            background: white;
+            border: 1.631px solid transparent;
+            border-radius: 19px;
+            margin: 28px 0px 10px 0px;
+        }
+        
+        .card {
+            margin: 25px 0px 10px 0px;
+        }
+        
+        .info-app-name {
+            padding: 15px 0px;
+            text-align: center;
+        }
+        
+        .cancel-request-mobile {
+            display: block;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .cancel-request {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 20px;
+        }
+        
+        .card-content-right-mobile {
+            display: block;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-pin-image {
+            max-width: 200px;
+        }
+        
+        html {
+            font-size: 80%;
         }
         
         body {
-            background-color: #f5f5f5;
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            text-align: center;
         }
         
-        /* الهيدر */
-        .header {
-            background-color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: relative;
+        .uaepass-logo {
+            max-width: 120px;
         }
         
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .polling-footer {
+            display: none;
         }
         
-        .logo-icon {
-            color: #2d8c4a;
-            font-size: 24px;
+        .card-content-right {
+            display: none;
         }
         
-        .logo-text {
-            font-weight: bold;
-            color: #2d8c4a;
+        .cancel-request-div {
+            display: none;
+        }
+        
+        .info-description {
             font-size: 18px;
-        }
-        
-        .header-logo {
-            height: 40px;
-        }
-        
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        /* النموذج */
-        .form-container {
-            background-color: white;
-            width: 90%;
-            max-width: 800px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-            border-top: 4px solid #2d8c4a;
-            border-left: 4px solid #2d8c4a;
-        }
-        
-        /* الزر المخفي */
-        .hidden-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: none;
-            border: none;
-            color: #d9534f;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: underline;
-            z-index: 10;
-        }
-        
-        /* محتوى النموذج */
-        .form-content {
-            display: flex;
-            min-height: 300px;
-        }
-        
-        .image-section {
-            flex: 1;
-            background-color: #f9f9f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .app-image {
-            max-width: 80%;
-            max-height: 250px;
-            object-fit: contain;
-        }
-        
-        .text-section {
-            flex: 1;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .text-section h2 {
-            color: #2d8c4a;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .text-section p {
-            margin-bottom: 15px;
-            line-height: 1.6;
-            color: #555;
-        }
-        
-        /* المربع الرمادي مع الرقم */
-        .code-box {
-            background-color: #f5f5f5;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            padding: 12px 20px;
-            display: inline-block;
-            margin-top: 10px;
-            align-self: flex-start;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .code-box:before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            bottom: -2px;
-            left: -2px;
-            border: 2px solid transparent;
-            border-right-color: #2d8c4a;
-            border-left-color: #2d8c4a;
-            border-radius: 6px;
-            animation: border-animation 3s infinite;
-        }
-        
-        @keyframes border-animation {
-            0% { border-right-color: #2d8c4a; border-left-color: #2d8c4a; }
-            50% { border-right-color: #4CAF50; border-left-color: #4CAF50; }
-            100% { border-right-color: #2d8c4a; border-left-color: #2d8c4a; }
-        }
-        
-        .code-number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #333;
-            letter-spacing: 3px;
-        }
-        
-        /* النص في الأسفل */
-        .waiting-text {
+            font-style: normal;
+            font-weight: 400;
+            line-height: 29px;
+            max-width: 500px;
             text-align: center;
-            margin-top: 25px;
-            padding: 15px;
-            color: #666;
+            margin: 0 auto 30px;
+        }
+        
+        .card.login .card-content .card-content-left {
+            max-width: 100%;
+            padding-right: 0px;
+        }
+        
+        .card.login {
+            margin: 0px;
+            height: auto;
+        }
+        
+        .header-section {
+            display: block !important;
+        }
+        
+        .card.login .card-header {
+            justify-content: space-between;
+        }
+        
+        .waiting-confirmation {
+            color: #C78200;
+            font-family: Roboto;
+            font-size: 17px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+            padding-top: 25px;
+        }
+        
+        .passcode-card {
+            margin: 30px auto;
+        }
+    }
+    
+    @media only screen and (max-width: 360px) {
+        .info-description {
             font-size: 16px;
-            border-top: 1px solid #eee;
+            line-height: 26px;
         }
         
-        /* التذييل */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-size: 14px;
-            background-color: #f0f0f0;
-            margin-top: 20px;
+        .waiting-confirmation {
+            font-size: 16px;
         }
         
-        /* التكيف مع الشاشات الصغيرة */
-        @media (max-width: 768px) {
-            .form-content {
-                flex-direction: column;
-            }
-            
-            .header {
-                padding: 15px;
-            }
-            
-            .logo-text {
-                font-size: 16px;
-            }
+        .passcode-card {
+            width: 80px;
+            height: 80px;
         }
-    </style>
+        
+        .passcode-card::after {
+            font-size: 42px;
+            line-height: 80px;
+        }
+    }
+</style>
 </head>
 <body>
-    <!-- الهيدر -->
-    <header class="header">
-        <div class="logo">
-            <i class="fas fa-check-circle logo-icon"></i>
-            <span class="logo-text">الموافقة على طلب تسجيل الدخول</span>
+	
+<div>
+    <div class="header-section">
+        <div class="login-container-fluid header">
+            <div class="login-container flex">
+                <img src="uaepass/images/uae-pass-logo.png" class="uaepass-logo" alt="UAE PASS Logo">
+                <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
+            </div>
         </div>
-        <img src="https://cdn-icons-png.flaticon.com/512/197/197551.png" alt="شعار" class="header-logo">
-    </header>
+    </div>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="main-content">
-        <div class="form-container">
-            <!-- الزر المخفي -->
-            <button class="hidden-btn">إلغاء الطلب</button>
-            
-            <div class="form-content">
-                <!-- قسم الصورة -->
-                <div class="image-section">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="تطبيق الهوية الرقمية" class="app-image">
-                </div>
-                
-                <!-- قسم النص -->
-                <div class="text-section">
-                    <h2>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</h2>
-                    <p>طلب تسجيل الدخول من<br><strong>Self Service Portal</strong></p>
-                    
-                    <!-- المربع الرمادي مع الرقم -->
-                    <div class="code-box">
-                        <div class="code-number">28</div>
+    <div class="login-container-fluid">
+        <div class="login-container">
+            <form id="loginForm" action="../../commonauth" method="post" enctype="application/x-www-form-urlencoded" autocomplete="off">
+                <input id="username" name="username" type="hidden" value="">
+                <input id="cancelOnWeb" type="hidden" name="cancelOnWeb" value="">
+                <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
+                <input id="password" name="password" type="hidden" value="">
+                <input type="hidden" id="sessionDataKey" name="sessionDataKey" value="f9b79f82-8317-4f54-aa60-0cd566553e95">
+
+                <div class="card login">
+                    <div class="card-header">
+                        <div><img src="uaepass/images/digital_id_H.svg" class="uaepass-text-logo" alt="Digital ID"></div>
+                        <div class="cancel-request-div">
+                            <button type="button" class="cancel-request" onclick="cancel()">إلغاء الطلب</button>
+                        </div>
                     </div>
                     
-                    <p style="margin-top: 20px; color: #888; font-size: 14px;">
-                        <i class="fas fa-info-circle"></i> الرقم صالح لمدة 5 دقائق فقط
-                    </p>
+                    <div class="card-content">
+                        <div dir="rtl" class="card-content-left">
+                            <div class="card-info">
+                                <div class="info-title">طلب تسجيل الدخول من</div>
+                                <div class="info-app-name">Self Service Portal</div>
+
+                                <div class="card-content-right-mobile">
+                                    <img src="uaepass/images/login-pin.svg" class="login-pin-image" alt="Login PIN">
+                                </div>
+
+                                <div class="info-description">
+                                    <span>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</span>
+                                </div>
+                                
+                                <div class="card-info">
+                                    <div class="passcode-card" data-after-content="28"></div>
+                                </div>
+                                
+                                <div class="waiting-confirmation">
+                                    <img src="uaepass/images/Timer.gif" class="timer-img" alt="Timer">
+                                    في انتظار تأكيدك
+                                </div>
+
+                                <div class="cancel-request-mobile">
+                                    <button type="button" class="cancel-request" onclick="cancel()">إلغاء الطلب</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-content-right">
+                            <img src="uaepass/images/login-pin.svg" class="login-pin-image" alt="Login PIN">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- النص في الأسفل -->
-            <div class="waiting-text">
-                <i class="fas fa-clock"></i> في انتظار التأكيد
-            </div>
+                
+                <div class="polling-footer">
+                    <img class="ids-logo" src="uaepass/images/n6.png" alt="IDS Logo" />
+                    <p class="poweredby"> Powered by UAE PASS </p>
+                </div>
+            </form>
         </div>
-    </main>
+    </div>
+</div>
 
-    <!-- التذييل -->
-    <footer class="footer">
-        <p>Powered by UAE PASS</p>
-        <p style="margin-top: 5px; font-size: 12px; color: #999;">
-            <i class="fas fa-shield-alt"></i> خدمة آمنة ومشفرة
-        </p>
-    </footer>
+<script>
+    function cancel() {
+        document.getElementById("cancelOnWeb").value = "cancelledOnWebWaiting";
+        document.getElementById("loginForm").submit();
+    }
 
-    <script>
-        // توليد رقم عشوائي مكون من رقمين
-        function generateRandomNumber() {
-            return Math.floor(10 + Math.random() * 90); // رقم بين 10 و 99
+    function timeout() {
+        document.getElementById("cancelOnWeb").value = "webWaitingTimeout";
+        document.getElementById("loginForm").submit();
+    }
+
+    // عد تنازلي للرمز (اختياري - يمكن إزالته إذا لم يكن مطلوباً)
+    let countdown = 180; // 3 دقائق
+    const countdownInterval = setInterval(function() {
+        countdown--;
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            timeout();
         }
-        
-        // تحديث الرقم عند النقر على المربع
-        document.querySelector('.code-box').addEventListener('click', function() {
-            const newNumber = generateRandomNumber();
-            document.querySelector('.code-number').textContent = newNumber;
-        });
-        
-        // إضافة تأثير عند النقر على الزر المخفي
-        document.querySelector('.hidden-btn').addEventListener('click', function() {
-            alert('تم إلغاء طلب تسجيل الدخول');
-        });
-        
-        // إضافة تأثير للبوردر المتحرك
-        const codeBox = document.querySelector('.code-box');
-        setInterval(() => {
-            codeBox.style.transform = 'scale(1.02)';
-            setTimeout(() => {
-                codeBox.style.transform = 'scale(1)';
-            }, 300);
-        }, 3000);
-    </script>
+    }, 1000);
+
+    // تحديث الرقم بشكل دوري (اختياري)
+    const passcodeElement = document.querySelector('.passcode-card');
+    setInterval(function() {
+        // يمكن تغيير هذا المنطق حسب الحاجة
+        const newCode = Math.floor(Math.random() * 90) + 10; // رقم بين 10 و99
+        passcodeElement.setAttribute('data-after-content', newCode);
+    }, 30000); // كل 30 ثانية
+
+    // دالة لمحاكاة استجابة الخادم
+    function pollServer() {
+        // يمكن إضافة منطق الاتصال بالخادم هنا
+        console.log("Polling server...");
+    }
+
+    // بدء الاستطلاع
+    setInterval(pollServer, 2000);
+</script>
+
 </body>
 </html>
