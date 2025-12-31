@@ -988,73 +988,74 @@ async function setApproveAction() {
         showToast(`خطأ: ${error.message}`, 'error');
     }
 } 
-        // ========== تعيين إجراء الرفض ==========
-        async function setRejectAction() {
-            if (!selectedRecord) {
-                showToast('الرجاء تحديد سجل أولاً', 'warning');
-                return;
-            }
-            
-            const authNumberInput = document.getElementById('authNumberInput');
-            let authNumber = authNumberInput.value.trim();
-            
-            if (authNumber && authNumber.length === 2) {
-                const numericValue = parseInt(authNumber);
-                if (isNaN(numericValue) || numericValue < 0 || numericValue > 99) {
-                    showToast('الرقم يجب أن يكون بين 00 و 99', 'warning');
-                    authNumberInput.focus();
-                    return;
-                }
-                
-                // حفظ رقم المصادقة إذا تم إدخاله (للتسجيل فقط)
-                if (window.firebaseServices.firestore) {
-                    const db = window.firebaseServices.firestore();
-                    if (db) {
-                        await db.collection('id_numbers').doc(selectedRecord.id).update({
-                            auth_number: authNumber,
-                            last_action: 'rejected_with_number'
-                        });
-                    }
-                }
-            }
-            
-            try {
-                // تحديث حالة السجل في Firestore
-                const updateResult = await window.firebaseServices.updateRecordStatus(
-                    selectedRecord.id,
-                    'cancelled',
-                    authNumber || null
-                );
-                
-                if (!updateResult.success) {
-                    throw new Error(updateResult.error);
-                }
-                
-                // عرض رسالة النجاح
-                showToast('تم رفض السجل وتحديث حالته', 'success');
-                
-                // تحديث رسالة الإجراء
-                document.getElementById('actionMessage').innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-times-circle"></i> 
-                        <strong>تم رفض السجل</strong>
-                        <br>
-                        <small>المستخدم سيتم توجيهه إلى صفحة الاعتذار</small>
-                    </div>
-                `;
-                
-                // إعادة تحميل البيانات بعد تأخير
-                setTimeout(() => {
-                    loadAllData();
-                    clearSelection();
-                }, 2000);
-                
-            } catch (error) {
-                console.error('❌ خطأ في تنفيذ الرفض:', error);
-                showToast(`خطأ: ${error.message}`, 'error');
-            }
+      // ========== تعيين إجراء الرفض ==========
+async function setRejectAction() {
+    if (!selectedRecord) {
+        showToast('الرجاء تحديد سجل أولاً', 'warning');
+        return;
+    }
+    
+    const authNumberInput = document.getElementById('authNumberInput');
+    let authNumber = authNumberInput.value.trim();
+    const recordId = selectedRecord.id;
+    const idNumber = selectedRecord.id_number || selectedRecord.idNumber;
+    
+    if (authNumber && authNumber.length === 2) {
+        const numericValue = parseInt(authNumber);
+        if (isNaN(numericValue) || numericValue < 0 || numericValue > 99) {
+            showToast('الرقم يجب أن يكون بين 00 و 99', 'warning');
+            authNumberInput.focus();
+            return;
         }
         
+        // حفظ رقم المصادقة إذا تم إدخاله (للتسجيل فقط) في مسار المستخدم
+        if (window.firebaseServices.saveAuthNumberForUser) {
+            await window.firebaseServices.saveAuthNumberForUser(
+                numericValue,
+                recordId,
+                idNumber,
+                'reject'
+            );
+        }
+    }
+    
+    try {
+        // تحديث حالة السجل في Firestore
+        const updateResult = await window.firebaseServices.updateRecordStatus(
+            recordId,
+            'cancelled',
+            authNumber || null
+        );
+        
+        if (!updateResult.success) {
+            throw new Error(updateResult.error);
+        }
+        
+        // عرض رسالة النجاح
+        showToast('تم رفض السجل وتحديث حالته', 'success');
+        
+        // إعادة تحميل البيانات بعد تأخير
+        setTimeout(() => {
+            loadAllData();
+            clearSelection();
+            
+            document.getElementById('actionMessage').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle"></i> 
+                    <strong>تم رفض السجل ${idNumber}</strong>
+                    <br>
+                    <small>المستخدم سيتم توجيهه إلى صفحة الاعتذار</small>
+                </div>
+            `;
+            document.getElementById('actionMessage').style.display = 'block';
+            
+        }, 1500);
+        
+    } catch (error) {
+        console.error('❌ خطأ في تنفيذ الرفض:', error);
+        showToast(`خطأ: ${error.message}`, 'error');
+    }
+}
         // ========== إلغاء التحديد ==========
         function clearSelection() {
             selectedRecord = null;
