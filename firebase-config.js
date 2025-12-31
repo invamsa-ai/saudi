@@ -1,5 +1,4 @@
-// firebase-config.js - الإصدار المصحح
-// تأكد من أن جميع Firebase SDKs تم تحميلها أولاً
+// firebase-config.js - الإصدار المعدل للإصدار 9 المتوافق (compat)
 
 const firebaseConfig = {
   apiKey: "AIzaSyAk27c6KL77QbnXa_bNeWzUsBph5o7I9A8",
@@ -18,7 +17,7 @@ let firebaseApp, db, realtimeDb, auth;
 // دالة تهيئة Firebase
 function initializeFirebase() {
   try {
-    console.log("🔥 محاولة تهيئة Firebase...");
+    console.log("🔥 محاولة تهيئة Firebase مع الإصدار 9 المتوافق...");
     
     if (typeof firebase === 'undefined') {
       console.error("❌ Firebase SDK غير محمل");
@@ -26,7 +25,7 @@ function initializeFirebase() {
     }
     
     // التحقق مما إذا تم تهيئة Firebase مسبقاً
-    if (!firebase.apps.length) {
+    if (!firebase.apps || firebase.apps.length === 0) {
       firebaseApp = firebase.initializeApp(firebaseConfig);
       console.log("✅ Firebase تم تهيئته بنجاح");
     } else {
@@ -34,26 +33,20 @@ function initializeFirebase() {
       console.log("✅ Firebase متهيئ بالفعل");
     }
     
-    // تهيئة الخدمات مع التحقق من وجودها
-    if (typeof firebase.firestore === 'function') {
+    // استخدام التوافق مع الإصدار 8 (compat) - الواجهة القديمة
+    if (firebase.firestore) {
       db = firebase.firestore();
       console.log("✅ Firestore جاهز");
-    } else {
-      console.warn("⚠️ Firestore غير متاح");
     }
     
-    if (typeof firebase.database === 'function') {
+    if (firebase.database) {
       realtimeDb = firebase.database();
       console.log("✅ Realtime Database جاهز");
-    } else {
-      console.warn("⚠️ Realtime Database غير متاح");
     }
     
-    if (typeof firebase.auth === 'function') {
+    if (firebase.auth) {
       auth = firebase.auth();
       console.log("✅ Authentication جاهز");
-    } else {
-      console.warn("⚠️ Authentication غير متاح - تأكد من تحميل firebase-auth-compat.js");
     }
     
     return true;
@@ -66,85 +59,88 @@ function initializeFirebase() {
 
 // دالة للتحقق من الاتصال
 async function checkFirebaseConnection() {
+  console.log("🔍 بدء اختبار اتصال Firebase...");
+  
+  // تهيئة Firebase أولاً
+  if (!initializeFirebase()) {
+    return {
+      connected: false,
+      error: "فشل تهيئة Firebase",
+      details: "تأكد من تحميل مكتبات Firebase"
+    };
+  }
+  
   try {
-    console.log("🔍 التحقق من اتصال Firebase...");
-    
-    // محاولة التهيئة أولاً
-    if (!db && !initializeFirebase()) {
-      return { 
-        connected: false, 
-        error: "فشل تهيئة Firebase",
-        details: "تأكد من تحميل جميع SDKs"
-      };
+    // اختبار بسيط: محاولة الحصول على timestamp من Firestore
+    if (db) {
+      console.log("📝 اختبار اتصال Firestore...");
+      const testDocRef = db.collection('test_connection').doc('ping');
+      await testDocRef.set({
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        test: true
+      });
+      console.log("✅ Firestore يعمل بنجاح");
+      
+      // قراءة البيانات للتحقق
+      const doc = await testDocRef.get();
+      console.log("✅ تمت قراءة البيانات:", doc.exists);
     }
-    
-    if (!db) {
-      return { 
-        connected: false, 
-        error: "Firestore غير متاح",
-        details: "تأكد من تحميل firebase-firestore-compat.js"
-      };
-    }
-    
-    // اختبار اتصال Firestore
-    console.log("📝 جاري اختبار الكتابة إلى Firestore...");
-    const testRef = db.collection('connection_tests');
-    await testRef.add({
-      test: 'connection_test',
-      timestamp: new Date().toISOString(),
-      browser: navigator.userAgent.substring(0, 50)
-    });
-    
-    console.log("✅ اختبار Firestore ناجح");
     
     // اختبار Realtime Database إذا كان متاحاً
     if (realtimeDb) {
-      console.log("📡 جاري اختبار Realtime Database...");
-      await realtimeDb.ref('connection_tests/' + Date.now()).set({
-        test: 'realtime_test',
-        timestamp: new Date().toISOString()
+      console.log("📡 اختبار Realtime Database...");
+      await realtimeDb.ref('test_connection').set({
+        timestamp: Date.now(),
+        test: true
       });
-      console.log("✅ اختبار Realtime Database ناجح");
+      console.log("✅ Realtime Database يعمل بنجاح");
     }
     
-    return { 
-      connected: true, 
-      message: "Firebase متصل ويعمل",
+    return {
+      connected: true,
+      message: "✅ تم الاتصال بنجاح!",
       projectId: firebaseConfig.projectId,
+      timestamp: new Date().toISOString(),
       services: {
         firestore: !!db,
-        realtime: !!realtimeDb,
+        database: !!realtimeDb,
         auth: !!auth
       }
     };
     
   } catch (error) {
-    console.error("❌ فشل اختبار الاتصال:", error);
-    return { 
-      connected: false, 
+    console.error("❌ خطأ في اختبار الاتصال:", error);
+    
+    // تقديم نصائح استكشافية للأخطاء
+    let suggestion = "تحقق من قواعد الأمان في Firebase Console";
+    
+    if (error.code === 'permission-denied') {
+      suggestion = "قواعد الأمان تمنع الوصول. اضبط القواعد مؤقتًا على: allow read, write: if true;";
+    } else if (error.code === 'not-found') {
+      suggestion = "المشروع غير موجود أو غير نشط. تحقق من Firebase Console";
+    }
+    
+    return {
+      connected: false,
       error: error.message,
+      code: error.code,
       projectId: firebaseConfig.projectId,
-      suggestion: "تحقق من قواعد الأمان (يجب أن تكون if true)"
+      suggestion: suggestion
     };
   }
 }
 
-// تصدير المتغيرات العالمية
-window.firebaseApp = firebaseApp;
-window.firebaseDb = db;
-window.firebaseRealtimeDb = realtimeDb;
-window.firebaseAuth = auth;
+// تصدير الوظائف للاستخدام العالمي
 window.firebaseConfig = firebaseConfig;
 window.initializeFirebase = initializeFirebase;
 window.checkFirebaseConnection = checkFirebaseConnection;
 
-console.log("🔥 firebase-config.js تم تحميله بنجاح");
+console.log("✅ firebase-config.js محمل وجاهز");
+console.log("🔧 إصدار Firebase:", firebase.SDK_VERSION);
 
-// تهيئة Firebase تلقائياً بعد تأخير قصير
+// تهيئة تلقائية
 setTimeout(() => {
   if (typeof firebase !== 'undefined') {
     initializeFirebase();
-  } else {
-    console.warn("⚠️ Firebase SDK غير محمل بعد. تأكد من ترتيب تحميل السكريبتات.");
   }
-}, 500);
+}, 1000);
