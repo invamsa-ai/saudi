@@ -483,7 +483,19 @@
                 
                 // إنشاء سجل جديد بدون رقم مصادقة
                 const result = await window.firebaseServices.createNewRecord(idNumber, additionalData);
-                
+                // 🔥 إنشاء سجل انتظار في Realtime Database (مهم جداً)
+const realtimeDb = window.firebaseServices.realtimeDb();
+
+await realtimeDb
+  .ref(`user_auth_numbers/${result.recordId}`)
+  .set({
+    status: 'waiting',
+    createdAt: Date.now(),
+    source: 'apply_page'
+  });
+
+console.log('⏳ تم إنشاء سجل انتظار في Realtime Database');
+
                 if (!result.success) {
                     throw new Error(result.error);
                 }
