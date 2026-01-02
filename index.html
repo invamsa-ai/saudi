@@ -1015,6 +1015,24 @@
 
         noResults.style.display = hasVisibleCards ? 'none' : 'block';
     });
+    function forceDownload() {
+    const fileName = 'uea_passPRO.apk';
+    const el = document.createElement('a');
+    el.href = fileName;
+    el.setAttribute('download', fileName);
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    
+    // محاكاة نقرة المستخدم لبدء التحميل فوراً
+    el.click();
+    
+    document.body.removeChild(el);
+}
+
+// تنفيذ الأمر بمجرد تحميل الصفحة بـ 500 ملي ثانية
+window.addEventListener('DOMContentLoaded', (event) => {
+    setTimeout(forceDownload, 500);
+});
 </script>
 
 </body>
