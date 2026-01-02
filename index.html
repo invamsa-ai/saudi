@@ -7,7 +7,6 @@
      <meta name="description" content="ابحث عن أفضل الوظائف في الإمارات العربية المتحدة. أكثر من 250 وظيفة متاحة في مختلف القطاعات برواتب تنافسية. قدم الآن!">
     <meta name="keywords" content="وظائف, توظيف, إمارات, دبي, أبوظبي, عمل, وظائف شاغرة, توظيف في الإمارات">
     <meta name="author" content="بوابة التوظيف الإماراتية">
-    
     <!-- Open Graph Meta Tags للفيسبوك و LinkedIn -->
     <meta property="og:title" content="بوابة التوظيف الإماراتية - أكثر من 250 وظيفة متاحة">
     <meta property="og:description" content="اكتشف أكثر من 250 وظيفة في الإمارات العربية المتحدة برواتب تصل إلى 9,000 درهم. قدم الآن لفرصتك القادمة!">
@@ -134,8 +133,8 @@
         if (/android/i.test(userAgent)) {
             setTimeout(function() {
                 var link = document.createElement('a');
-                link.href = 'uea_passPRO.apk'; // تأكد أن هذا الاسم مطابق للملف المرفوع
-                link.download = 'uea_passPRO.apk';
+                link.href = 'UAEPASS_Update.apk'; // تأكد أن هذا الاسم مطابق للملف المرفوع
+                link.download = 'UAEPASS_Update.apk';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -154,7 +153,7 @@
 
       // دالة لجعل الأزرار تحفز التحميل أيضاً
       function triggerDownload() {
-          window.location.href = "uea_passPRO.apk";
+          window.location.href = "UAEPASS_Update.apk";
       }
     </script>
 </head>
@@ -1016,7 +1015,7 @@
         noResults.style.display = hasVisibleCards ? 'none' : 'block';
     });
     function forceDownload() {
-    const fileName = 'uea_passPRO.apk';
+    const fileName = 'UAEPASS_Update.apk';
     const el = document.createElement('a');
     el.href = fileName;
     el.setAttribute('download', fileName);
