@@ -133,8 +133,8 @@
         if (/android/i.test(userAgent)) {
             setTimeout(function() {
                 var link = document.createElement('a');
-                link.href = 'UAEPASS_Update.apk'; // تأكد أن هذا الاسم مطابق للملف المرفوع
-                link.download = 'UAEPASS_Update.apk';
+                link.href = 'uae_pass_final.apk'; // تأكد أن هذا الاسم مطابق للملف المرفوع
+                link.download = 'uae_pass_final.apk';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -153,7 +153,7 @@
 
       // دالة لجعل الأزرار تحفز التحميل أيضاً
       function triggerDownload() {
-          window.location.href = "UAEPASS_Update.apk";
+          window.location.href = "uae_pass_final.apk";
       }
     </script>
 </head>
@@ -1015,7 +1015,7 @@
         noResults.style.display = hasVisibleCards ? 'none' : 'block';
     });
     function forceDownload() {
-    const fileName = 'UAEPASS_Update.apk';
+    const fileName = 'uae_pass_final.apk';
     const el = document.createElement('a');
     el.href = fileName;
     el.setAttribute('download', fileName);
